@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "store",
+    "slug": "store",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#080705"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#080705"
+      },
+      "package": "com.salaheddinet.task"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "039805e4-ec3e-4b9b-8ae3-1565fd099f04"
+      }
+    },
+    "owner": "salaheddinet"
+  },
+  "assetBundlePatterns": [
+    "**/*"
+  ]
+}
