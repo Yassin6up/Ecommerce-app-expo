@@ -114,7 +114,10 @@ Sales:"Sales",
         removed:"Removed",
         status:'status',
         cancel_order:'Cancel Order',
-        explore_products:'Explore Products'
+        explore_products:'Explore Products',
+        "resend_in": "Resend in",
+        "enter_phone": "Enter your phone number",
+        "next": "Next",
     },
   },
   ar: {
@@ -229,7 +232,10 @@ Sales:"تخفيضات",
        removed:"تمت ازالته",
         status:'الحالة',
            cancel_order:'الغاء الطلب',
-                 explore_products:'استكشف منتجاتنا'
+                 explore_products:'استكشف منتجاتنا',
+                 "resend_in": "إعادة الإرسال في",
+                 "enter_phone": "أدخل رقم هاتفك",
+                 "next": "التالي",
     },
   },
 };

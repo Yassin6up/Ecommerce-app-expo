@@ -155,10 +155,14 @@ const handleSearchSubmit = () => {
                 <Popover.Content width="150px">
                   <Popover.Body>
                     <Box>
-                      <Pressable onPress={() => handleLanguageChange("ar")} mb={4}>
+                      <Pressable onPress={() => {
+                        handleLanguageChange("ar")
+                        setShowSetting(false)}} mb={4}>
                         <Text>العربية</Text>
                       </Pressable>
-                      <Pressable onPress={() => handleLanguageChange("en")}>
+                      <Pressable onPress={() => {handleLanguageChange("en")
+                         setShowSetting(false)
+                      }}>
                         <Text>English</Text>
                       </Pressable>
                     </Box>

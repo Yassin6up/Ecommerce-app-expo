@@ -46,7 +46,7 @@ export default function RecoveryPassword() {
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
   const inputBorderColor = isDarkMode ? "#333333" : "#E9E9F1";
 
-  const showToast = (message, bgColor) => {
+  const showToast = (message:any, bgColor:any) => {
     toast.show({
       placement: "top",
       render: () => (
@@ -147,7 +147,7 @@ export default function RecoveryPassword() {
       // Reset timer
       setTimer(120);
       setCanResend(false);
-
+      setStep(2);
       showToast(t("code_resent"), "green.500");
     } catch (error: any) {
       showToast(error.response?.data?.message || t("resend_error"), "red.500");
@@ -161,7 +161,7 @@ export default function RecoveryPassword() {
         setPhoneNumber(validatedPhone);
 
         resendVerificationCode();
-        setStep(2);
+        
       } catch (error) {
         showToast(t("invalid_phone_number"), "red.500");
       }
@@ -207,7 +207,7 @@ export default function RecoveryPassword() {
       });
 
       dispatch(setPassHome(true))
-    } catch (error) {
+    } catch (error:any) {
       // Show error message
       toast.show({
         placement: "top",

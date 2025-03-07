@@ -109,7 +109,7 @@ export default function Login() {
         const validatedPhone = validatePhoneNumber(formattedText);
         setPhoneNumber(validatedPhone); // Update with validated and formatted phone number
         setPhoneError('');
-      } catch (error) {
+      } catch (error:any) {
         setPhoneError(error.message);
       }
     } else {
@@ -163,7 +163,7 @@ export default function Login() {
     } catch (error: any) {
       if (error.response) {
         // Handle specific error responses
-        const errorMessage = error.response.data.message || t("login_failed");
+        const errorMessage = error.response.data.message || t("login failed");
         showToast(errorMessage, "red.500");
 
         // Redirect to confirmation page if user is not verified
@@ -172,7 +172,7 @@ export default function Login() {
         }
       } else {
         // Handle network or other errors
-        showToast(t("network_error"), "red.500");
+        showToast(t("network error"), "red.500");
       }
     }
   };
