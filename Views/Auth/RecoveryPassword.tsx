@@ -147,7 +147,7 @@ export default function RecoveryPassword() {
       // Reset timer
       setTimer(120);
       setCanResend(false);
-
+      setStep(2);
       showToast(t("code_resent"), "green.500");
     } catch (error: any) {
       showToast(error.response?.data?.message || t("resend_error"), "red.500");
@@ -161,7 +161,7 @@ export default function RecoveryPassword() {
         setPhoneNumber(validatedPhone);
 
         resendVerificationCode();
-        setStep(2);
+        
       } catch (error) {
         showToast(t("invalid_phone_number"), "red.500");
       }
