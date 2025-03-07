@@ -20,8 +20,9 @@ import {
   Input,
   Divider,
   useToast,
+  Select, // Added for dropdown
 } from "native-base";
-import { ArrowLeft } from "iconsax-react-native";
+import { ArrowLeft, Location } from "iconsax-react-native"; // Added Location icon
 import * as ImagePicker from "expo-image-picker";
 import i18next from "i18next";
 
@@ -32,37 +33,29 @@ interface UserData {
 }
 
 const Profil = () => {
-  // Internationalization and Navigation
   const isRTL = i18next.language === "ar";
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
   const toast = useToast();
 
-  // Redux Hooks
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const dispatch = useDispatch();
 
-  // State Management
   const [name, setName] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Fetch User Profile
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        // Retrieve session token
         const token = await AsyncStorage.getItem("sessionToken");
-
         if (!token) {
           throw new Error("No session token found");
         }
-
         setSessionToken(token);
 
-        // Fetch user data
         const response = await axios.get<UserData>(
           "https://backend.j-byu.shop/api/users",
           {
@@ -70,7 +63,6 @@ const Profil = () => {
           }
         );
 
-        // Update state with user data
         setName(response.data.name || "");
         setAddress(response.data.address || "");
         setProfileImage(response.data.profile_image || null);
@@ -88,7 +80,6 @@ const Profil = () => {
     fetchUserProfile();
   }, []);
 
-  // Image Picker
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -110,7 +101,6 @@ const Profil = () => {
     }
   };
 
-  // Save Profile Changes
   const saveChanges = async () => {
     if (!sessionToken) {
       toast.show({
@@ -121,7 +111,6 @@ const Profil = () => {
     }
 
     try {
-      // Update profile
       await axios.put(
         "https://backend.j-byu.shop/api/user/address-name",
         {
@@ -133,7 +122,6 @@ const Profil = () => {
         }
       );
 
-      // Dispatch local state update
       dispatch(
         updateProfile({
           name,
@@ -142,7 +130,6 @@ const Profil = () => {
         })
       );
 
-      // Show success toast
       toast.show({
         title: t("save_changes_success"),
         status: "success",
@@ -156,7 +143,6 @@ const Profil = () => {
     }
   };
 
-  // Loading State
   if (isLoading) {
     return (
       <Stack
@@ -179,7 +165,6 @@ const Profil = () => {
       ]}
       paddingX={4}
       paddingY={6}>
-      {/* Page Header */}
       <HStack
         justifyContent="space-between"
         alignItems="center"
@@ -203,7 +188,7 @@ const Profil = () => {
       </HStack>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Profile Image Section
+        {/* Profile Image Section (Commented out as in your original)
         <VStack alignItems="center" space={4} mb={6}>
           <Pressable onPress={pickImage}>
             {profileImage ? (
@@ -249,7 +234,7 @@ const Profil = () => {
           />
         </VStack>
 
-        {/* Address Input Section */}
+        {/* Address Dropdown Section */}
         <VStack space={3} mb={4}>
           <Text
             color={isDarkMode ? "#E0E0E0" : "#000"}
@@ -257,16 +242,40 @@ const Profil = () => {
             textAlign={isRTL ? "right" : "left"}>
             {t("address")}
           </Text>
-          <Input
-            variant="filled"
-            bgColor={isDarkMode ? "#333" : "#F5F5F5"}
-            color={isDarkMode ? "#F7CF9D" : "#000"}
-            value={address}
-            onChangeText={setAddress}
-            placeholder={t("Enter your address")}
-            textAlign={isRTL ? "right" : "left"}
-            _focus={{ borderColor: "#F7CF9D" }}
-          />
+          <Box
+            flexDirection={isRTL ? "row-reverse" : "row"}
+            alignItems="center"
+            px={4}
+            borderWidth={1}
+            borderColor={isDarkMode ? "#333" : "#F5F5F5"}
+            rounded="8px"
+            bgColor={isDarkMode ? "#333" : "#F5F5F5"}>
+            <Select
+              flex={1}
+              variant="unstyled"
+              selectedValue={address}
+              placeholder={isRTL ? "اختر العنوان" : "Select Address"}
+              onValueChange={(itemValue) => setAddress(itemValue)}
+              _selectedItem={{
+                bg: "#F7CF9D",
+              }}
+              textAlign={isRTL ? "right" : "left"}
+              color={isDarkMode ? "#F7CF9D" : "#000"}>
+              <Select.Item label={isRTL ? "عمان" : "Amman"} value="Amman" />
+              <Select.Item label={isRTL ? "إربد" : "Irbid"} value="Irbid" />
+              <Select.Item label={isRTL ? "البلقاء" : "Balqa"} value="Balqa" />
+              <Select.Item label={isRTL ? "الكرك" : "Karak"} value="Karak" />
+              <Select.Item label={isRTL ? "معان" : "Ma'an"} value="Ma'an" />
+              <Select.Item label={isRTL ? "الزرقاء" : "Zarqa"} value="Zarqa" />
+              <Select.Item label={isRTL ? "المفرق" : "Mafraq"} value="Mafraq" />
+              <Select.Item label={isRTL ? "الطفيلة" : "Tafilah"} value="Tafilah" />
+              <Select.Item label={isRTL ? "مادبا" : "Madaba"} value="Madaba" />
+              <Select.Item label={isRTL ? "جرش" : "Jerash"} value="Jerash" />
+              <Select.Item label={isRTL ? "عجلون" : "Ajloun"} value="Ajloun" />
+              <Select.Item label={isRTL ? "العقبة" : "Aqaba"} value="Aqaba" />
+            </Select>
+            <Location size="24" color="#F7CF9D" />
+          </Box>
         </VStack>
 
         <Divider bgColor="#F7CF9D" />

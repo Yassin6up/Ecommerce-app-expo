@@ -5,7 +5,7 @@ type LanguageState = {
 };
 
 const initialState: LanguageState = {
-  currentLanguage: 'en', // Default to English
+  currentLanguage: 'ar', // Default to English
 };
 
 const languageSlice = createSlice({

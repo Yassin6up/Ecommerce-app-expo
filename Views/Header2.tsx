@@ -83,7 +83,7 @@ const handleSearchSubmit = () => {
   };
 
   return (
-    <Stack width="100%" paddingX={8} paddingY={8} backgroundColor={isDarkMode ? "#0C0C0C" : "#FFF6DF"} position="relative" > 
+    <Stack width="100%" paddingX={8}  paddingTop={12} paddingBottom={2} backgroundColor={isDarkMode ? "#0C0C0C" : "#FFF6DF"} position="relative" > 
 
 
       <HStack w={'full'} alignItems={'center'} justifyContent={'space-between'}>
