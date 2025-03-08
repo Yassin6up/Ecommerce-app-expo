@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -39,20 +39,24 @@ const PageThree = () => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
-  const [DELIVERY_PRICE, setDelivery_price] = useState(0);
+  const [deliveryPrice, setDeliveryPrice] = useState<number>(0); // Use camelCase and type as number
 
   useEffect(() => {
     const fetchDeliveryFees = async () => {
       try {
         const response = await axios.get('https://backend.j-byu.shop/api/settings/delivryFees');
-        
-        setDelivery_price(response.data);
-        
+        console.log('API Response:', response.data); // Debug: Check the response structure
+        // Assuming response.data is a number or an object like { deliveryFees: 3 }
+        const fee = typeof response.data === 'number' 
+          ? response.data 
+          : response.data?.deliveryFees || 0; // Fallback to 0 if undefined
+        setDeliveryPrice(fee);
       } catch (error) {
         console.error('Error fetching delivery fees:', error);
+        setDeliveryPrice(0); // Fallback to 0 on error
       }
     };
-  
+
     fetchDeliveryFees();
   }, []);
 
@@ -60,7 +64,7 @@ const PageThree = () => {
   const selectedSubtotal = cartItems
     .filter((item) => selectedItems.includes(item.id))
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const selectedTotal = selectedItems.length > 0 ? selectedSubtotal + DELIVERY_PRICE : 0;
+  const selectedTotal = selectedItems.length > 0 ? selectedSubtotal + deliveryPrice : 0;
 
   const toggleItemSelection = (itemId: number) => {
     if (selectedItems.includes(itemId)) {
@@ -111,7 +115,7 @@ const PageThree = () => {
         total_price: item.price * item.quantity,
         status: "pending",
       })),
-      delivery_price: DELIVERY_PRICE, // Include delivery price in order data
+      delivery_price: deliveryPrice, // Use camelCase
     };
 
     try {
@@ -356,7 +360,7 @@ const PageThree = () => {
                 {t("delivery_price")}
               </Text>
               <Text bold fontSize="lg" color={isDarkMode ? "white" : "gray.900"}>
-                ${DELIVERY_PRICE.toFixed(2)}
+                ${deliveryPrice.toFixed(2)} {/* Use camelCase */}
               </Text>
             </HStack>
             <HStack

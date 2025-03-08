@@ -180,7 +180,7 @@ const Profil = () => {
         <Text
           bold
           fontSize="xl"
-          color={isDarkMode ? "#F7CF9D" : "#F9D77E"}
+          color={ "#F7CF9D"}
           textAlign={isRTL ? "right" : "left"}>
           {t("edit_profile")}
         </Text>

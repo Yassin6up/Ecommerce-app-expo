@@ -83,6 +83,7 @@ export default function Women() {
           py={2}
           rounded={4}
           bgColor={"#F9D77E"}
+           alignSelf="stretch"
           onPress={() =>
             navigation.navigate("page two", {
               screen: "men",
@@ -120,6 +121,7 @@ export default function Women() {
                 width: CARD_WIDTH,
                 marginRight: CARD_SPACING,
                 alignItems: "center",
+                 alignSelf:"stretch"
               }}>
               <Image
                 source={{ uri: imageUrl }}

@@ -9,22 +9,21 @@ import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 import axios from "axios";
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get("window"); // Get the device width
 
 export default function Adds() {
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
-  const { t } = useTranslation();
-  const navigation: any = useNavigation();
-  const [sliders, setSliders] = useState<any[]>([]);
+  const { t, i18n } = useTranslation();
+  const navigation = useNavigation();
+  const [sliders, setSliders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const isArabic = i18n.language === "ar";
 
   useEffect(() => {
     const fetchSliders = async () => {
       try {
-        const response = await axios.get(
-          "https://backend.j-byu.shop/api/sliders/all"
-        );
+        const response = await axios.get("https://backend.j-byu.shop/api/sliders/all");
         setSliders(response.data);
       } catch (err) {
         setError("Failed to load sliders");
@@ -37,11 +36,10 @@ export default function Adds() {
     fetchSliders();
   }, []);
 
-  const handleBannerPress = (link: string) => {
-    // Extract product ID from link (assuming link format: "/products/7")
+  const handleBannerPress = (link) => {
     const productId = link.split("/").pop();
     if (productId) {
-      navigation.navigate("ProductScreen", { productId });
+
     }
   };
 
@@ -69,25 +67,17 @@ export default function Adds() {
       ]}
       space={4}
       alignItems="center"
-      justifyContent="center">
+      justifyContent="center"
+    >
       <Animated.Text
         entering={FadeInUp.duration(800)}
         exiting={FadeOutDown.duration(600)}
-        style={styles.salesText}>
+        style={styles.salesText}
+      >
         {t("Sales")}
       </Animated.Text>
 
-      <Box
-        style={{
-          width: "100%",
-          borderRadius: 16,
-          overflow: "hidden",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.2,
-          shadowRadius: 5,
-          elevation: 5,
-        }}>
+      <Box style={styles.swiperContainer}>
         <Swiper
           loop
           autoplay
@@ -95,12 +85,15 @@ export default function Adds() {
           showsPagination
           dotStyle={{ backgroundColor: "rgba(255, 255, 255, 0.5)" }}
           activeDotStyle={{ backgroundColor: "#F7CF9D" }}
-          height={250}>
+          width={width} // Set Swiper width to full device width
+          height={250} // You can adjust this or make it dynamic
+        >
           {sliders.map((slider) => (
             <Pressable
               key={slider.id}
               onPress={() => handleBannerPress(slider.link)}
-              style={styles.bannerContainer}>
+              style={styles.bannerContainer}
+            >
               <Image
                 source={{
                   uri: `https://backend.j-byu.shop/api/slider/img/${slider.image}`,
@@ -110,10 +103,19 @@ export default function Adds() {
                 resizeMode="cover"
               />
               <Box style={styles.textContainer}>
-                <Text fontSize="xl" fontWeight="bold" color="white">
+                <Text
+                  fontSize="xl"
+                  fontWeight="bold"
+                  color="white"
+                  textAlign={isArabic ? "right" : "left"}
+                >
                   {slider.text}
                 </Text>
-                <Text fontSize="md" color="white">
+                <Text
+                  fontSize="md"
+                  color="white"
+                  textAlign={isArabic ? "right" : "left"}
+                >
                   {slider.description}
                 </Text>
               </Box>
@@ -148,6 +150,17 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0, 0, 0, 0.2)",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
+    fontFamily: "Alexandria_600SemiBold",
+  },
+  swiperContainer: {
+    width: "100%", // Ensure the container takes full width
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
   bannerContainer: {
     flex: 1,
@@ -157,10 +170,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     position: "relative",
+    width: width, // Match the device width
   },
   bannerImage: {
-    width: "100%",
-    height: 250,
+    width: width, // Full width of the device
+    height: 250, // You can adjust this or make it dynamic
     borderRadius: 16,
   },
   textContainer: {

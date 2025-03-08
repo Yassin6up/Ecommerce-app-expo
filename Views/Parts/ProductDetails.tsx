@@ -111,7 +111,7 @@ const ProductDetails = () => {
         isDarkMode ? styles.darkBckground : styles.lightBckground,
       ]}>
       <Stack w={"full"} mb={4} position={"fixed"}>
-        <Pressable onPress={() => navigation.goBack()}>
+        <Pressable onPress={() => navigation.navigate("parts")}>
           <ArrowLeft size="32" color={isDarkMode ? "#DCAE74" : "#F7CF9D"} />
         </Pressable>
       </Stack>
@@ -160,12 +160,12 @@ const ProductDetails = () => {
           color={isDarkMode ? "#DCAE74" : "#468500"}
           bold
           fontSize="2xl"
-          textAlign={isRTL ? "right" : "left"}>
+          textAlign={isRTL ? "right" : "left"} >
           ${product.price}
         </Text>
 
-        <Text color={isDarkMode ? "#FFFFFF" : "#000000"}>
-          {product.description}
+        <Text color={isDarkMode ? "#FFFFFF" : "#000000"}    textAlign={isRTL ? "right" : "left"}>
+          {product.description} 
         </Text>
 
         {/* Vendor Information */}

@@ -226,9 +226,7 @@ export default function RecoveryPassword() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}>
+    
       <VStack
         style={[
           styles.mainContainer,
@@ -333,6 +331,6 @@ export default function RecoveryPassword() {
           </Text>
         </Button>
       </VStack>
-    </KeyboardAvoidingView>
+
   );
 }
