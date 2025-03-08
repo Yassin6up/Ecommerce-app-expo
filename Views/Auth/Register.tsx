@@ -220,6 +220,7 @@ export default function Register() {
               textAlign={isArabic ? "right" : "left"}
               flex={1}
               value={phoneNumber}
+              defaultValue="+962"
               onChangeText={handlePhoneChange}
               keyboardType="phone-pad"
               variant="unstyled"

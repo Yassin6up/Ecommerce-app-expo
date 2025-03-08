@@ -250,7 +250,8 @@ export default function RecoveryPassword() {
               </Text>
               <Input
                 placeholder={t("phone_placeholder")}
-                defaultValue={phoneNumber}
+                value={phoneNumber}
+                defaultValue="+962"
                 onChangeText={setPhoneNumber}
                 borderColor={inputBorderColor}
                 keyboardType="phone-pad"

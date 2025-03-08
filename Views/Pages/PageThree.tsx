@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -39,8 +39,22 @@ const PageThree = () => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
+  const [DELIVERY_PRICE, setDelivery_price] = useState(0);
 
-  const DELIVERY_PRICE = 0; // Fixed delivery price of $3
+  useEffect(() => {
+    const fetchDeliveryFees = async () => {
+      try {
+        const response = await axios.get('https://backend.j-byu.shop/api/settings/delivryFees');
+        
+        setDelivery_price(response.data);
+        
+      } catch (error) {
+        console.error('Error fetching delivery fees:', error);
+      }
+    };
+  
+    fetchDeliveryFees();
+  }, []);
 
   // Calculate subtotal (items only) and total with delivery for selected items
   const selectedSubtotal = cartItems

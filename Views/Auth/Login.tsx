@@ -231,6 +231,7 @@ export default function Login() {
             textAlign={isArabic ? "right" : "left"}
             flex={1}
             value={phoneNumber}
+            defaultValue="+962"
             onChangeText={handlePhoneChange}
             keyboardType="phone-pad"
             variant="unstyled"
