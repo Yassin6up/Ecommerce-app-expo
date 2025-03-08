@@ -33,7 +33,7 @@ export default function Kids() {
           images: JSON.parse(product.images),
         }));
         setKidsProducts(products);
-      } catch (err) {
+      } catch (err:any) {
         if (err.response.status == 404) {
           return;
         }
@@ -79,7 +79,7 @@ export default function Kids() {
             isDarkMode ? styles.darkText : styles.lightText,
             { fontSize: 20 },
           ]}>
-          <Text style={{ color: "#F7CF9D" }}>ا</Text>خر
+          <Text style={{ color: "#F7CF9D" }}>اخر</Text>
         </Text>
         <Pressable
           px={4}

@@ -40,6 +40,14 @@ const PageThree = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
 
+  const DELIVERY_PRICE = 0; // Fixed delivery price of $3
+
+  // Calculate subtotal (items only) and total with delivery for selected items
+  const selectedSubtotal = cartItems
+    .filter((item) => selectedItems.includes(item.id))
+    .reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const selectedTotal = selectedItems.length > 0 ? selectedSubtotal + DELIVERY_PRICE : 0;
+
   const toggleItemSelection = (itemId: number) => {
     if (selectedItems.includes(itemId)) {
       setSelectedItems(selectedItems.filter((id) => id !== itemId));
@@ -57,7 +65,6 @@ const PageThree = () => {
   };
 
   const submitOrder = async () => {
-    // Validate selected items
     if (selectedItems.length === 0) {
       toast.show({
         title: t("no_items_selected"),
@@ -67,12 +74,6 @@ const PageThree = () => {
       return;
     }
 
-    // Get selected items to submit
-    const selectedOrderItems = cartItems.filter((item) =>
-      selectedItems.includes(item.id)
-    );
-
-    // Get session token from AsyncStorage
     const sessionToken = await AsyncStorage.getItem("sessionToken");
     if (!sessionToken) {
       toast.show({
@@ -83,49 +84,42 @@ const PageThree = () => {
       return;
     }
 
-    // Prepare order data
+    const selectedOrderItems = cartItems.filter((item) =>
+      selectedItems.includes(item.id)
+    );
+
     const orderData = {
       session_token: sessionToken,
       orders: selectedOrderItems.map((item) => ({
-        vendor_id: 1, // Hardcoded as requested
+        vendor_id: 1,
         product_id: item.id,
         quantity: item.quantity,
         total_price: item.price * item.quantity,
         status: "pending",
-        // Add any additional fields if needed
       })),
+      delivery_price: DELIVERY_PRICE, // Include delivery price in order data
     };
 
     try {
       setIsSubmitting(true);
-
-      // Submit order to backend
       const response = await axios.post(
         "https://backend.j-byu.shop/api/orders",
         orderData
       );
 
-      // Success handling
       toast.show({
         title: t("order_submitted_success"),
         status: "success",
         placement: "top",
       });
 
-      // Remove submitted items from cart
       selectedItems.forEach((itemId) => {
         dispatch(removeFromCart({ id: itemId }));
       });
-
-      // Clear selection
       setSelectedItems([]);
-
-      // Optional: Navigate to orders screen or home
       navigation.navigate("page one");
     } catch (error) {
       console.error("Order submission error:", error);
-
-      // Error handling
       toast.show({
         title: t("order_submission_failed"),
         description: error.response?.data?.message || t("unknown_error"),
@@ -210,7 +204,6 @@ const PageThree = () => {
                         height={200}
                         borderRadius={8}
                       />
-
                       <VStack
                         flex={1}
                         space={2}
@@ -224,14 +217,12 @@ const PageThree = () => {
                         <Text color={isDarkMode ? "gray.400" : "gray.600"}>
                           {t("price_each", { price: item.price.toFixed(2) })}
                         </Text>
-
                         {item.size && (
                           <Text>
                             <Text bold>{t("size")}:</Text> {item.size}
                           </Text>
                         )}
                       </VStack>
-
                       <VStack alignItems="center" space={2}>
                         <HStack
                           alignItems="center"
@@ -260,7 +251,6 @@ const PageThree = () => {
                               color={isDarkMode ? "white" : "gray.900"}
                             />
                           </Button>
-
                           <Box
                             bg={isDarkMode ? "gray.700" : "gray.100"}
                             borderRadius="md"
@@ -273,7 +263,6 @@ const PageThree = () => {
                               {item.quantity}
                             </Text>
                           </Box>
-
                           <Button
                             variant="outline"
                             size="sm"
@@ -298,7 +287,6 @@ const PageThree = () => {
                             />
                           </Button>
                         </HStack>
-
                         <Button
                           variant="subtle"
                           bgColor="#F9D77E"
@@ -334,17 +322,41 @@ const PageThree = () => {
           padding={4}
           borderTopWidth={1}
           borderTopColor={isDarkMode ? "gray.700" : "gray.200"}>
-          <HStack
-            justifyContent="space-between"
-            alignItems="center"
-            flexDirection={isArabic ? "row-reverse" : "row"}>
-            <Text bold fontSize="xl" color={isDarkMode ? "white" : "gray.900"}>
-              {t("total")}
-            </Text>
-            <Text bold fontSize="xl" color="#468500">
-              ${totalAmount.toFixed(2)}
-            </Text>
-          </HStack>
+          <VStack space={2}>
+            <HStack
+              justifyContent="space-between"
+              alignItems="center"
+              flexDirection={isArabic ? "row-reverse" : "row"}>
+              <Text bold fontSize="lg" color={isDarkMode ? "white" : "gray.900"}>
+                {t("subtotal")}
+              </Text>
+              <Text bold fontSize="lg" color={isDarkMode ? "white" : "gray.900"}>
+                ${selectedSubtotal.toFixed(2)}
+              </Text>
+            </HStack>
+            <HStack
+              justifyContent="space-between"
+              alignItems="center"
+              flexDirection={isArabic ? "row-reverse" : "row"}>
+              <Text bold fontSize="lg" color={isDarkMode ? "white" : "gray.900"}>
+                {t("delivery_price")}
+              </Text>
+              <Text bold fontSize="lg" color={isDarkMode ? "white" : "gray.900"}>
+                ${DELIVERY_PRICE.toFixed(2)}
+              </Text>
+            </HStack>
+            <HStack
+              justifyContent="space-between"
+              alignItems="center"
+              flexDirection={isArabic ? "row-reverse" : "row"}>
+              <Text bold fontSize="xl" color={isDarkMode ? "white" : "gray.900"}>
+                {t("total")}
+              </Text>
+              <Text bold fontSize="xl" color="#468500">
+                ${selectedTotal.toFixed(2)}
+              </Text>
+            </HStack>
+          </VStack>
 
           <HStack space={4} marginTop={4}>
             <Button
@@ -364,7 +376,6 @@ const PageThree = () => {
                 {t("clear_cart")}
               </Text>
             </Button>
-
             <Button
               variant="solid"
               bg="#F9D77E"

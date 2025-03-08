@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect } from "react";
-import { StyleSheet, Text, View,SafeAreaView } from "react-native";
+import { StyleSheet, Text, View,SafeAreaView ,I18nManager} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { NativeBaseProvider, extendTheme } from "native-base";
@@ -14,6 +14,12 @@ import Pages from "./Views";
 import AppScreens from "./Views/AllPages";
 export default function App() {
   SplashScreen.preventAutoHideAsync();
+  useEffect(() => {
+    if (I18nManager.isRTL) {
+      I18nManager.forceRTL(false);
+      I18nManager.allowRTL(false);
+    }
+  }, []);
   let [fontsLoaded] = useFonts({
     Alexandria_100Thin: require("./assets/fonts/Alexandria/static/Alexandria-Thin.ttf"),
     Alexandria_200ExtraLight: require("./assets/fonts/Alexandria/static/Alexandria-ExtraLight.ttf"),

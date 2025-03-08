@@ -76,7 +76,7 @@ export default function Women() {
             isDarkMode ? styles.darkText : styles.lightText,
             { fontSize: 20 },
           ]}>
-          <Text style={{ color: "#F7CF9D" }}>م</Text>نزلي
+          <Text style={{ color: "#F7CF9D",padding:2 }}>منزلي</Text>
         </Text>
         <Pressable
           px={4}

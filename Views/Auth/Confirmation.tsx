@@ -186,7 +186,7 @@ const Confirmation = ({ navigation, route }: any) => {
 
       <Stack h="full" w="full">
         <Stack w="full" justifyContent="center" alignItems="center" mt={10}>
-          <Text color={textColor}>{t("enter_code ") + phone}</Text>
+        <Text color={textColor}>{t("enter_code", { phone: phone })}</Text>
         </Stack>
         <Formik
           initialValues={initialValues}

@@ -46,7 +46,7 @@ export default function RecoveryPassword() {
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
   const inputBorderColor = isDarkMode ? "#333333" : "#E9E9F1";
 
-  const showToast = (message, bgColor) => {
+  const showToast = (message:any, bgColor:any) => {
     toast.show({
       placement: "top",
       render: () => (
@@ -207,7 +207,7 @@ export default function RecoveryPassword() {
       });
 
       dispatch(setPassHome(true))
-    } catch (error) {
+    } catch (error:any) {
       // Show error message
       toast.show({
         placement: "top",

@@ -79,7 +79,7 @@ export default function Men() {
             isDarkMode ? styles.darkText : styles.lightText,
             { fontSize: 20 },
           ]}>
-          <Text style={{ color: "#F7CF9D" }}>ت</Text>قنية
+          <Text style={{ color: "#F7CF9D" }}>تقنية</Text>
         </Text>
         <Pressable
           px={4}

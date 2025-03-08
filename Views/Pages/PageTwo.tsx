@@ -156,6 +156,7 @@ const PageTwo = () => {
                           px={8} // Indent child category
                           py={2}
                           rounded={4}
+                          my={2}
                           bgColor={"#FDEECF"}
                           alignItems={"center"}
                           justifyContent={"space-between"}>
