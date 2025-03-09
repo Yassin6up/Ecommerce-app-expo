@@ -29,6 +29,8 @@ import { useNavigation } from "@react-navigation/native";
 import { ArrowLeft, Heart } from "iconsax-react-native";
 import i18next from "i18next";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const ProductDetails = () => {
   const navigation: any = useNavigation();
@@ -41,13 +43,11 @@ const ProductDetails = () => {
   const [scaleValue] = useState(new Animated.Value(1));
   const [selectedColor, setSelectedColor] = useState<string | null>(null); // State for selected color
   const [selectedSize, setSelectedSize] = useState<string | null>(null); // State for selected size
-
+  const [isFavorite , setFave] = useState(false)
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
-  const favorites = useSelector((state: RootState) => state.favorites.items);
   const userId = useSelector((state: RootState) => state.auth?.user?.id);
   const isRTL = i18next.language === "ar";
 
-  const isFavorite = favorites.some((item) => item.id === product?.id);
 
   // Static arrays for colors and sizes (since no backend yet)
   const colors = ["#FF0000", "#0000FF", "#00FF00", "#FFA500"]; // Red, Blue, Green, Orange
@@ -57,15 +57,18 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         const { id } = route.params;
+        const userId = await AsyncStorage.getItem("userId");
+        
         const response = await axios.get(
           `https://backend.j-byu.shop/api/products/${id}`,
-          { params: { user_id: 1 } }
+          { params: { user_id: userId } }
         );
 
         const productData = {
           ...response.data,
           images: JSON.parse(response.data.images),
         };
+        setFave(response.data.isSaved)
 
         setProduct(productData);
       } catch (err: any) {
@@ -98,39 +101,59 @@ const ProductDetails = () => {
     );
   };
 
-  const handleToggleFavorite = () => {
-    if (!product) return;
+const handleToggleFavorite = async () => {
+  if (!product) return;
+  const userId = await AsyncStorage.getItem("userId");
 
-    const favoriteItem = {
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      image: product.images[0],
-      vendorWhatsApp: product.vendorWhatsApp,
-      vendorPhoneNumber: product.vendorPhoneNumber,
-      color: selectedColor || undefined, // Include selected color
-      size: selectedSize || undefined, // Include selected size
-    };
+  // Animation sequence
+  Animated.sequence([
+    Animated.timing(scaleValue, {
+      toValue: 1.2,
+      duration: 100,
+      useNativeDriver: true,
+    }),
+    Animated.timing(scaleValue, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: true,
+    }),
+  ]).start();
 
-    Animated.sequence([
-      Animated.timing(scaleValue, {
-        toValue: 1.2,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleValue, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+  // Update UI state immediately for better user experience
+  setFave(!isFavorite);
 
-    if (isFavorite) {
-      dispatch(removeFromFavorites(product.id));
+  // Make API call to toggle favorite status
+  try {
+    const response = await axios.post(
+      "https://backend.j-byu.shop/api/toggle-saved-product",
+      {
+        user_id: userId, // Make sure userId is defined or passed as parameter
+        product_id: product.id, // Assuming product.id exists
+      }
+    );
+
+    // Handle the response based on the status
+    if (response.status === 201) {
+      console.log("Product saved successfully:", response.data);
     } else {
-      dispatch(addToFavorites(favoriteItem));
+      console.log("Product removed from saved list:", response.data);
     }
-  };
+  } catch (error) {
+    // Handle error and potentially revert UI state
+    setFave(isFavorite); // Revert back if API call fails
+    
+    if (error.response) {
+      // The server responded with a status other than 2xx
+      console.error("Error response:", error.response.data);
+    } else if (error.request) {
+      // The request was made, but no response was received
+      console.error("No response received:", error.request);
+    } else {
+      // Something happened in setting up the request
+      console.error("Error setting up request:", error.message);
+    }
+  }
+};
 
   if (loading) {
     return (
@@ -230,31 +253,39 @@ const ProductDetails = () => {
         </Text>
 
         {/* Color Selection */}
-        <VStack mt={4} space={2}>
-          <Text
-            fontSize="lg"
-            fontWeight="bold"
-            color={isDarkMode ? "#FFFFFF" : "#000000"}
-            textAlign={isRTL ? "right" : "left"}>
-            {t("Select_Color")}
-          </Text>
-          <HStack space={3}>
-            {colors.map((color) => (
-              <Pressable
-                key={color}
-                onPress={() => setSelectedColor(color)}
-                style={[
-                  customStyles.colorButton,
-                  { backgroundColor: color },
-                  selectedColor === color && customStyles.selectedColorButton,
-                ]}
-              />
-            ))}
-          </HStack>
-        </VStack>
+{
+  JSON.parse(product.colors) && (
+
+    <VStack mt={4} space={2}>
+    <Text
+      fontSize="lg"
+      fontWeight="bold"
+      color={isDarkMode ? "#FFFFFF" : "#000000"}
+      textAlign={isRTL ? "right" : "left"}>
+      {t("Select_Color")}
+    </Text>
+    <HStack space={3}>
+      {JSON.parse(product.colors)?.map((color) => (
+        <Pressable
+          key={color}
+          onPress={() => setSelectedColor(color)}
+          style={[
+            customStyles.colorButton,
+            { backgroundColor: color },
+            selectedColor === color && customStyles.selectedColorButton,
+          ]}
+        />
+      ))}
+    </HStack>
+  </VStack>
+
+  )
+}
 
         {/* Size Selection */}
-        <VStack mt={4} space={2}>
+
+        {JSON.parse(product.sizes) && (
+          <VStack mt={4} space={2}>
           <Text
             fontSize="lg"
             fontWeight="bold"
@@ -263,7 +294,7 @@ const ProductDetails = () => {
             {t("Select_Size")}
           </Text>
           <HStack space={3}>
-            {sizes.map((size) => (
+            {JSON.parse(product.sizes)?.map((size) => (
               <Pressable
                 key={size}
                 onPress={() => setSelectedSize(size)}
@@ -288,6 +319,9 @@ const ProductDetails = () => {
             ))}
           </HStack>
         </VStack>
+        )}
+        
+
       </ScrollView>
 
       <View style={button.fixedButtonContainer}>

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { removeFromFavorites } from "../../store/features/favoritesSlice";
 import styles from "../Styles";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   ScrollView,
   Stack,
@@ -15,18 +16,21 @@ import {
   HStack,
   Image,
   Pressable,
+  Spinner,
+  Center,
 } from "native-base";
 import i18next from "i18next";
-import { Heart, ArrowLeft } from "iconsax-react-native"; // Add ArrowLeft for back button
+import { Heart, ArrowLeft } from "iconsax-react-native";
 
 const MyFavourite = () => {
   const isRTL = i18next.language === "ar";
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
-  const dispatch = useDispatch();
-
+  
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
-  const favorites = useSelector((state: RootState) => state.favorites.items);
 
   const textColor = isDarkMode ? "#E0E0E0" : "#000";
   const secondaryTextColor = isDarkMode ? "#9E9E9E" : "#616161";
@@ -34,9 +38,60 @@ const MyFavourite = () => {
   const cardBackground = isDarkMode ? "#2A2A2A" : "#FFFFFF";
   const cardBorderColor = isDarkMode ? "#3A3A3A" : "#E0E0E0";
 
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
+  
+  // Fetch favorites from backend
+  const fetchFavorites = async () => {
+    try {
+      setLoading(true);
+      const userId = await AsyncStorage.getItem("userId");
+      
+      if (!userId) {
+        console.error("User ID not found");
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get(
+        `https://backend.j-byu.shop/api/saved-products/${userId}`
+      );
+      console.log(response.data.savedProducts)
+      setFavorites(response.data.savedProducts || []);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+      setLoading(false);
+    }
+  };
+
   // Handle removing an item from favorites
-  const handleRemoveFavorite = (id: number) => {
-    dispatch(removeFromFavorites(id));
+  const handleRemoveFavorite = async (id: number) => {
+    try {
+      const userId = await AsyncStorage.getItem("userId");
+      
+      if (!userId) {
+        console.error("User ID not found");
+        return;
+      }
+      
+      // Optimistically update UI
+      setFavorites(favorites.filter(item => item.id !== id));
+      
+      // Make API call to remove from favorites
+      await axios.post("https://backend.j-byu.shop/api/toggle-saved-product", {
+        user_id: userId,
+        product_id: id
+      });
+      
+      // Refresh the favorites list
+      fetchFavorites();
+    } catch (error) {
+      console.error("Error removing favorite:", error);
+      // Revert optimistic update if failed
+      fetchFavorites();
+    }
   };
 
   // Navigate to ProductDetails
@@ -80,84 +135,106 @@ const MyFavourite = () => {
 
       {/* Favorites List */}
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        <VStack space={4} paddingX={6}>
-          {favorites.length > 0 ? (
-            favorites.map((item) => (
-              <Pressable
-                key={item.id}
-                onPress={() => handleProductPress(item)}
-                _pressed={{ opacity: 0.8 }}>
-                <Box
-                  bg={cardBackground}
-                  borderRadius={16} // Softer corners
-                  borderWidth={1} // Subtle border
-                  borderColor={cardBorderColor}
-                  shadow={2} // Lighter shadow for a cleaner look
-                  padding={4}>
-                  <HStack space={4} alignItems="center">
-                    {/* Product Image */}
-                    <Image
-                      source={{
-                        uri: item.image
-                          ? `https://backend.j-byu.shop/api/prudact/${item.id}/img/${item.image}`
-                          : "https://via.placeholder.com/100",
-                      }}
-                      alt={item.title}
-                      size="lg" // Larger image
-                      borderRadius={10}
-                      resizeMode="cover"
-                    />
+        {loading ? (
+          <Center flex={1} paddingY={20}>
+            <Spinner size="lg" color={dividerColor} />
+          </Center>
+        ) : (
+          <VStack space={4} paddingX={6}>
+            {favorites.length > 0 ? (
+              favorites.map((item) => (
+                <Pressable
+                  key={item.id}
+                  onPress={() => handleProductPress(item)}
+                  _pressed={{ opacity: 0.8 }}>
+                  <Box
+                    bg={cardBackground}
+                    borderRadius={16}
+                    borderWidth={1}
+                    borderColor={cardBorderColor}
+                    shadow={2}
+                    padding={4}>
+                    <HStack space={4} alignItems="center">
+                      {/* Product Image */}
+                      <Image
+                        source={{
+                          uri: item.images
+                            ? `https://backend.j-byu.shop/api/prudact/${item.id}/img/${JSON.parse(item.images)  [0]}`
+                            : "https://via.placeholder.com/100",
+                        }}
+                        alt={item.title}
+                        size="lg"
+                        borderRadius={10}
+                        resizeMode="cover"
+                      />
 
-                    {/* Product Details */}
-                    <VStack flex={1} justifyContent="center" space={1}>
-                      <Text
-                        fontSize="lg"
-                        fontWeight="semibold"
-                        color={textColor}
-                        textAlign={isRTL ? "right" : "left"}
-                        numberOfLines={1}>
-                        {item.title}
-                      </Text>
-                      <Text
-                        fontSize="md"
-                        color={dividerColor}
-                        textAlign={isRTL ? "right" : "left"}>
-                        ${item.price}
-                      </Text>
-                    </VStack>
+                      {/* Product Details */}
+                      <VStack flex={1} justifyContent="center" space={1}>
+                        <Text
+                          fontSize="lg"
+                          fontWeight="semibold"
+                          color={textColor}
+                          textAlign={isRTL ? "right" : "left"}
+                          numberOfLines={1}>
+                          {item.title}
+                        </Text>
+                        <Text
+                          fontSize="md"
+                          color={dividerColor}
+                          textAlign={isRTL ? "right" : "left"}>
+                          ${item.price}
+                        </Text>
+                        {item.size && (
+                          <Text
+                            fontSize="sm"
+                            color={secondaryTextColor}
+                            textAlign={isRTL ? "right" : "left"}>
+                            {t("size")}: {item.size}
+                          </Text>
+                        )}
+                        {item.color && (
+                          <Text
+                            fontSize="sm"
+                            color={secondaryTextColor}
+                            textAlign={isRTL ? "right" : "left"}>
+                            {t("color")}: {item.color}
+                          </Text>
+                        )}
+                      </VStack>
 
-                    {/* Remove Favorite Button */}
-                    <Pressable
-                      onPress={() => handleRemoveFavorite(item.id)}
-                      _pressed={{ opacity: 0.7 }}>
-                      <Heart size={24} color="#FF0000" variant="Bold" />
-                    </Pressable>
-                  </HStack>
-                </Box>
-              </Pressable>
-            ))
-          ) : (
-            <VStack
-              flex={1}
-              justifyContent="center"
-              alignItems="center"
-              paddingY={20}>
-              <Text
-                fontSize="lg"
-                color={secondaryTextColor}
-                textAlign="center">
-                {t("no_favorites_yet")}
-              </Text>
-              <Pressable
-                onPress={() => navigation.navigate("parts")}
-                mt={4}>
-                <Text fontSize="md" color={dividerColor}>
-                  {t("explore_products")}
+                      {/* Remove Favorite Button */}
+                      <Pressable
+                        onPress={() => handleRemoveFavorite(item.id)}
+                        _pressed={{ opacity: 0.7 }}>
+                        <Heart size={24} color="#FF0000" variant="Bold" />
+                      </Pressable>
+                    </HStack>
+                  </Box>
+                </Pressable>
+              ))
+            ) : (
+              <VStack
+                flex={1}
+                justifyContent="center"
+                alignItems="center"
+                paddingY={20}>
+                <Text
+                  fontSize="lg"
+                  color={secondaryTextColor}
+                  textAlign="center">
+                  {t("no_favorites_yet")}
                 </Text>
-              </Pressable>
-            </VStack>
-          )}
-        </VStack>
+                <Pressable
+                  onPress={() => navigation.navigate("page two")}
+                  mt={4}>
+                  <Text fontSize="md" color={dividerColor}>
+                    {t("explore_products")}
+                  </Text>
+                </Pressable>
+              </VStack>
+            )}
+          </VStack>
+        )}
       </ScrollView>
     </Stack>
   );

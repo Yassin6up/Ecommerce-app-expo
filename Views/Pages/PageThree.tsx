@@ -41,16 +41,17 @@ const PageThree = () => {
   const toast = useToast();
   const [deliveryPrice, setDeliveryPrice] = useState<number>(0); // Use camelCase and type as number
 
+  console.log(cartItems)
   useEffect(() => {
     const fetchDeliveryFees = async () => {
       try {
         const response = await axios.get('https://backend.j-byu.shop/api/settings/delivryFees');
         console.log('API Response:', response.data); // Debug: Check the response structure
         // Assuming response.data is a number or an object like { deliveryFees: 3 }
-        const fee = typeof response.data === 'number' 
-          ? response.data 
-          : response.data?.deliveryFees || 0; // Fallback to 0 if undefined
+
+        const fee =  Number(response?.data) 
         setDeliveryPrice(fee);
+        
       } catch (error) {
         console.error('Error fetching delivery fees:', error);
         setDeliveryPrice(0); // Fallback to 0 on error
@@ -111,6 +112,8 @@ const PageThree = () => {
       orders: selectedOrderItems.map((item) => ({
         vendor_id: 1,
         product_id: item.id,
+        color: item.color , 
+        size : item.size,
         quantity: item.quantity,
         total_price: item.price * item.quantity,
         status: "pending",
@@ -137,7 +140,7 @@ const PageThree = () => {
       setSelectedItems([]);
       navigation.navigate("page one");
     } catch (error) {
-      console.error("Order submission error:", error);
+      console.error("Order submission error:", error.response.data);
       toast.show({
         title: t("order_submission_failed"),
         description: error.response?.data?.message || t("unknown_error"),
@@ -360,7 +363,7 @@ const PageThree = () => {
                 {t("delivery_price")}
               </Text>
               <Text bold fontSize="lg" color={isDarkMode ? "white" : "gray.900"}>
-                ${deliveryPrice.toFixed(2)} {/* Use camelCase */}
+                JOD{deliveryPrice?.toFixed(2)} {/* Use camelCase */}
               </Text>
             </HStack>
             <HStack
