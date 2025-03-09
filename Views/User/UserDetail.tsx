@@ -6,6 +6,7 @@ import TermsAndCondition from "./TermsAndCondition";
 import Policy from "./Policy";
 import PageFour from "../Pages/PageFour";
 const Stack = createNativeStackNavigator();
+import MyFavourite from "./MyFavourite";
 
 const UserDetail: React.FC<any> = () => {
   return (
@@ -41,6 +42,13 @@ const UserDetail: React.FC<any> = () => {
       <Stack.Screen
         name="Policy"
         component={Policy}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="MyFavourite"
+        component={MyFavourite}
         options={{
           headerShown: false,
         }}

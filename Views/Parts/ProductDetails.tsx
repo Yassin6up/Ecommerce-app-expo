@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { View, Pressable, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+  Animated,
+} from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
+import {
+  addToFavorites,
+  removeFromFavorites,
+} from "../../store/features/favoritesSlice";
 import { useTranslation } from "react-i18next";
 import { RootState } from "../../store/store";
 import {
@@ -16,7 +26,7 @@ import {
 } from "native-base";
 import styles from "../Styles";
 import { useNavigation } from "@react-navigation/native";
-import { ArrowLeft } from "iconsax-react-native";
+import { ArrowLeft, Heart } from "iconsax-react-native";
 import i18next from "i18next";
 import axios from "axios";
 
@@ -26,21 +36,26 @@ const ProductDetails = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [product, setProduct] = useState<any>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [scaleValue] = useState(new Animated.Value(1));
+  const [selectedColor, setSelectedColor] = useState<string | null>(null); // State for selected color
+  const [selectedSize, setSelectedSize] = useState<string | null>(null); // State for selected size
 
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
-  const userId = useSelector((state: RootState) => state.auth?.user?.id); // Assuming you have auth state
+  const favorites = useSelector((state: RootState) => state.favorites.items);
+  const userId = useSelector((state: RootState) => state.auth?.user?.id);
   const isRTL = i18next.language === "ar";
 
-  console.log(route.params);
+  const isFavorite = favorites.some((item) => item.id === product?.id);
+
+  // Static arrays for colors and sizes (since no backend yet)
+  const colors = ["#FF0000", "#0000FF", "#00FF00", "#FFA500"]; // Red, Blue, Green, Orange
+  const sizes = ["S", "M", "L", "XL"];
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        console.log(userId);
         const { id } = route.params;
         const response = await axios.get(
           `https://backend.j-byu.shop/api/products/${id}`,
@@ -49,13 +64,13 @@ const ProductDetails = () => {
 
         const productData = {
           ...response.data,
-          images: JSON.parse(response.data.images), // Parse images array
+          images: JSON.parse(response.data.images),
         };
 
         setProduct(productData);
-      } catch (err) {
+      } catch (err: any) {
         setError(t("product_fetch_error"));
-        console.error("Product fetch error:", err.response.data);
+        console.error("Product fetch error:", err.response?.data);
       } finally {
         setLoading(false);
       }
@@ -64,12 +79,10 @@ const ProductDetails = () => {
     if (route.params?.id) {
       fetchProduct();
     }
-  }, [route.params?.id]);
+  }, [route.params?.id, t]);
 
   const handleAddToCart = () => {
     if (!product) return;
-
-    // if (selectedSize && selectedColor) {
     dispatch(
       addToCart({
         id: product.id,
@@ -77,15 +90,46 @@ const ProductDetails = () => {
         price: product.price,
         image: product.images[0],
         quantity: 1,
-        // size: selectedSize,
-        // color: selectedColor,
         vendorWhatsApp: product.vendorWhatsApp,
         vendorPhoneNumber: product.vendorPhoneNumber,
+        color: selectedColor || undefined, // Include selected color
+        size: selectedSize || undefined, // Include selected size
       })
     );
-    // } else {
-    //   alert(t("Please_select_size_and_color"));
-    // }
+  };
+
+  const handleToggleFavorite = () => {
+    if (!product) return;
+
+    const favoriteItem = {
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      image: product.images[0],
+      vendorWhatsApp: product.vendorWhatsApp,
+      vendorPhoneNumber: product.vendorPhoneNumber,
+      color: selectedColor || undefined, // Include selected color
+      size: selectedSize || undefined, // Include selected size
+    };
+
+    Animated.sequence([
+      Animated.timing(scaleValue, {
+        toValue: 1.2,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleValue, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    if (isFavorite) {
+      dispatch(removeFromFavorites(product.id));
+    } else {
+      dispatch(addToFavorites(favoriteItem));
+    }
   };
 
   if (loading) {
@@ -148,80 +192,102 @@ const ProductDetails = () => {
           </VStack>
         </HStack>
 
-        <Text
-          fontSize={28}
-          marginTop={2}
-          color={isDarkMode ? "#FFFFFF" : "#000000"}
-          textAlign={isRTL ? "right" : "left"}>
-          {product.title}
-        </Text>
+        <HStack justifyContent="space-between" alignItems="center">
+          <Text
+            fontSize={28}
+            marginTop={2}
+            color={isDarkMode ? "#FFFFFF" : "#000000"}
+            textAlign={isRTL ? "right" : "left"}>
+            {product.title}
+          </Text>
+          <Animated.View
+            style={[
+              customStyles.favoriteButton,
+              { transform: [{ scale: scaleValue }] },
+            ]}>
+            <Pressable onPress={handleToggleFavorite}>
+              <Heart
+                size="28"
+                color={isFavorite ? "#FF0000" : isDarkMode ? "#DCAE74" : "#F7CF9D"}
+                variant={isFavorite ? "Bold" : "Outline"}
+              />
+            </Pressable>
+          </Animated.View>
+        </HStack>
 
         <Text
           color={isDarkMode ? "#DCAE74" : "#468500"}
           bold
           fontSize="2xl"
-          textAlign={isRTL ? "right" : "left"} >
+          textAlign={isRTL ? "right" : "left"}>
           ${product.price}
         </Text>
 
-        <Text color={isDarkMode ? "#FFFFFF" : "#000000"}    textAlign={isRTL ? "right" : "left"}>
-          {product.description} 
+        <Text
+          color={isDarkMode ? "#FFFFFF" : "#000000"}
+          textAlign={isRTL ? "right" : "left"}>
+          {product.description}
         </Text>
-
-        {/* Vendor Information */}
-        {/* <VStack mt={4} space={2}>
-          <Text bold color={isDarkMode ? "#FFFFFF" : "#000000"}>
-            {t("vendor_info")}
-          </Text>
-          <Text color={isDarkMode ? "#FFFFFF" : "#000000"}>
-            WhatsApp: {product.vendorWhatsApp}
-          </Text>
-          <Text color={isDarkMode ? "#FFFFFF" : "#000000"}>
-            {t("phone")}: {product.vendorPhoneNumber}
-          </Text>
-        </VStack> */}
-
-        {/* Size Selection */}
-        {/* <Text style={[styles.sectionTitle, { textAlign: isRTL ? "right" : "left" }]}>
-          {t("Select_Size")}
-        </Text> */}
-        {/* <View style={{ flexDirection: "row", marginVertical: 10 }}>
-          {["XL", "L", "M", "S"].map((size) => (
-            <Pressable
-              key={size}
-              onPress={() => setSelectedSize(size)}
-              style={[
-                styles.sizeButton,
-                {
-                  borderColor: selectedSize === size ? "#468500" : isDarkMode ? "#DCAE74" : "#FFCC8B",
-                  backgroundColor: isDarkMode ? "#2A2A2A" : "#F9D77E"
-                }
-              ]}
-            >
-              <Text color={isDarkMode ? "#FFFFFF" : "#000000"}>{size}</Text>
-            </Pressable>
-          ))}
-        </View> */}
 
         {/* Color Selection */}
-        {/* <Text style={[styles.sectionTitle, { textAlign: isRTL ? "right" : "left" }]}>
-          {t("Select_Color")}
-        </Text>
-        <View style={{ flexDirection: "row", marginVertical: 10 }}>
-          {["#FF0000", "#0000FF", "#008000", "#808080"].map((color) => (
-            <Pressable
-              key={color}
-              onPress={() => setSelectedColor(color)}
-              style={[
-                styles.colorButton,
-                {
-                  backgroundColor: color,
-                  borderColor: selectedColor === color ? (isDarkMode ? "#DCAE74" : "#F7CF9D") : "transparent"
-                }
-              ]}
-            />
-          ))}
-        </View> */}
+        <VStack mt={4} space={2}>
+          <Text
+            fontSize="lg"
+            fontWeight="bold"
+            color={isDarkMode ? "#FFFFFF" : "#000000"}
+            textAlign={isRTL ? "right" : "left"}>
+            {t("Select_Color")}
+          </Text>
+          <HStack space={3}>
+            {colors.map((color) => (
+              <Pressable
+                key={color}
+                onPress={() => setSelectedColor(color)}
+                style={[
+                  customStyles.colorButton,
+                  { backgroundColor: color },
+                  selectedColor === color && customStyles.selectedColorButton,
+                ]}
+              />
+            ))}
+          </HStack>
+        </VStack>
+
+        {/* Size Selection */}
+        <VStack mt={4} space={2}>
+          <Text
+            fontSize="lg"
+            fontWeight="bold"
+            color={isDarkMode ? "#FFFFFF" : "#000000"}
+            textAlign={isRTL ? "right" : "left"}>
+            {t("Select_Size")}
+          </Text>
+          <HStack space={3}>
+            {sizes.map((size) => (
+              <Pressable
+                key={size}
+                onPress={() => setSelectedSize(size)}
+                style={[
+                  customStyles.sizeButton,
+                  {
+                    backgroundColor: isDarkMode ? "#2A2A2A" : "#F9D77E",
+                    borderColor:
+                      selectedSize === size
+                        ? "#468500"
+                        : isDarkMode
+                        ? "#DCAE74"
+                        : "#FFCC8B",
+                  },
+                ]}>
+                <Text
+                  color={isDarkMode ? "#FFFFFF" : "#000000"}
+                  fontWeight={selectedSize === size ? "bold" : "normal"}>
+                  {size}
+                </Text>
+              </Pressable>
+            ))}
+          </HStack>
+        </VStack>
       </ScrollView>
 
       <View style={button.fixedButtonContainer}>
@@ -236,27 +302,6 @@ const ProductDetails = () => {
   );
 };
 
-// const styles = StyleSheet.create({
-//   sectionTitle: {
-//     marginTop: 10,
-//     fontWeight: "bold",
-//     color: "#000000",
-//   },
-//   sizeButton: {
-//     padding: 10,
-//     margin: 5,
-//     borderWidth: 2,
-//     borderRadius: 5,
-//   },
-//   colorButton: {
-//     width: 40,
-//     height: 40,
-//     borderRadius: 20,
-//     borderWidth: 4,
-//     margin: 5,
-//   },
-// });
-
 const button = StyleSheet.create({
   fixedButtonContainer: {
     position: "absolute",
@@ -264,6 +309,38 @@ const button = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 10,
+  },
+});
+
+const customStyles = StyleSheet.create({
+  favoriteButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 20,
+    padding: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  colorButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: "#FFFFFF", // White border for contrast
+  },
+  selectedColorButton: {
+    borderColor: "#468500", // Green border for selected color
+    borderWidth: 3,
+  },
+  sizeButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

@@ -188,33 +188,7 @@ const Profil = () => {
       </HStack>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Profile Image Section (Commented out as in your original)
-        <VStack alignItems="center" space={4} mb={6}>
-          <Pressable onPress={pickImage}>
-            {profileImage ? (
-              <Image
-                source={{ uri: profileImage }}
-                alt="Profile Image"
-                size={24}
-                borderRadius={12}
-              />
-            ) : (
-              <Box
-                size={24}
-                bgColor={isDarkMode ? "#333" : "#DDD"}
-                borderRadius={12}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Text color={isDarkMode ? "#F7CF9D" : "#F9D77E"}>
-                  {t("change_image")}
-                </Text>
-              </Box>
-            )}
-          </Pressable>
-        </VStack> */}
 
-        {/* Name Input Section */}
         <VStack space={3} mb={4}>
           <Text
             color={isDarkMode ? "#E0E0E0" : "#000"}

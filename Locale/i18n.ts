@@ -145,6 +145,11 @@ const resources = {
       order_cancelled_success: "Order cancelled successfully",
       "No Connection": "No Connection",
       NoProductsAvailable: "No Products Available",
+    "Favorites": "Favorites",
+  "my_favorites": "My Favorites",
+  "items": "Items",
+  "no_favorites_yet": "You haven't added any favorites yet.",
+
     },
   },
   ar: {
@@ -289,6 +294,11 @@ const resources = {
       order_cancelled_success: "تم إلغاء الطلب بنجاح",
       "No Connection": "لا يوجد اتصال",
       NoProductsAvailable: "لا توجد منتجات متاحة",
+      "Favorites": "المفضلة",
+  "my_favorites": "مفضلاتي",
+  "items": "عناصر",
+  "no_favorites_yet": "لم تُضف أي مفضلات بعد.",
+
     },
   },
 };

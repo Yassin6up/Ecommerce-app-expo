@@ -7,6 +7,7 @@ import passHomeReducer from './PassHomeSlice';
 import searchReducer from "./searchSlice";
 import productsReducer from './features/productsSlice';
 import categoriesReducer from './categories/categoriesSlice';
+import favoritesReducer from "./features/favoritesSlice"
 const store = configureStore({
   reducer: {
     theme: themeReducer,
@@ -17,6 +18,7 @@ const store = configureStore({
     search: searchReducer,
     products: productsReducer,
     categories: categoriesReducer,
+    favorites: favoritesReducer,
   },
 });
 

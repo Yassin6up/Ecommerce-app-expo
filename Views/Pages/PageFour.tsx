@@ -75,7 +75,7 @@ const PageFour = () => {
         });
 
         setIsLoading(false);
-      } catch (err) {
+      } catch (err:any) {
         console.error("Error fetching user profile:", err);
         setError(err.message);
         setIsLoading(false);
@@ -130,13 +130,10 @@ const PageFour = () => {
           isDarkMode ? styles.darkBckground : styles.lightBckground,
         ]}>
         <Text color="red.500" bold>
-          {t("Error_Fetching_Profile")}
+          {t("error_fetch_profile")}
         </Text>
-        <Button
-          onPress={() => navigation.navigate("Login")}
-          marginTop={4}
-          variant="outline">
-          {t("Go_to_Login")}
+        <Button onPress={handleLogout} marginTop={4} variant="outline">
+          {t("Logout")}
         </Button>
       </VStack>
     );
@@ -161,12 +158,12 @@ const PageFour = () => {
                 color: textColor,
                 fontSize: 20,
                 fontWeight: "bold",
-                textAlign: textAlignStyle,
+           
               }}>
               {userProfile?.name || t("Guest User")}
             </Text>
             <Text
-              style={{ color: secondaryTextColor, textAlign: textAlignStyle }}>
+              style={{ color: secondaryTextColor}}>
               {userProfile?.address || "لا وجود للعنوان"}
             </Text>
             <Text style={{ color: textColor, textAlign: textAlignStyle }}>
@@ -222,6 +219,26 @@ const PageFour = () => {
             {t("my_orders")}
           </Text>
           <Button variant="ghost" onPress={() => navigation.navigate("Orders")}>
+            <Text style={{ color: "#F7CF9D" }}>{t("View")}</Text>
+          </Button>
+        </HStack>
+      </VStack>
+
+      {/* Favorites Section */}
+      <VStack space={3}>
+        <Text
+          bold
+          fontSize="xl"
+          style={{ color: textColor, textAlign: textAlignStyle }}>
+          {t("Favorites")} {/* Add translation key for "Favorites" */}
+        </Text>
+        <HStack justifyContent="space-between" alignItems="center">
+          <Text style={{ color: textColor, textAlign: textAlignStyle }}>
+            {t("my_favorites")} {/* Add translation key for "My Favorites" */}
+          </Text>
+          <Button
+            variant="ghost"
+            onPress={() => navigation.navigate("MyFavourite")}>
             <Text style={{ color: "#F7CF9D" }}>{t("View")}</Text>
           </Button>
         </HStack>
