@@ -116,11 +116,11 @@ const PageTwo = () => {
                   px={4}
                   py={2}
                   rounded={4}
-                  bgColor={"#F9D77E"}
+                  bgColor={"#171717"}
                   alignItems={"center"}
                   justifyContent={"space-between"}>
-                  <ArrowLeft size="24" color="#000" variant="Bold" />
-                  <Text fontWeight={"bold"} fontSize={16}>
+                  <ArrowLeft size="24" color="#fff" variant="Bold" />
+                  <Text fontWeight={"bold"} fontSize={16} color={'white'}>
                     {category.name}
                   </Text>
 
@@ -157,11 +157,11 @@ const PageTwo = () => {
                           py={2}
                           rounded={4}
                           my={2}
-                          bgColor={"#FDEECF"}
+                          bgColor={"#212121"}
                           alignItems={"center"}
                           justifyContent={"space-between"}>
-                          <ArrowLeft size="20" color="#000" variant="Bold" />
-                          <Text fontWeight={"bold"} fontSize={14}>
+                          <ArrowLeft size="20" color="#fff" variant="Bold" />
+                          <Text fontWeight={"bold"} fontSize={14} color={'white'}>
                             {child.name}
                           </Text>
                         </HStack>

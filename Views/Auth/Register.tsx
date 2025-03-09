@@ -13,10 +13,10 @@ import {
   useToast,
   ScrollView,
   FormControl,
-  Select, // Added for dropdown
+  Select,
 } from "native-base";
 import { StatusBar } from "expo-status-bar";
-import { UserSquare, Mobile, Lock, Location } from "iconsax-react-native"; // Added Location icon
+import { UserSquare, Mobile, Lock, Location } from "iconsax-react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/store";
 import { useTranslation } from "react-i18next";
@@ -64,11 +64,17 @@ export default function Register() {
   const [username, setUsername] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
-  const [address, setAddress] = useState(""); // New state for address
+  const [selectedCity, setSelectedCity] = useState(""); // State for selected city
+  const [addressDetails, setAddressDetails] = useState(""); // State for address details
   const [isPressed, setIsPressed] = useState(false);
   const [phoneError, setPhoneError] = useState("");
 
   const isArabic = i18n.language === "ar";
+
+  // Combine city and address details into a single address string
+  const fullAddress = selectedCity && addressDetails 
+    ? `${selectedCity}, ${addressDetails}` 
+    : selectedCity || addressDetails || "";
 
   const showToast = (message: string, bgColor: string) => {
     toast.show({
@@ -100,7 +106,7 @@ export default function Register() {
       try {
         validatePhoneNumber(formattedText);
         setPhoneError('');
-      } catch (error:any) {
+      } catch (error: any) {
         setPhoneError(error.message);
       }
     }
@@ -123,9 +129,8 @@ export default function Register() {
       showToast(t("password_required"), "red.500");
       return;
     }
-    // Optionally validate address
-    if (!address) {
-      showToast("Please select an address", "red.500"); // Add translation later if needed
+    if (!fullAddress.trim()) {
+      showToast(t("address_required"), "red.500"); // Add translation key
       return;
     }
 
@@ -137,14 +142,14 @@ export default function Register() {
           name: username,
           phone: formattedPhone,
           password: password,
-          address: address,
+          address: fullAddress, // Send combined address
         }
       );
       if (response.status === 201) {
         showToast(t("registration_successful"), "#F7CF9D");
         navigation.navigate("Confirmation", { phone: formattedPhone });
       }
-    } catch (error:any) {
+    } catch (error: any) {
       let errorMessage = t("registration_failed");
       if (axios.isAxiosError(error)) {
         errorMessage = error.response?.data?.message || errorMessage;
@@ -178,7 +183,7 @@ export default function Register() {
 
         <VStack space="14px" flex={1} mt="50px" mb={10}>
           {/* Username Input */}
-          <Text color={textColor}  textAlign={isArabic ? "right" : "left"} fontFamily="Alexandria_500Medium">
+          <Text color={textColor} textAlign={isArabic ? "right" : "left"} fontFamily="Alexandria_500Medium">
             {t("username")}
           </Text>
           <Box
@@ -207,7 +212,7 @@ export default function Register() {
           </Box>
 
           {/* Phone Number Input */}
-          <Text color={textColor}  textAlign={isArabic ? "right" : "left"}>{t("phone_number")}</Text>
+          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>{t("phone_number")}</Text>
           <Box
             flexDirection={isArabic ? "row-reverse" : "row"}
             alignItems="center"
@@ -241,7 +246,7 @@ export default function Register() {
           )}
 
           {/* Password Input */}
-          <Text color={textColor}  textAlign={isArabic ? "right" : "left"}>{t("password")}</Text>
+          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>{t("password")}</Text>
           <Box
             flexDirection={isArabic ? "row-reverse" : "row"}
             alignItems="center"
@@ -268,8 +273,9 @@ export default function Register() {
             <Lock size="24" color="#F7CF9D" />
           </Box>
 
-          {/* Address Dropdown */}
-          <Text color={textColor}  textAlign={isArabic ? "right" : "left"}>{t("address")}</Text>
+          {/* Address Section */}
+          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>{t("address")}</Text>
+          {/* City Dropdown */}
           <Box
             flexDirection={isArabic ? "row-reverse" : "row"}
             alignItems="center"
@@ -280,9 +286,9 @@ export default function Register() {
             <Select
               flex={1}
               variant="unstyled"
-              selectedValue={address}
-              placeholder={isArabic ? "اختر العنوان" : "Select Address"}
-              onValueChange={(itemValue) => setAddress(itemValue)}
+              selectedValue={selectedCity}
+              placeholder={isArabic ? "اختر المدينة" : "Select City"}
+              onValueChange={(itemValue) => setSelectedCity(itemValue)}
               _selectedItem={{
                 bg: "#F7CF9D",
               }}
@@ -301,6 +307,33 @@ export default function Register() {
               <Select.Item label={isArabic ? "عجلون" : "Ajloun"} value="Ajloun" />
               <Select.Item label={isArabic ? "العقبة" : "Aqaba"} value="Aqaba" />
             </Select>
+            <Location size="24" color="#F7CF9D" />
+          </Box>
+
+          {/* Address Details Input */}
+          <Box
+            flexDirection={isArabic ? "row-reverse" : "row"}
+            alignItems="center"
+            px={4}
+            borderWidth={1}
+            borderColor={inputBorderColor}
+            rounded="8px"
+            mt={2}>
+            <Input
+              placeholder={isArabic ? "تفاصيل العنوان (مثال: شارع ١٢٣)" : "Address Details (e.g., Street 123)"}
+              flex={1}
+              variant="unstyled"
+              value={addressDetails}
+              onChangeText={setAddressDetails}
+              _focus={{
+                backgroundColor: "transparent",
+                borderColor: "transparent",
+              }}
+              bg="transparent"
+              borderWidth={0}
+              textAlign={isArabic ? "right" : "left"}
+              color={textColor}
+            />
             <Location size="24" color="#F7CF9D" />
           </Box>
 

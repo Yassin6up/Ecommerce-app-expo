@@ -13,16 +13,15 @@ import {
   Stack,
   Text,
   Box,
-  Image,
   Button,
   VStack,
   HStack,
   Input,
   Divider,
   useToast,
-  Select, // Added for dropdown
+  Select,
 } from "native-base";
-import { ArrowLeft, Location } from "iconsax-react-native"; // Added Location icon
+import { ArrowLeft, Location } from "iconsax-react-native";
 import * as ImagePicker from "expo-image-picker";
 import i18next from "i18next";
 
@@ -42,10 +41,16 @@ const Profil = () => {
   const dispatch = useDispatch();
 
   const [name, setName] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
+  const [selectedCity, setSelectedCity] = useState<string>(""); // State for selected city
+  const [addressDetails, setAddressDetails] = useState<string>(""); // State for address details
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Combine city and address details into a single address string
+  const fullAddress = selectedCity && addressDetails 
+    ? `${selectedCity}, ${addressDetails}` 
+    : selectedCity || addressDetails || "";
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -64,7 +69,10 @@ const Profil = () => {
         );
 
         setName(response.data.name || "");
-        setAddress(response.data.address || "");
+        // Split the address into city and details if it contains a comma
+        const [city, ...details] = (response.data.address || "").split(", ");
+        setSelectedCity(city || "");
+        setAddressDetails(details.join(", ") || "");
         setProfileImage(response.data.profile_image || null);
       } catch (error) {
         console.error("Profile fetch error:", error);
@@ -78,7 +86,7 @@ const Profil = () => {
     };
 
     fetchUserProfile();
-  }, []);
+  }, [t]);
 
   const pickImage = async () => {
     try {
@@ -115,7 +123,7 @@ const Profil = () => {
         "https://backend.j-byu.shop/api/user/address-name",
         {
           name: name,
-          address: address,
+          address: fullAddress, // Send combined address
         },
         {
           params: { token: sessionToken },
@@ -125,7 +133,7 @@ const Profil = () => {
       dispatch(
         updateProfile({
           name,
-          address,
+          address: fullAddress,
           profileImage,
         })
       );
@@ -180,7 +188,7 @@ const Profil = () => {
         <Text
           bold
           fontSize="xl"
-          color={ "#F7CF9D"}
+          color="#F7CF9D"
           textAlign={isRTL ? "right" : "left"}>
           {t("edit_profile")}
         </Text>
@@ -188,7 +196,7 @@ const Profil = () => {
       </HStack>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-
+        {/* Name Input */}
         <VStack space={3} mb={4}>
           <Text
             color={isDarkMode ? "#E0E0E0" : "#000"}
@@ -208,7 +216,7 @@ const Profil = () => {
           />
         </VStack>
 
-        {/* Address Dropdown Section */}
+        {/* Address Section */}
         <VStack space={3} mb={4}>
           <Text
             color={isDarkMode ? "#E0E0E0" : "#000"}
@@ -216,6 +224,7 @@ const Profil = () => {
             textAlign={isRTL ? "right" : "left"}>
             {t("address")}
           </Text>
+          {/* City Dropdown */}
           <Box
             flexDirection={isRTL ? "row-reverse" : "row"}
             alignItems="center"
@@ -227,9 +236,9 @@ const Profil = () => {
             <Select
               flex={1}
               variant="unstyled"
-              selectedValue={address}
-              placeholder={isRTL ? "اختر العنوان" : "Select Address"}
-              onValueChange={(itemValue) => setAddress(itemValue)}
+              selectedValue={selectedCity}
+              placeholder={isRTL ? "اختر المدينة" : "Select City"}
+              onValueChange={(itemValue) => setSelectedCity(itemValue)}
               _selectedItem={{
                 bg: "#F7CF9D",
               }}
@@ -248,6 +257,29 @@ const Profil = () => {
               <Select.Item label={isRTL ? "عجلون" : "Ajloun"} value="Ajloun" />
               <Select.Item label={isRTL ? "العقبة" : "Aqaba"} value="Aqaba" />
             </Select>
+            <Location size="24" color="#F7CF9D" />
+          </Box>
+
+          {/* Address Details Input */}
+          <Box
+            flexDirection={isRTL ? "row-reverse" : "row"}
+            alignItems="center"
+            px={4}
+            borderWidth={1}
+            borderColor={isDarkMode ? "#333" : "#F5F5F5"}
+            rounded="8px"
+            bgColor={isDarkMode ? "#333" : "#F5F5F5"}
+            mt={2}>
+            <Input
+              flex={1}
+              variant="unstyled"
+              value={addressDetails}
+              onChangeText={setAddressDetails}
+              placeholder={isRTL ? "تفاصيل العنوان (مثال: شارع ١٢٣)" : "Address Details (e.g., Street 123)"}
+              _focus={{ borderColor: "#F7CF9D" }}
+              textAlign={isRTL ? "right" : "left"}
+              color={isDarkMode ? "#F7CF9D" : "#000"}
+            />
             <Location size="24" color="#F7CF9D" />
           </Box>
         </VStack>

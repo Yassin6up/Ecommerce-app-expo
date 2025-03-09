@@ -149,6 +149,7 @@ const resources = {
   "my_favorites": "My Favorites",
   "items": "Items",
   "no_favorites_yet": "You haven't added any favorites yet.",
+  "address_required": "Please provide an address"
 
     },
   },
@@ -298,6 +299,7 @@ const resources = {
   "my_favorites": "مفضلاتي",
   "items": "عناصر",
   "no_favorites_yet": "لم تُضف أي مفضلات بعد.",
+  "address_required": "يرجى تقديم عنوان"
 
     },
   },
