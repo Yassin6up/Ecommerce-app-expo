@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Stack, Pressable, Text, Center, Switch, Popover, VStack, HStack, Box } from "native-base";
-import { Setting2,Moon,Sun1 } from "iconsax-react-native";
+import { Setting2, Moon, Sun1 } from "iconsax-react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "../store/themeSlice";
 import { setLanguage } from "../store/languageSlice";
@@ -14,6 +14,13 @@ const Header = () => {
   const dispatch = useDispatch();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const currentLanguage = useSelector((state: RootState) => state.language.currentLanguage);
+
+  // Define black-and-white color scheme
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Titles, bold text
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Subtle text if needed
+  const dropdownBgColor = isDarkMode ? "#1A1A1A" : "#F5F5F5"; // Slightly off for contrast
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
 
   const showMessage = (text: string) => {
     setMessage(text);
@@ -29,11 +36,11 @@ const Header = () => {
     const themeMessage = isDarkMode ? i18n.t("lightMode") : i18n.t("darkMode");
     showMessage(themeMessage);
   };
+
   const handleThemePress = () => {
-    dispatch(toggleTheme());
-    const themeMessage = isDarkMode ? i18n.t("lightMode") : i18n.t("darkMode");
-    showMessage(themeMessage);
+    handleThemeToggle();
   };
+
   const handleLanguageChange = (lang: string) => {
     dispatch(setLanguage(lang));
     setShowDropdown(false);
@@ -41,16 +48,22 @@ const Header = () => {
   };
 
   return (
-    <Stack width="100%" paddingX={8} paddingTop={12} paddingBottom={2} backgroundColor={ isDarkMode? 'black':"#FFF6DF"} position="relative">
+    <Stack 
+      width="100%" 
+      paddingX={8} 
+      paddingTop={12} 
+      paddingBottom={2} 
+      backgroundColor={backgroundColor} 
+      position="relative"
+    >
       <HStack w={'full'} alignItems={'center'} justifyContent={'space-between'}>
-      <Pressable onPress={() => setShowSetting(!showSetting)}>
-        <Setting2 size="26" color="#F7CF9D" />
-      </Pressable>
-      <Pressable onPress={handleThemePress}> 
-           {isDarkMode ? <Sun1 size="26" color="#F7CF9D" /> : <Moon size="26" color="#F7CF9D" />}
+        <Pressable onPress={() => setShowSetting(!showSetting)}>
+          <Setting2 size="26" color={iconColor} />
+        </Pressable>
+        <Pressable onPress={handleThemePress}> 
+          {isDarkMode ? <Sun1 size="26" color={iconColor} /> : <Moon size="26" color={iconColor} />}
         </Pressable>
       </HStack>
-
 
       {showSetting && (
         <Box 
@@ -62,38 +75,51 @@ const Header = () => {
         >
           <VStack
             space={4}
-            backgroundColor="#F9D77E"
+            backgroundColor={dropdownBgColor}
             p={5}
             rounded="8px"
             width="60%"
           >
-      
-
             <HStack alignItems="center" justifyContent="space-between">
-              <Text color={isDarkMode ? "white" : "black"}>{i18n.t("language")}</Text>
+              <Text color={primaryTextColor}>{i18n.t("language")}</Text>
               <Popover
                 isOpen={showDropdown}
                 onClose={() => setShowDropdown(false)}
                 trigger={(triggerProps) => (
-                  <Pressable {...triggerProps} onPress={() => setShowDropdown(true)} bg={isDarkMode ? "#D4AF37" : "white"} padding={2} rounded="md">
-                    <Text color={isDarkMode ? "white" : "black"}>
+                  <Pressable 
+                    {...triggerProps} 
+                    onPress={() => setShowDropdown(true)} 
+                    bg={dropdownBgColor} 
+                    padding={2} 
+                    rounded="md"
+                    borderWidth={1}
+                    borderColor={primaryTextColor}
+                  >
+                    <Text color={primaryTextColor}>
                       {currentLanguage === "ar" ? "العربية" : "English"}
                     </Text>
                   </Pressable>
                 )}
               >
-                <Popover.Content width="150px">
+                <Popover.Content width="150px" bg={dropdownBgColor}>
                   <Popover.Body>
                     <Box>
-                      <Pressable onPress={() => {
-                        handleLanguageChange("ar")
-                        setShowSetting(false)}} mb={4}>
-                        <Text>العربية</Text>
+                      <Pressable 
+                        onPress={() => {
+                          handleLanguageChange("ar");
+                          setShowSetting(false);
+                        }} 
+                        mb={4}
+                      >
+                        <Text color={primaryTextColor}>العربية</Text>
                       </Pressable>
-                      <Pressable onPress={() => {handleLanguageChange("en")
-                         setShowSetting(false)
-                      }}>
-                        <Text>English</Text>
+                      <Pressable 
+                        onPress={() => {
+                          handleLanguageChange("en");
+                          setShowSetting(false);
+                        }}
+                      >
+                        <Text color={primaryTextColor}>English</Text>
                       </Pressable>
                     </Box>
                   </Popover.Body>
@@ -103,7 +129,6 @@ const Header = () => {
           </VStack>
         </Box>
       )}
-
     </Stack>
   );
 };

@@ -20,15 +20,15 @@ const Policy = () => {
   const { t } = useTranslation();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
 
-  const textColor = isDarkMode ? "#E0E0E0" : "#000";
-  const dividerColor = "#F7CF9D";
+  // Define black-and-white color scheme with secondary color
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // For titles and bold text
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // For content text
+  const dividerColor = isDarkMode ? "#FFFFFF" : "#000000";
 
   return (
     <Stack
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}
+      style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
     >
       <ScrollView paddingX={4} paddingY={6}>
         {/* Title */}
@@ -36,7 +36,7 @@ const Policy = () => {
           <Text
             bold
             fontSize="xl"
-            color={dividerColor}
+            color={primaryTextColor}
             textAlign={isRTL ? "right" : "left"}
           >
             {t("policy_title")}
@@ -45,10 +45,17 @@ const Policy = () => {
 
           {/* Privacy Section */}
           <VStack space={3}>
-            <Text bold color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              bold
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("privacy_policy_title")}
             </Text>
-            <Text color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              color={secondaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("privacy_policy_content")}
             </Text>
           </VStack>
@@ -57,10 +64,17 @@ const Policy = () => {
 
           {/* Terms and Conditions Section */}
           <VStack space={3}>
-            <Text bold color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              bold
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("terms_conditions_title")}
             </Text>
-            <Text color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              color={secondaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("terms_conditions_content")}
             </Text>
           </VStack>
@@ -69,10 +83,17 @@ const Policy = () => {
 
           {/* Data Usage Section */}
           <VStack space={3}>
-            <Text bold color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              bold
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("data_usage_title")}
             </Text>
-            <Text color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              color={secondaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("data_usage_content")}
             </Text>
           </VStack>

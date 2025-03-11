@@ -41,16 +41,26 @@ const Profil = () => {
   const dispatch = useDispatch();
 
   const [name, setName] = useState<string>("");
-  const [selectedCity, setSelectedCity] = useState<string>(""); // State for selected city
-  const [addressDetails, setAddressDetails] = useState<string>(""); // State for address details
+  const [selectedCity, setSelectedCity] = useState<string>("");
+  const [addressDetails, setAddressDetails] = useState<string>("");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Combine city and address details into a single address string
   const fullAddress = selectedCity && addressDetails 
     ? `${selectedCity}, ${addressDetails}` 
     : selectedCity || addressDetails || "";
+
+  // Define black-and-white color scheme
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Titles, bold text
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Input values, placeholders
+  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const dividerColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const inputBgColor = isDarkMode ? "#1A1A1A" : "#F5F5F5"; // Slightly off for contrast
+  const borderColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -69,7 +79,6 @@ const Profil = () => {
         );
 
         setName(response.data.name || "");
-        // Split the address into city and details if it contains a comma
         const [city, ...details] = (response.data.address || "").split(", ");
         setSelectedCity(city || "");
         setAddressDetails(details.join(", ") || "");
@@ -123,7 +132,7 @@ const Profil = () => {
         "https://backend.j-byu.shop/api/user/address-name",
         {
           name: name,
-          address: fullAddress, // Send combined address
+          address: fullAddress,
         },
         {
           params: { token: sessionToken },
@@ -154,42 +163,40 @@ const Profil = () => {
   if (isLoading) {
     return (
       <Stack
-        style={[
-          styles.mainContainer,
-          isDarkMode ? styles.darkBckground : styles.lightBckground,
-        ]}
+        style={[styles.mainContainer, { backgroundColor }]}
         paddingX={4}
-        paddingY={6}>
-        <Text>{t("loading")}</Text>
+        paddingY={6}
+      >
+        <Text color={primaryTextColor}>{t("loading")}</Text>
       </Stack>
     );
   }
 
   return (
     <Stack
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}
+      style={[styles.mainContainer, { backgroundColor }]}
       paddingX={4}
-      paddingY={6}>
+      paddingY={6}
+    >
       <HStack
         justifyContent="space-between"
         alignItems="center"
         mb={4}
-        flexDirection={isRTL ? "row-reverse" : "row"}>
+        flexDirection={isRTL ? "row-reverse" : "row"}
+      >
         <Pressable onPress={() => navigation.goBack()}>
           <ArrowLeft
             size={24}
-            color={isDarkMode ? "#F7CF9D" : "#F9D77E"}
+            color={iconColor}
             style={{ transform: isRTL ? [{ rotateY: "180deg" }] : undefined }}
           />
         </Pressable>
         <Text
           bold
           fontSize="xl"
-          color="#F7CF9D"
-          textAlign={isRTL ? "right" : "left"}>
+          color={primaryTextColor}
+          textAlign={isRTL ? "right" : "left"}
+        >
           {t("edit_profile")}
         </Text>
         <Box w={6} />
@@ -199,29 +206,33 @@ const Profil = () => {
         {/* Name Input */}
         <VStack space={3} mb={4}>
           <Text
-            color={isDarkMode ? "#E0E0E0" : "#000"}
+            color={primaryTextColor}
             bold
-            textAlign={isRTL ? "right" : "left"}>
+            textAlign={isRTL ? "right" : "left"}
+          >
             {t("name")}
           </Text>
           <Input
             variant="filled"
-            bgColor={isDarkMode ? "#333" : "#F5F5F5"}
-            color={isDarkMode ? "#F7CF9D" : "#000"}
+            bgColor={inputBgColor}
+            color={primaryTextColor}
             value={name}
             onChangeText={setName}
             placeholder={t("edit_name")}
+            placeholderTextColor={secondaryTextColor}
             textAlign={isRTL ? "right" : "left"}
-            _focus={{ borderColor: "#F7CF9D" }}
+            _focus={{ borderColor: primaryTextColor }}
+            borderColor={borderColor}
           />
         </VStack>
 
         {/* Address Section */}
         <VStack space={3} mb={4}>
           <Text
-            color={isDarkMode ? "#E0E0E0" : "#000"}
+            color={primaryTextColor}
             bold
-            textAlign={isRTL ? "right" : "left"}>
+            textAlign={isRTL ? "right" : "left"}
+          >
             {t("address")}
           </Text>
           {/* City Dropdown */}
@@ -230,9 +241,10 @@ const Profil = () => {
             alignItems="center"
             px={4}
             borderWidth={1}
-            borderColor={isDarkMode ? "#333" : "#F5F5F5"}
+            borderColor={borderColor}
             rounded="8px"
-            bgColor={isDarkMode ? "#333" : "#F5F5F5"}>
+            bgColor={inputBgColor}
+          >
             <Select
               flex={1}
               variant="unstyled"
@@ -240,10 +252,12 @@ const Profil = () => {
               placeholder={isRTL ? "اختر المدينة" : "Select City"}
               onValueChange={(itemValue) => setSelectedCity(itemValue)}
               _selectedItem={{
-                bg: "#F7CF9D",
+                bg: primaryTextColor,
               }}
               textAlign={isRTL ? "right" : "left"}
-              color={isDarkMode ? "#F7CF9D" : "#000"}>
+              color={primaryTextColor}
+              placeholderTextColor={secondaryTextColor}
+            >
               <Select.Item label={isRTL ? "عمان" : "Amman"} value="Amman" />
               <Select.Item label={isRTL ? "إربد" : "Irbid"} value="Irbid" />
               <Select.Item label={isRTL ? "البلقاء" : "Balqa"} value="Balqa" />
@@ -257,7 +271,7 @@ const Profil = () => {
               <Select.Item label={isRTL ? "عجلون" : "Ajloun"} value="Ajloun" />
               <Select.Item label={isRTL ? "العقبة" : "Aqaba"} value="Aqaba" />
             </Select>
-            <Location size="24" color="#F7CF9D" />
+            <Location size="24" color={iconColor} />
           </Box>
 
           {/* Address Details Input */}
@@ -266,32 +280,35 @@ const Profil = () => {
             alignItems="center"
             px={4}
             borderWidth={1}
-            borderColor={isDarkMode ? "#333" : "#F5F5F5"}
+            borderColor={borderColor}
             rounded="8px"
-            bgColor={isDarkMode ? "#333" : "#F5F5F5"}
-            mt={2}>
+            bgColor={inputBgColor}
+            mt={2}
+          >
             <Input
               flex={1}
               variant="unstyled"
               value={addressDetails}
               onChangeText={setAddressDetails}
               placeholder={isRTL ? "تفاصيل العنوان (مثال: شارع ١٢٣)" : "Address Details (e.g., Street 123)"}
-              _focus={{ borderColor: "#F7CF9D" }}
+              placeholderTextColor={secondaryTextColor}
+              _focus={{ borderColor: primaryTextColor }}
               textAlign={isRTL ? "right" : "left"}
-              color={isDarkMode ? "#F7CF9D" : "#000"}
+              color={primaryTextColor}
             />
-            <Location size="24" color="#F7CF9D" />
+            <Location size="24" color={iconColor} />
           </Box>
         </VStack>
 
-        <Divider bgColor="#F7CF9D" />
+        <Divider bgColor={dividerColor} />
 
         {/* Save Button */}
         <Button
           mt={6}
-          bgColor="#F7CF9D"
+          bgColor={buttonBgColor}
           onPress={saveChanges}
-          _text={{ color: "white", fontWeight: "bold" }}>
+          _text={{ color: buttonTextColor, fontWeight: "bold" }}
+        >
           {t("save_changes")}
         </Button>
       </ScrollView>

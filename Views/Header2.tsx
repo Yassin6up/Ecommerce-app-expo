@@ -6,60 +6,45 @@ import { toggleTheme } from "../store/themeSlice";
 import { setLanguage } from "../store/languageSlice";
 import { RootState } from "../store/store";
 import i18n from "../Locale/i18n";
-import { Keyboard } from 'react-native';
-// import { setSearchQuery } from "../store/searchSlice";
+import { Keyboard } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-
 
 const Header2 = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const [showSetting, setShowSetting] = useState<boolean>(false);
-   const navigation = useNavigation<any>();
+  const navigation = useNavigation<any>();
  
   const dispatch = useDispatch();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const currentLanguage = useSelector((state: RootState) => state.language.currentLanguage);
 
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [searchQuery, setSearchQuery] = useState('');
+  // Define black-and-white color scheme
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Titles, input text
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Placeholders
+  const dropdownBgColor = isDarkMode ? "#1A1A1A" : "#F5F5F5"; // Slightly off for contrast
+  const inputBgColor = isDarkMode ? "#1A1A1A" : "#F5F5F5"; // Input background
+  const borderColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
 
-const handleSearchChange = (text: string) => {
-  setSearchQuery(text);
-};
+  const handleSearchChange = (text: string) => {
+    setSearchQuery(text);
+  };
 
-const handleSearchSubmit = () => {
-  // Trim the search query to remove leading/trailing whitespaces
-  const trimmedQuery = searchQuery.trim();
-  
-  // Check if the search query is not empty
-  if (trimmedQuery) {
-    // Perform search-related actions here
-    console.log('Searching for:', trimmedQuery);
-
-
-    navigation.navigate("page two", { 
-      screen: "men", 
-      params: { isSearch : true , searchText : trimmedQuery  } 
-    })
-    
-    
-    // 2. Trigger a search API call
-    // fetchSearchResults(trimmedQuery);
-    
-    // 3. Navigate to search results screen
-    // navigation.navigate('SearchResults', { query: trimmedQuery });
-    
-    // 4. Close keyboard
-    Keyboard.dismiss();
-  }
-};
-
-
-  // const handleSearchChange = (text: string) => {
-  //   setLocalSearchQuery(text);
-  //   dispatch(setSearchQuery(text));
-  // };
+  const handleSearchSubmit = () => {
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery) {
+      console.log("Searching for:", trimmedQuery);
+      navigation.navigate("page two", { 
+        screen: "men", 
+        params: { isSearch: true, searchText: trimmedQuery } 
+      });
+      Keyboard.dismiss();
+    }
+  };
 
   const showMessage = (text: string) => {
     setMessage(text);
@@ -83,44 +68,55 @@ const handleSearchSubmit = () => {
   };
 
   return (
-    <Stack width="100%" paddingX={8}  paddingTop={12} paddingBottom={2} backgroundColor={isDarkMode ? "#0C0C0C" : "#FFF6DF"} position="relative" > 
-
-
+    <Stack 
+      width="100%" 
+      paddingX={8} 
+      paddingTop={12} 
+      paddingBottom={2} 
+      backgroundColor={backgroundColor} 
+      position="relative"
+    > 
       <HStack w={'full'} alignItems={'center'} justifyContent={'space-between'}>
         {/* Settings Icon */}
         <Pressable onPress={() => setShowSetting(!showSetting)}>
-          <Setting2 size="26" color="#F7CF9D" />
+          <Setting2 size="26" color={iconColor} />
         </Pressable>
 
         {/* Search Box */}
-        <Box width="70%" variant="filled"   bgColor={isDarkMode ? "#333333" : "#F5F5F5"}  borderRadius="8"    borderWidth={1} borderColor={'#F7CF9D'}>
-        <Input
-    variant="unstyled"
-    _focus={{ backgroundColor: "transparent", borderColor: "transparent" }}
-    bg="transparent"
-    borderWidth={0}
-    placeholder={i18n.t("searchPlaceholder") || "Search..."}
-    value={searchQuery}
-    onChangeText={handleSearchChange}
-    onSubmitEditing={handleSearchSubmit}
-    returnKeyType="search"
-    InputLeftElement={
-      <Icon 
-        as={<SearchNormal1 />} 
-        size={5} 
-        ml={2} 
-        color={isDarkMode ? "#F7CF9D" : "gray.500"} 
-      />
-    }
-    color={isDarkMode ? "white" : "black"}
-          
-        />
+        <Box 
+          width="70%" 
+          variant="filled" 
+          bgColor={inputBgColor} 
+          borderRadius="8" 
+          borderWidth={1} 
+          borderColor={borderColor}
+        >
+          <Input
+            variant="unstyled"
+            _focus={{ backgroundColor: "transparent", borderColor: primaryTextColor }}
+            bg="transparent"
+            borderWidth={0}
+            placeholder={i18n.t("searchPlaceholder") || "Search..."}
+            placeholderTextColor={secondaryTextColor}
+            value={searchQuery}
+            onChangeText={handleSearchChange}
+            onSubmitEditing={handleSearchSubmit}
+            returnKeyType="search"
+            InputLeftElement={
+              <Icon 
+                as={<SearchNormal1 />} 
+                size={5} 
+                ml={2} 
+                color={iconColor} 
+              />
+            }
+            color={primaryTextColor}
+          />
         </Box>
-      
 
         {/* Theme Toggle Icon */}
         <Pressable onPress={handleThemePress}>
-          {isDarkMode ? <Sun1 size="26" color="#F7CF9D" /> : <Moon size="26" color="#F7CF9D" />}
+          {isDarkMode ? <Sun1 size="26" color={iconColor} /> : <Moon size="26" color={iconColor} />}
         </Pressable>
       </HStack>
 
@@ -134,36 +130,51 @@ const handleSearchSubmit = () => {
         >
           <VStack
             space={4}
-            backgroundColor="#F9D77E"
+            backgroundColor={dropdownBgColor}
             p={5}
             rounded="8px"
             width="60%"
           >
             <HStack alignItems="center" justifyContent="space-between">
-              <Text color={isDarkMode ? "white" : "black"}>{i18n.t("language")}</Text>
+              <Text color={primaryTextColor}>{i18n.t("language")}</Text>
               <Popover
                 isOpen={showDropdown}
                 onClose={() => setShowDropdown(false)}
                 trigger={(triggerProps) => (
-                  <Pressable {...triggerProps} onPress={() => setShowDropdown(true)} bg={isDarkMode ? "#D4AF37" : "white"} padding={2} rounded="md">
-                    <Text color={isDarkMode ? "white" : "black"}>
+                  <Pressable 
+                    {...triggerProps} 
+                    onPress={() => setShowDropdown(true)} 
+                    bg={dropdownBgColor} 
+                    padding={2} 
+                    rounded="md"
+                    borderWidth={1}
+                    borderColor={primaryTextColor}
+                  >
+                    <Text color={primaryTextColor}>
                       {currentLanguage === "ar" ? "العربية" : "English"}
                     </Text>
                   </Pressable>
                 )}
               >
-                <Popover.Content width="150px">
+                <Popover.Content width="150px" bg={dropdownBgColor}>
                   <Popover.Body>
                     <Box>
-                      <Pressable onPress={() => {
-                        handleLanguageChange("ar")
-                        setShowSetting(false)}} mb={4}>
-                        <Text>العربية</Text>
+                      <Pressable 
+                        onPress={() => {
+                          handleLanguageChange("ar");
+                          setShowSetting(false);
+                        }} 
+                        mb={4}
+                      >
+                        <Text color={primaryTextColor}>العربية</Text>
                       </Pressable>
-                      <Pressable onPress={() => {handleLanguageChange("en")
-                         setShowSetting(false)
-                      }}>
-                        <Text>English</Text>
+                      <Pressable 
+                        onPress={() => {
+                          handleLanguageChange("en");
+                          setShowSetting(false);
+                        }}
+                      >
+                        <Text color={primaryTextColor}>English</Text>
                       </Pressable>
                     </Box>
                   </Popover.Body>

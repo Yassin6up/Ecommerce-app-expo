@@ -36,7 +36,7 @@ export default function Adds() {
     fetchSliders();
   }, []);
 
-  const handleBannerPress = (link) => {
+  const handleBannerPress = (link:any) => {
     const productId = link.split("/").pop();
     if (productId) {
 
@@ -72,7 +72,7 @@ export default function Adds() {
       <Animated.Text
         entering={FadeInUp.duration(800)}
         exiting={FadeOutDown.duration(600)}
-        style={styles.salesText}
+        style={{...styles.salesText,   color: isDarkMode ? "#fff" : "#000",}}
       >
         {t("Sales")}
       </Animated.Text>
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   salesText: {
-    color: "#F7CF9D",
+
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",

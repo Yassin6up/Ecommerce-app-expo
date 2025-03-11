@@ -32,17 +32,19 @@ const MyFavourite = () => {
   
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
 
-  const textColor = isDarkMode ? "#E0E0E0" : "#000";
-  const secondaryTextColor = isDarkMode ? "#9E9E9E" : "#616161";
-  const dividerColor = "#F7CF9D";
-  const cardBackground = isDarkMode ? "#2A2A2A" : "#FFFFFF";
-  const cardBorderColor = isDarkMode ? "#3A3A3A" : "#E0E0E0";
+  // Define black-and-white color scheme
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Titles, bold text, icons
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Muted text (size, color, no favorites)
+  const cardBackground = isDarkMode ? "#1A1A1A" : "#F5F5F5"; // Slightly off for card contrast
+  const cardBorderColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const dividerColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
 
   useEffect(() => {
     fetchFavorites();
   }, []);
-  
-  // Fetch favorites from backend
+
   const fetchFavorites = async () => {
     try {
       setLoading(true);
@@ -57,7 +59,7 @@ const MyFavourite = () => {
       const response = await axios.get(
         `https://backend.j-byu.shop/api/saved-products/${userId}`
       );
-      console.log(response.data.savedProducts)
+      console.log(response.data.savedProducts);
       setFavorites(response.data.savedProducts || []);
       setLoading(false);
     } catch (error) {
@@ -66,7 +68,6 @@ const MyFavourite = () => {
     }
   };
 
-  // Handle removing an item from favorites
   const handleRemoveFavorite = async (id: number) => {
     try {
       const userId = await AsyncStorage.getItem("userId");
@@ -76,25 +77,20 @@ const MyFavourite = () => {
         return;
       }
       
-      // Optimistically update UI
       setFavorites(favorites.filter(item => item.id !== id));
       
-      // Make API call to remove from favorites
       await axios.post("https://backend.j-byu.shop/api/toggle-saved-product", {
         user_id: userId,
         product_id: id
       });
       
-      // Refresh the favorites list
       fetchFavorites();
     } catch (error) {
       console.error("Error removing favorite:", error);
-      // Revert optimistic update if failed
       fetchFavorites();
     }
   };
 
-  // Navigate to ProductDetails
   const handleProductPress = (item: any) => {
     navigation.navigate("page two", {
       screen: "ProductDetails",
@@ -104,25 +100,21 @@ const MyFavourite = () => {
 
   return (
     <Stack
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}>
+      style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
+    >
       {/* Header */}
       <VStack paddingX={6} paddingTop={4} paddingBottom={2}>
         <HStack justifyContent="space-between" alignItems="center">
           <HStack space={4} alignItems="center">
             <Pressable onPress={() => navigation.goBack()}>
-              <ArrowLeft
-                size={32}
-                color={isDarkMode ? "#DCAE74" : "#F7CF9D"}
-              />
+              <ArrowLeft size={32} color={iconColor} />
             </Pressable>
             <Text
               fontSize="2xl"
               fontWeight="bold"
-              color={textColor}
-              textAlign={isRTL ? "right" : "left"}>
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("my_favorites")}
             </Text>
           </HStack>
@@ -137,7 +129,7 @@ const MyFavourite = () => {
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         {loading ? (
           <Center flex={1} paddingY={20}>
-            <Spinner size="lg" color={dividerColor} />
+            <Spinner size="lg" color={primaryTextColor} />
           </Center>
         ) : (
           <VStack space={4} paddingX={6}>
@@ -146,20 +138,22 @@ const MyFavourite = () => {
                 <Pressable
                   key={item.id}
                   onPress={() => handleProductPress(item)}
-                  _pressed={{ opacity: 0.8 }}>
+                  _pressed={{ opacity: 0.8 }}
+                >
                   <Box
                     bg={cardBackground}
                     borderRadius={16}
                     borderWidth={1}
                     borderColor={cardBorderColor}
                     shadow={2}
-                    padding={4}>
+                    padding={4}
+                  >
                     <HStack space={4} alignItems="center">
                       {/* Product Image */}
                       <Image
                         source={{
                           uri: item.images
-                            ? `https://backend.j-byu.shop/api/prudact/${item.id}/img/${JSON.parse(item.images)  [0]}`
+                            ? `https://backend.j-byu.shop/api/prudact/${item.id}/img/${JSON.parse(item.images)[0]}`
                             : "https://via.placeholder.com/100",
                         }}
                         alt={item.title}
@@ -173,22 +167,25 @@ const MyFavourite = () => {
                         <Text
                           fontSize="lg"
                           fontWeight="semibold"
-                          color={textColor}
+                          color={primaryTextColor}
                           textAlign={isRTL ? "right" : "left"}
-                          numberOfLines={1}>
+                          numberOfLines={1}
+                        >
                           {item.title}
                         </Text>
                         <Text
                           fontSize="md"
-                          color={dividerColor}
-                          textAlign={isRTL ? "right" : "left"}>
+                          color={primaryTextColor}
+                          textAlign={isRTL ? "right" : "left"}
+                        >
                           ${item.price}
                         </Text>
                         {item.size && (
                           <Text
                             fontSize="sm"
                             color={secondaryTextColor}
-                            textAlign={isRTL ? "right" : "left"}>
+                            textAlign={isRTL ? "right" : "left"}
+                          >
                             {t("size")}: {item.size}
                           </Text>
                         )}
@@ -196,7 +193,8 @@ const MyFavourite = () => {
                           <Text
                             fontSize="sm"
                             color={secondaryTextColor}
-                            textAlign={isRTL ? "right" : "left"}>
+                            textAlign={isRTL ? "right" : "left"}
+                          >
                             {t("color")}: {item.color}
                           </Text>
                         )}
@@ -205,8 +203,9 @@ const MyFavourite = () => {
                       {/* Remove Favorite Button */}
                       <Pressable
                         onPress={() => handleRemoveFavorite(item.id)}
-                        _pressed={{ opacity: 0.7 }}>
-                        <Heart size={24} color="#FF0000" variant="Bold" />
+                        _pressed={{ opacity: 0.7 }}
+                      >
+                        <Heart size={24} color={iconColor} variant="Bold" />
                       </Pressable>
                     </HStack>
                   </Box>
@@ -217,17 +216,20 @@ const MyFavourite = () => {
                 flex={1}
                 justifyContent="center"
                 alignItems="center"
-                paddingY={20}>
+                paddingY={20}
+              >
                 <Text
                   fontSize="lg"
                   color={secondaryTextColor}
-                  textAlign="center">
+                  textAlign="center"
+                >
                   {t("no_favorites_yet")}
                 </Text>
                 <Pressable
                   onPress={() => navigation.navigate("page two")}
-                  mt={4}>
-                  <Text fontSize="md" color={dividerColor}>
+                  mt={4}
+                >
+                  <Text fontSize="md" color={primaryTextColor}>
                     {t("explore_products")}
                   </Text>
                 </Pressable>

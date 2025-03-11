@@ -20,6 +20,14 @@ export default function Men() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Define black-and-white color scheme
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Titles, prices
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Subtle text if needed
+  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const highlightColor = isDarkMode ? "#FFFFFF" : "#000000"; // For "New" text
+
   const MEN_CATEGORY_ID = 1;
 
   useEffect(() => {
@@ -35,7 +43,7 @@ export default function Men() {
         setMenProducts(products);
       } catch (err: any) {
         if (err.response?.status === 404) {
-          setMenProducts([]); // Handle 404 gracefully
+          setMenProducts([]);
           return;
         }
         setError("Failed to fetch products");
@@ -48,7 +56,6 @@ export default function Men() {
     fetchProducts();
   }, []);
 
-  // Memoize navigation handler
   const handlePress = useCallback(
     (item: any) => {
       navigation.navigate("page two", {
@@ -61,15 +68,15 @@ export default function Men() {
 
   if (loading) {
     return (
-      <View style={[styles.mainContainer, { justifyContent: "center" }]}>
-        <ActivityIndicator size="large" color="#F7CF9D" />
+      <View style={[styles.mainContainer, { justifyContent: "center", backgroundColor }]}>
+        <ActivityIndicator size="large" color={primaryTextColor} />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.mainContainer}>
+      <View style={[styles.mainContainer, { backgroundColor }]}>
         <Text style={{ color: "red" }}>{error}</Text>
       </View>
     );
@@ -87,9 +94,9 @@ export default function Men() {
           width: CARD_WIDTH,
           marginRight: CARD_SPACING,
           alignItems: "center",
-           alignSelf:"stretch"
+          alignSelf: "stretch",
         }}
-        _pressed={{ opacity: 0.7 }} // Visual feedback
+        _pressed={{ opacity: 0.7 }}
       >
         <Image
           source={{ uri: imageUrl }}
@@ -102,17 +109,20 @@ export default function Men() {
           w={"90%"}
           alignItems={"center"}
           justifyContent={"space-between"}
-          mt={5}>
+          mt={5}
+        >
           <Text
-            style={isDarkMode ? styles.darkText : styles.lightText}
+            color={primaryTextColor}
             w={"70%"}
-            numberOfLines={2}>
+            numberOfLines={2}
+          >
             {item.title}
           </Text>
           <VStack>
             <Text
-              style={{ color: isDarkMode ? "#FFCC8B" : "black" }}
-              fontSize={18}>
+              color={primaryTextColor}
+              fontSize={18}
+            >
               ${item.price}
             </Text>
           </VStack>
@@ -122,38 +132,34 @@ export default function Men() {
   };
 
   return (
-    <View
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}>
+    <View style={[styles.mainContainer, { backgroundColor }]}>
       <HStack
         w={"full"}
         alignItems={"center"}
         justifyContent={"space-between"}
-        my={4}>
-        <Text
-          style={[
-            isDarkMode ? styles.darkText : styles.lightText,
-            { fontSize: 20 },
-          ]}>
-          <Text style={{ color: "#F7CF9D" }}>{t("New")}</Text> {/* Assuming "تقنية" was a placeholder */}
+        my={4}
+      >
+        <Text color={primaryTextColor} fontSize={20}>
+          <Text color={highlightColor}>{t("New")}</Text>
         </Text>
         <Pressable
           px={4}
           py={2}
           rounded={4}
-          bgColor={"#F9D77E"}
-           alignSelf="stretch"
+          bgColor={buttonBgColor}
+          alignSelf="stretch"
           onPress={() =>
             navigation.navigate("page two", {
               screen: "men",
               params: { categoryId: 1 },
             })
           }
-          _pressed={{ opacity: 0.7 }}>
+          _pressed={{ opacity: 0.7 }}
+        >
           <HStack alignItems={"center"} justifyContent={"space-between"}>
-            <Text fontSize={12}>{t("show_all")}</Text>
+            <Text color={buttonTextColor} fontSize={12}>
+              {t("show_all")}
+            </Text>
           </HStack>
         </Pressable>
       </HStack>
@@ -167,9 +173,9 @@ export default function Men() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: CARD_SPACING / 2 }}
         renderItem={renderItem}
-        initialNumToRender={3} // Render fewer items initially
-        maxToRenderPerBatch={5} // Control batch rendering
-        windowSize={5} // Limit virtualized items
+        initialNumToRender={3}
+        maxToRenderPerBatch={5}
+        windowSize={5}
       />
     </View>
   );

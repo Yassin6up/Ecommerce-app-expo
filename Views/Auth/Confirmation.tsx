@@ -34,11 +34,9 @@ const Confirmation = ({ navigation, route }: any) => {
   const [timer, setTimer] = useState(120); // 2 minutes
   const [canResend, setCanResend] = useState(false);
 
-  // Extract phone from route params
   const { phone } = route.params;
   console.log("phone : ", phone);
-  
-  // Countdown timer
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (timer > 0) {
@@ -58,7 +56,6 @@ const Confirmation = ({ navigation, route }: any) => {
 
   const initialValues = { otp: "" };
 
-  // API call to verify code
   const verifyCode = async (code: string) => {
     try {
       const response = await axios.post(
@@ -70,7 +67,6 @@ const Confirmation = ({ navigation, route }: any) => {
       );
       console.log(response.data);
 
-      // If verification is successful
       if (response.data.verified) {
         await AsyncStorage.setItem("sessionToken", response.data.sessionToken);
         await AsyncStorage.setItem("userId", response.data.userId.toString());
@@ -85,7 +81,8 @@ const Confirmation = ({ navigation, route }: any) => {
               px="2"
               py="1"
               rounded="sm"
-              _text={{ color: "white" }}>
+              _text={{ color: "#FFFFFF" }}
+            >
               {t("verification_success")}
             </Box>
           ),
@@ -101,7 +98,8 @@ const Confirmation = ({ navigation, route }: any) => {
             px="2"
             py="1"
             rounded="sm"
-            _text={{ color: "white" }}>
+            _text={{ color: "#FFFFFF" }}
+          >
             {error.response?.data?.message || t("verification_error")}
           </Box>
         ),
@@ -109,7 +107,6 @@ const Confirmation = ({ navigation, route }: any) => {
     }
   };
 
-  // API call to resend verification code
   const resendVerificationCode = async () => {
     try {
       await axios.post(
@@ -117,7 +114,6 @@ const Confirmation = ({ navigation, route }: any) => {
         { phone }
       );
 
-      // Reset timer
       setTimer(120);
       setCanResend(false);
 
@@ -129,7 +125,8 @@ const Confirmation = ({ navigation, route }: any) => {
             px="2"
             py="1"
             rounded="sm"
-            _text={{ color: "white" }}>
+            _text={{ color: "#FFFFFF" }}
+          >
             {t("code_resent")}
           </Box>
         ),
@@ -143,7 +140,8 @@ const Confirmation = ({ navigation, route }: any) => {
             px="2"
             py="1"
             rounded="sm"
-            _text={{ color: "white" }}>
+            _text={{ color: "#FFFFFF" }}
+          >
             {error.response?.data?.message || t("resend_error")}
           </Box>
         ),
@@ -155,10 +153,15 @@ const Confirmation = ({ navigation, route }: any) => {
     await verifyCode(values.otp);
   };
 
+  // Define black-and-white color scheme
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
-  const inputBorderColor = isDarkMode ? "#F7CF9D" : "#F7CF9D";
+  const inputBorderColor = isDarkMode ? "#FFFFFF" : "#000000"; // Updated to black/white
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF"; // Background
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000"; // Icons
+  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000"; // Button background
+  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF"; // Button text (inverted)
+  const buttonPressedBgColor = isDarkMode ? "#CCCCCC" : "#333333"; // Pressed state
 
-  // Format timer
   const formatTimer = () => {
     const minutes = Math.floor(timer / 60);
     const seconds = timer % 60;
@@ -167,15 +170,13 @@ const Confirmation = ({ navigation, route }: any) => {
 
   return (
     <VStack
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}
-      flex={1}>
+      style={[styles.mainContainer, { backgroundColor: backgroundColor }]} // Direct background
+      flex={1}
+    >
       <StatusBar style="auto" />
       <Stack w={"full"} mb={4} position={"fixed"}>
         <Pressable onPress={() => navigation.goBack()}>
-          <ArrowLeft size="32" color="#F7CF9D" />
+          <ArrowLeft size="32" color={iconColor} />
         </Pressable>
       </Stack>
       <Stack w="full" justifyContent="center" alignItems="center">
@@ -186,23 +187,24 @@ const Confirmation = ({ navigation, route }: any) => {
 
       <Stack h="full" w="full">
         <Stack w="full" justifyContent="center" alignItems="center" mt={10}>
-        <Text color={textColor}>{t("enter_code", { phone: phone })}</Text>
+          <Text color={textColor}>{t("enter_code", { phone: phone })}</Text>
         </Stack>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={handleSubmit}>
+          onSubmit={handleSubmit}
+        >
           {({ handleSubmit, errors, touched, setFieldValue, values }) => (
             <>
               <VStack space="16px">
                 <FormControl
                   isInvalid={!!(errors.otp && touched.otp)}
-                  marginTop="48px">
+                  marginTop="48px"
+                >
                   <Stack alignItems="center" justifyContent="center">
                     <Input
                       value={values.otp}
                       onChangeText={(text) => {
-                        // Only allow digits and limit to 6 characters
                         const digitsOnly = text.replace(/[^0-9]/g, "").substring(0, 6);
                         setFieldValue("otp", digitsOnly);
                         if (digitsOnly.length === 6) {
@@ -227,7 +229,8 @@ const Confirmation = ({ navigation, route }: any) => {
                     />
                   </Stack>
                   <FormControl.ErrorMessage
-                    leftIcon={<WarningOutlineIcon size="xs" />}>
+                    leftIcon={<WarningOutlineIcon size="xs" />}
+                  >
                     {errors.otp}
                   </FormControl.ErrorMessage>
                 </FormControl>
@@ -237,7 +240,8 @@ const Confirmation = ({ navigation, route }: any) => {
                 paddingTop="24px"
                 w="full"
                 alignItems="center"
-                justifyContent="center">
+                justifyContent="center"
+              >
                 {!canResend ? (
                   <Text color={textColor}>
                     {t("resend_in")} {formatTimer()}
@@ -247,8 +251,9 @@ const Confirmation = ({ navigation, route }: any) => {
                     {t("did_not_receive_code")}
                     <Text
                       underline
-                      style={{ color: "#F7CF9D" }}
-                      onPress={resendVerificationCode}>
+                      style={{ color: buttonBgColor }} // Matches button for consistency
+                      onPress={resendVerificationCode}
+                    >
                       {" "}
                       {t("resend")}
                     </Text>
@@ -263,25 +268,29 @@ const Confirmation = ({ navigation, route }: any) => {
                 bottom={20}
                 left={-3}
                 position="absolute"
-                width="full">
+                width="full"
+              >
                 <Button
                   width="full"
-                  backgroundColor={isPressed ? "#F9D77E" : "#F7CF9D"}
+                  backgroundColor={isPressed ? buttonPressedBgColor : buttonBgColor}
                   rounded="12px"
                   mt="20px"
                   py="16px"
                   onPressIn={() => setIsPressed(true)}
                   onPressOut={() => setIsPressed(false)}
                   isDisabled={values.otp.length < 6}
-                  onPress={() => handleSubmit()}>
+                  onPress={() => handleSubmit()}
+                >
                   <HStack
                     alignItems="center"
                     justifyContent="space-between"
-                    w="full">
+                    w="full"
+                  >
                     <Text
                       fontSize="16px"
                       fontFamily="Alexandria_700Bold"
-                      color="white">
+                      color={buttonTextColor}
+                    >
                       {t("confirm")}
                     </Text>
                   </HStack>

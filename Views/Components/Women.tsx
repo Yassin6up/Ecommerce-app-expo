@@ -20,6 +20,14 @@ export default function Women() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Define black-and-white color scheme
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Titles, prices
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Subtle text if needed
+  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const highlightColor = isDarkMode ? "#FFFFFF" : "#000000"; // For "منزلي" text
+
   const WOMEN_CATEGORY_ID = 3;
 
   useEffect(() => {
@@ -46,52 +54,48 @@ export default function Women() {
 
   if (loading) {
     return (
-      <View style={[styles.mainContainer, { justifyContent: "center" }]}>
-        <ActivityIndicator size="large" color="#F7CF9D" />
+      <View style={[styles.mainContainer, { justifyContent: "center", backgroundColor }]}>
+        <ActivityIndicator size="large" color={primaryTextColor} />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.mainContainer}>
+      <View style={[styles.mainContainer, { backgroundColor }]}>
         <Text style={{ color: "red" }}>{error}</Text>
       </View>
     );
   }
 
   return (
-    <View
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}>
+    <View style={[styles.mainContainer, { backgroundColor }]}>
       <HStack
         w={"full"}
         alignItems={"center"}
         justifyContent={"space-between"}
-        my={4}>
-        <Text
-          style={[
-            isDarkMode ? styles.darkText : styles.lightText,
-            { fontSize: 20 },
-          ]}>
-          <Text style={{ color: "#F7CF9D",padding:2 }}>منزلي</Text>
+        my={4}
+      >
+        <Text color={primaryTextColor} fontSize={20}>
+          <Text color={highlightColor} padding={2}>{t("New")}</Text> {/* Replacing "منزلي" with "New" */}
         </Text>
         <Pressable
           px={4}
           py={2}
           rounded={4}
-          bgColor={"#F9D77E"}
-           alignSelf="stretch"
+          bgColor={buttonBgColor}
+          alignSelf="stretch"
           onPress={() =>
             navigation.navigate("page two", {
               screen: "men",
               params: { categoryId: 3 },
             })
-          }>
+          }
+        >
           <HStack alignItems={"center"} justifyContent={"space-between"}>
-            <Text fontSize={12}>{t("show_all")}</Text>
+            <Text color={buttonTextColor} fontSize={12}>
+              {t("show_all")}
+            </Text>
           </HStack>
         </Pressable>
       </HStack>
@@ -121,30 +125,33 @@ export default function Women() {
                 width: CARD_WIDTH,
                 marginRight: CARD_SPACING,
                 alignItems: "center",
-                 alignSelf:"stretch"
-              }}>
+                alignSelf: "stretch",
+              }}
+            >
               <Image
                 source={{ uri: imageUrl }}
                 alt={item.title}
                 style={{ width: "100%", height: 200, borderRadius: 8 }}
                 resizeMode="cover"
               />
-
               <HStack
                 w={"90%"}
                 alignItems={"center"}
                 justifyContent={"space-between"}
-                mt={5}>
+                mt={5}
+              >
                 <Text
-                  style={isDarkMode ? styles.darkText : styles.lightText}
+                  color={primaryTextColor}
                   w={"70%"}
-                  numberOfLines={2}>
+                  numberOfLines={2}
+                >
                   {item.title}
                 </Text>
                 <VStack>
                   <Text
-                    style={{ color: isDarkMode ? "#FFCC8B" : "black" }}
-                    fontSize={18}>
+                    color={primaryTextColor}
+                    fontSize={18}
+                  >
                     ${item.price}
                   </Text>
                 </VStack>

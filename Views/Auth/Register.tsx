@@ -64,14 +64,13 @@ export default function Register() {
   const [username, setUsername] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedCity, setSelectedCity] = useState(""); // State for selected city
-  const [addressDetails, setAddressDetails] = useState(""); // State for address details
+  const [selectedCity, setSelectedCity] = useState("");
+  const [addressDetails, setAddressDetails] = useState("");
   const [isPressed, setIsPressed] = useState(false);
   const [phoneError, setPhoneError] = useState("");
 
   const isArabic = i18n.language === "ar";
 
-  // Combine city and address details into a single address string
   const fullAddress = selectedCity && addressDetails 
     ? `${selectedCity}, ${addressDetails}` 
     : selectedCity || addressDetails || "";
@@ -85,7 +84,8 @@ export default function Register() {
           px="2"
           py="1"
           rounded="sm"
-          _text={{ color: "light.100" }}>
+          _text={{ color: "#FFFFFF" }} // White text for contrast
+        >
           {message}
         </Box>
       ),
@@ -130,7 +130,7 @@ export default function Register() {
       return;
     }
     if (!fullAddress.trim()) {
-      showToast(t("address_required"), "red.500"); // Add translation key
+      showToast(t("address_required"), "red.500");
       return;
     }
 
@@ -142,11 +142,11 @@ export default function Register() {
           name: username,
           phone: formattedPhone,
           password: password,
-          address: fullAddress, // Send combined address
+          address: fullAddress,
         }
       );
       if (response.status === 201) {
-        showToast(t("registration_successful"), "#F7CF9D");
+        showToast(t("registration_successful"), isDarkMode ? "#FFFFFF" : "#000000"); // Black/white for success
         navigation.navigate("Confirmation", { phone: formattedPhone });
       }
     } catch (error: any) {
@@ -162,17 +162,21 @@ export default function Register() {
     }
   };
 
+  // Define black-and-white color scheme
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
-  const inputBorderColor = isDarkMode ? "#333333" : "#E9E9F1";
-  const hintColor = isDarkMode ? "#FFFFFF" : "#333";
+  const inputBorderColor = isDarkMode ? "#FFFFFF" : "#000000"; // Updated to black/white
+  const hintColor = isDarkMode ? "#FFFFFF" : "#000000"; // Updated to black/white
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF"; // Background
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000"; // Icons
+  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000"; // Button background
+  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF"; // Button text (inverted for contrast)
+  const buttonPressedBgColor = isDarkMode ? "#CCCCCC" : "#333333"; // Slightly off black/white for pressed state
 
   return (
     <VStack
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}
-      flex={1}>
+      style={[styles.mainContainer, { backgroundColor: backgroundColor }]} // Direct background color
+      flex={1}
+    >
       <ScrollView>
         <StatusBar style={Platform.OS === "ios" ? "dark" : "auto"} />
         <Stack w="full" justifyContent="center" alignItems="center">
@@ -183,7 +187,11 @@ export default function Register() {
 
         <VStack space="14px" flex={1} mt="50px" mb={10}>
           {/* Username Input */}
-          <Text color={textColor} textAlign={isArabic ? "right" : "left"} fontFamily="Alexandria_500Medium">
+          <Text
+            color={textColor}
+            textAlign={isArabic ? "right" : "left"}
+            fontFamily="Alexandria_500Medium"
+          >
             {t("username")}
           </Text>
           <Box
@@ -192,7 +200,8 @@ export default function Register() {
             px={4}
             borderWidth={1}
             borderColor={inputBorderColor}
-            rounded="8px">
+            rounded="8px"
+          >
             <Input
               placeholder={t("username_placeholder")}
               flex={1}
@@ -208,18 +217,21 @@ export default function Register() {
               textAlign={isArabic ? "right" : "left"}
               color={textColor}
             />
-            <UserSquare size="24" color="#F7CF9D" />
+            <UserSquare size="24" color={iconColor} />
           </Box>
 
           {/* Phone Number Input */}
-          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>{t("phone_number")}</Text>
+          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>
+            {t("phone_number")}
+          </Text>
           <Box
             flexDirection={isArabic ? "row-reverse" : "row"}
             alignItems="center"
             px={4}
             borderWidth={1}
             borderColor={phoneError ? "red.500" : inputBorderColor}
-            rounded="8px">
+            rounded="8px"
+          >
             <Input
               placeholder={t("phone_placeholder")}
               textAlign={isArabic ? "right" : "left"}
@@ -237,7 +249,7 @@ export default function Register() {
               borderWidth={0}
               color={textColor}
             />
-            <Mobile size="26" color="#F7CF9D" />
+            <Mobile size="26" color={iconColor} />
           </Box>
           {phoneError && (
             <Text color="red.500" fontSize="xs" ml={2}>
@@ -246,14 +258,17 @@ export default function Register() {
           )}
 
           {/* Password Input */}
-          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>{t("password")}</Text>
+          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>
+            {t("password")}
+          </Text>
           <Box
             flexDirection={isArabic ? "row-reverse" : "row"}
             alignItems="center"
             px={4}
             borderWidth={1}
             borderColor={inputBorderColor}
-            rounded="8px">
+            rounded="8px"
+          >
             <Input
               placeholder={t("password_placeholder")}
               secureTextEntry
@@ -270,11 +285,13 @@ export default function Register() {
               textAlign={isArabic ? "right" : "left"}
               color={textColor}
             />
-            <Lock size="24" color="#F7CF9D" />
+            <Lock size="24" color={iconColor} />
           </Box>
 
           {/* Address Section */}
-          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>{t("address")}</Text>
+          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>
+            {t("address")}
+          </Text>
           {/* City Dropdown */}
           <Box
             flexDirection={isArabic ? "row-reverse" : "row"}
@@ -282,7 +299,8 @@ export default function Register() {
             px={4}
             borderWidth={1}
             borderColor={inputBorderColor}
-            rounded="8px">
+            rounded="8px"
+          >
             <Select
               flex={1}
               variant="unstyled"
@@ -290,10 +308,11 @@ export default function Register() {
               placeholder={isArabic ? "اختر المدينة" : "Select City"}
               onValueChange={(itemValue) => setSelectedCity(itemValue)}
               _selectedItem={{
-                bg: "#F7CF9D",
+                bg: buttonBgColor, // Match button color
               }}
               textAlign={isArabic ? "right" : "left"}
-              color={textColor}>
+              color={textColor}
+            >
               <Select.Item label={isArabic ? "عمان" : "Amman"} value="Amman" />
               <Select.Item label={isArabic ? "إربد" : "Irbid"} value="Irbid" />
               <Select.Item label={isArabic ? "البلقاء" : "Balqa"} value="Balqa" />
@@ -307,7 +326,7 @@ export default function Register() {
               <Select.Item label={isArabic ? "عجلون" : "Ajloun"} value="Ajloun" />
               <Select.Item label={isArabic ? "العقبة" : "Aqaba"} value="Aqaba" />
             </Select>
-            <Location size="24" color="#F7CF9D" />
+            <Location size="24" color={iconColor} />
           </Box>
 
           {/* Address Details Input */}
@@ -318,7 +337,8 @@ export default function Register() {
             borderWidth={1}
             borderColor={inputBorderColor}
             rounded="8px"
-            mt={2}>
+            mt={2}
+          >
             <Input
               placeholder={isArabic ? "تفاصيل العنوان (مثال: شارع ١٢٣)" : "Address Details (e.g., Street 123)"}
               flex={1}
@@ -334,16 +354,17 @@ export default function Register() {
               textAlign={isArabic ? "right" : "left"}
               color={textColor}
             />
-            <Location size="24" color="#F7CF9D" />
+            <Location size="24" color={iconColor} />
           </Box>
 
           {/* Login Text */}
           <HStack
             alignItems="center"
             space="2px"
-            flexDirection={isArabic ? "row" : "row-reverse"}>
+            flexDirection={isArabic ? "row" : "row-reverse"}
+          >
             <Pressable onPress={() => navigation.navigate("Login")}>
-              <Text fontSize="12px" color="#F7CF9D">
+              <Text fontSize="12px" color={buttonBgColor}>
                 {t("login")}
               </Text>
             </Pressable>
@@ -358,14 +379,15 @@ export default function Register() {
       <VStack>
         <Button
           width="full"
-          backgroundColor={isPressed ? "#F9D77E" : "#F7CF9D"}
+          backgroundColor={isPressed ? buttonPressedBgColor : buttonBgColor}
           rounded="12px"
           mt="20px"
           py="16px"
           onPressIn={() => setIsPressed(true)}
           onPressOut={() => setIsPressed(false)}
-          onPress={handleRegister}>
-          <Text fontSize="16px" fontFamily="Alexandria_700Bold" color="white">
+          onPress={handleRegister}
+        >
+          <Text fontSize="16px" fontFamily="Alexandria_700Bold" color={buttonTextColor}>
             {t("register")}
           </Text>
         </Button>

@@ -18,15 +18,15 @@ const TermsAndCondition = () => {
   const { t } = useTranslation();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
 
-  const textColor = isDarkMode ? "#E0E0E0" : "#000";
-  const dividerColor = "#F7CF9D";
+  // Define black-and-white color scheme with degrees
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF"; // Pure black/white for background
+  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Pure black/white for bold text
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Muted shades for content text
+  const dividerColor = isDarkMode ? "#FFFFFF" : "#000000"; // Pure black/white for dividers
 
   return (
     <Stack
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}
+      style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
     >
       <ScrollView paddingX={4} paddingY={6}>
         {/* Title */}
@@ -34,7 +34,7 @@ const TermsAndCondition = () => {
           <Text
             bold
             fontSize="xl"
-            color={dividerColor}
+            color={primaryTextColor}
             textAlign={isRTL ? "right" : "left"}
           >
             {t("terms_title")}
@@ -43,10 +43,17 @@ const TermsAndCondition = () => {
 
           {/* Acceptance of Terms */}
           <VStack space={3}>
-            <Text bold color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              bold
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("acceptance_of_terms_title")}
             </Text>
-            <Text color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              color={secondaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("acceptance_of_terms_content")}
             </Text>
           </VStack>
@@ -55,10 +62,17 @@ const TermsAndCondition = () => {
 
           {/* User Responsibilities */}
           <VStack space={3}>
-            <Text bold color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              bold
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("user_responsibilities_title")}
             </Text>
-            <Text color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              color={secondaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("user_responsibilities_content")}
             </Text>
           </VStack>
@@ -67,10 +81,17 @@ const TermsAndCondition = () => {
 
           {/* Modifications */}
           <VStack space={3}>
-            <Text bold color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              bold
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("modifications_title")}
             </Text>
-            <Text color={textColor} textAlign={isRTL ? "right" : "left"}>
+            <Text
+              color={secondaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
               {t("modifications_content")}
             </Text>
           </VStack>

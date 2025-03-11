@@ -31,7 +31,6 @@ import i18next from "i18next";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
 const ProductDetails = () => {
   const navigation: any = useNavigation();
   const route = useRoute<any>();
@@ -41,24 +40,27 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [scaleValue] = useState(new Animated.Value(1));
-  const [selectedColor, setSelectedColor] = useState<string | null>(null); // State for selected color
-  const [selectedSize, setSelectedSize] = useState<string | null>(null); // State for selected size
-  const [isFavorite , setFave] = useState(false)
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [isFavorite, setFave] = useState(false);
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const userId = useSelector((state: RootState) => state.auth?.user?.id);
   const isRTL = i18next.language === "ar";
 
-
-  // Static arrays for colors and sizes (since no backend yet)
-  const colors = ["#FF0000", "#0000FF", "#00FF00", "#FFA500"]; // Red, Blue, Green, Orange
-  const sizes = ["S", "M", "L", "XL"];
+  // Define black-and-white color scheme
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Titles, prices
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Descriptions
+  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const { id } = route.params;
         const userId = await AsyncStorage.getItem("userId");
-        
+
         const response = await axios.get(
           `https://backend.j-byu.shop/api/products/${id}`,
           { params: { user_id: userId } }
@@ -68,8 +70,7 @@ const ProductDetails = () => {
           ...response.data,
           images: JSON.parse(response.data.images),
         };
-        setFave(response.data.isSaved)
-
+        setFave(response.data.isSaved);
         setProduct(productData);
       } catch (err: any) {
         setError(t("product_fetch_error"));
@@ -95,91 +96,79 @@ const ProductDetails = () => {
         quantity: 1,
         vendorWhatsApp: product.vendorWhatsApp,
         vendorPhoneNumber: product.vendorPhoneNumber,
-        color: selectedColor || undefined, // Include selected color
-        size: selectedSize || undefined, // Include selected size
+        color: selectedColor || undefined,
+        size: selectedSize || undefined,
       })
     );
   };
 
-const handleToggleFavorite = async () => {
-  if (!product) return;
-  const userId = await AsyncStorage.getItem("userId");
+  const handleToggleFavorite = async () => {
+    if (!product) return;
+    const userId = await AsyncStorage.getItem("userId");
 
-  // Animation sequence
-  Animated.sequence([
-    Animated.timing(scaleValue, {
-      toValue: 1.2,
-      duration: 100,
-      useNativeDriver: true,
-    }),
-    Animated.timing(scaleValue, {
-      toValue: 1,
-      duration: 100,
-      useNativeDriver: true,
-    }),
-  ]).start();
+    Animated.sequence([
+      Animated.timing(scaleValue, {
+        toValue: 1.2,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleValue, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
-  // Update UI state immediately for better user experience
-  setFave(!isFavorite);
+    setFave(!isFavorite);
 
-  // Make API call to toggle favorite status
-  try {
-    const response = await axios.post(
-      "https://backend.j-byu.shop/api/toggle-saved-product",
-      {
-        user_id: userId, // Make sure userId is defined or passed as parameter
-        product_id: product.id, // Assuming product.id exists
+    try {
+      const response = await axios.post(
+        "https://backend.j-byu.shop/api/toggle-saved-product",
+        {
+          user_id: userId,
+          product_id: product.id,
+        }
+      );
+
+      if (response.status === 201) {
+        console.log("Product saved successfully:", response.data);
+      } else {
+        console.log("Product removed from saved list:", response.data);
       }
-    );
-
-    // Handle the response based on the status
-    if (response.status === 201) {
-      console.log("Product saved successfully:", response.data);
-    } else {
-      console.log("Product removed from saved list:", response.data);
+    } catch (error: any) {
+      setFave(isFavorite); // Revert on failure
+      console.error("Toggle favorite error:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      if (error.response?.status === 405) {
+        console.error("Method not allowed - try GET if POST is unsupported");
+      }
     }
-  } catch (error) {
-    // Handle error and potentially revert UI state
-    setFave(isFavorite); // Revert back if API call fails
-    
-    if (error.response) {
-      // The server responded with a status other than 2xx
-      console.error("Error response:", error.response.data);
-    } else if (error.request) {
-      // The request was made, but no response was received
-      console.error("No response received:", error.request);
-    } else {
-      // Something happened in setting up the request
-      console.error("Error setting up request:", error.message);
-    }
-  }
-};
+  };
 
   if (loading) {
     return (
-      <View style={[styles.mainContainer, { justifyContent: "center" }]}>
-        <ActivityIndicator size="large" color="#F7CF9D" />
+      <View style={[styles.mainContainer, { justifyContent: "center", backgroundColor }]}>
+        <ActivityIndicator size="large" color={primaryTextColor} />
       </View>
     );
   }
 
   if (error || !product) {
     return (
-      <View style={styles.mainContainer}>
+      <View style={[styles.mainContainer, { backgroundColor }]}>
         <Text style={{ color: "red" }}>{error || t("product_not_found")}</Text>
       </View>
     );
   }
 
   return (
-    <VStack
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}>
+    <VStack style={[styles.mainContainer, { backgroundColor }]}>
       <Stack w={"full"} mb={4} position={"fixed"}>
         <Pressable onPress={() => navigation.navigate("parts")}>
-          <ArrowLeft size="32" color={isDarkMode ? "#DCAE74" : "#F7CF9D"} />
+          <ArrowLeft size="32" color={iconColor} />
         </Pressable>
       </Stack>
 
@@ -187,7 +176,8 @@ const handleToggleFavorite = async () => {
         <HStack
           width={"full"}
           justifyContent={"space-between"}
-          alignItems={"center"}>
+          alignItems={"center"}
+        >
           <Image
             source={{
               uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${product.images[0]}`,
@@ -219,19 +209,22 @@ const handleToggleFavorite = async () => {
           <Text
             fontSize={28}
             marginTop={2}
-            color={isDarkMode ? "#FFFFFF" : "#000000"}
-            textAlign={isRTL ? "right" : "left"}>
+            color={primaryTextColor}
+            textAlign={isRTL ? "right" : "left"}
+          >
             {product.title}
           </Text>
           <Animated.View
             style={[
               customStyles.favoriteButton,
+              { backgroundColor: isDarkMode ? "#1A1A1A" : "#F5F5F5" },
               { transform: [{ scale: scaleValue }] },
-            ]}>
+            ]}
+          >
             <Pressable onPress={handleToggleFavorite}>
               <Heart
                 size="28"
-                color={isFavorite ? "#FF0000" : isDarkMode ? "#DCAE74" : "#F7CF9D"}
+                color={iconColor}
                 variant={isFavorite ? "Bold" : "Outline"}
               />
             </Pressable>
@@ -239,96 +232,94 @@ const handleToggleFavorite = async () => {
         </HStack>
 
         <Text
-          color={isDarkMode ? "#DCAE74" : "#468500"}
+          color={primaryTextColor}
           bold
           fontSize="2xl"
-          textAlign={isRTL ? "right" : "left"}>
+          textAlign={isRTL ? "right" : "left"}
+        >
           ${product.price}
         </Text>
 
         <Text
-          color={isDarkMode ? "#FFFFFF" : "#000000"}
-          textAlign={isRTL ? "right" : "left"}>
+          color={secondaryTextColor}
+          textAlign={isRTL ? "right" : "left"}
+        >
           {product.description}
         </Text>
 
         {/* Color Selection */}
-{
-  JSON.parse(product.colors) && (
-
-    <VStack mt={4} space={2}>
-    <Text
-      fontSize="lg"
-      fontWeight="bold"
-      color={isDarkMode ? "#FFFFFF" : "#000000"}
-      textAlign={isRTL ? "right" : "left"}>
-      {t("Select_Color")}
-    </Text>
-    <HStack space={3}>
-      {JSON.parse(product.colors)?.map((color) => (
-        <Pressable
-          key={color}
-          onPress={() => setSelectedColor(color)}
-          style={[
-            customStyles.colorButton,
-            { backgroundColor: color },
-            selectedColor === color && customStyles.selectedColorButton,
-          ]}
-        />
-      ))}
-    </HStack>
-  </VStack>
-
-  )
-}
+        {JSON.parse(product.colors) && (
+          <VStack mt={4} space={2}>
+            <Text
+              fontSize="lg"
+              fontWeight="bold"
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
+              {t("Select_Color")}
+            </Text>
+            <HStack space={3}>
+              {JSON.parse(product.colors)?.map((color: string) => (
+                <Pressable
+                  key={color}
+                  onPress={() => setSelectedColor(color)}
+                  style={[
+                    customStyles.colorButton,
+                    { backgroundColor: color },
+                    selectedColor === color && {
+                      borderColor: "green",
+                      borderWidth: 3,
+                    },
+                  ]}
+                />
+              ))}
+            </HStack>
+          </VStack>
+        )}
 
         {/* Size Selection */}
-
         {JSON.parse(product.sizes) && (
           <VStack mt={4} space={2}>
-          <Text
-            fontSize="lg"
-            fontWeight="bold"
-            color={isDarkMode ? "#FFFFFF" : "#000000"}
-            textAlign={isRTL ? "right" : "left"}>
-            {t("Select_Size")}
-          </Text>
-          <HStack space={3}>
-            {JSON.parse(product.sizes)?.map((size) => (
-              <Pressable
-                key={size}
-                onPress={() => setSelectedSize(size)}
-                style={[
-                  customStyles.sizeButton,
-                  {
-                    backgroundColor: isDarkMode ? "#2A2A2A" : "#F9D77E",
-                    borderColor:
-                      selectedSize === size
-                        ? "#468500"
-                        : isDarkMode
-                        ? "#DCAE74"
-                        : "#FFCC8B",
-                  },
-                ]}>
-                <Text
-                  color={isDarkMode ? "#FFFFFF" : "#000000"}
-                  fontWeight={selectedSize === size ? "bold" : "normal"}>
-                  {size}
-                </Text>
-              </Pressable>
-            ))}
-          </HStack>
-        </VStack>
+            <Text
+              fontSize="lg"
+              fontWeight="bold"
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
+              {t("Select_Size")}
+            </Text>
+            <HStack space={3}>
+              {JSON.parse(product.sizes)?.map((size: string) => (
+                <Pressable
+                  key={size}
+                  onPress={() => setSelectedSize(size)}
+                  style={[
+                    customStyles.sizeButton,
+                    {
+                      backgroundColor: isDarkMode ? "#1A1A1A" : "#F5F5F5",
+                      borderColor: selectedSize === size ? "green" : iconColor,
+                    },
+                  ]}
+                >
+                  <Text
+                    color={primaryTextColor}
+                    fontWeight={selectedSize === size ? "bold" : "normal"}
+                  >
+                    {size}
+                  </Text>
+                </Pressable>
+              ))}
+            </HStack>
+          </VStack>
         )}
-        
-
       </ScrollView>
 
       <View style={button.fixedButtonContainer}>
         <Button
           onPress={handleAddToCart}
-          backgroundColor="#FFCC8B"
-          _text={{ color: isDarkMode ? "#000000" : "#FFFFFF" }}>
+          backgroundColor={buttonBgColor}
+          _text={{ color: buttonTextColor }}
+        >
           {t("Add_to_cart")}
         </Button>
       </View>
@@ -348,7 +339,6 @@ const button = StyleSheet.create({
 
 const customStyles = StyleSheet.create({
   favoriteButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 20,
     padding: 6,
     shadowColor: "#000",
@@ -362,11 +352,7 @@ const customStyles = StyleSheet.create({
     height: 30,
     borderRadius: 15,
     borderWidth: 2,
-    borderColor: "#FFFFFF", // White border for contrast
-  },
-  selectedColorButton: {
-    borderColor: "#468500", // Green border for selected color
-    borderWidth: 3,
+    borderColor: "#FFFFFF",
   },
   sizeButton: {
     paddingVertical: 8,

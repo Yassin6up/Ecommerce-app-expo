@@ -72,7 +72,7 @@ export default function NewProducts() {
   if (status === "loading") {
     return (
       <View style={[styles.mainContainer, { justifyContent: "center" }]}>
-        <ActivityIndicator size="large" color="#F7CF9D" />
+        <ActivityIndicator size="large" color="black" />
       </View>
     );
   }
@@ -117,7 +117,7 @@ export default function NewProducts() {
         </Text>
         <Text
           style={{
-            color: "#F7CF9D",
+            color: isDarkMode ? "#fff" : "#000",
             fontSize: 16,
             textAlign: "center",
             marginTop: 4,
@@ -146,11 +146,12 @@ export default function NewProducts() {
               fontSize: 20,
               marginBottom: 16,
               textAlign: i18n.language === "ar" ? "right" : "left",
+              // color: isDarkMode ? "#fff" : "#000",
             },
           ]}>
-          <Text style={{ color: "#F7CF9D" }}>{t("New")}</Text> {t("Products")}
+          <Text style={{color: isDarkMode ? "#fff" : "#000" }}>{t("New")}</Text> {t("Products")}
         </Text>
-        <Stack width={"20%"} h={1.5} bg={"#F7CF9D"} rounded={4}></Stack>
+        <Stack width={"20%"} h={1.5} bg={isDarkMode ? "#fff" : "#000"} rounded={4}></Stack>
       </VStack>
 
       {displayedProducts.length > 0 ? (

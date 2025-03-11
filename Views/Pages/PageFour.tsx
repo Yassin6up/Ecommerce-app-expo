@@ -35,28 +35,30 @@ const PageFour = () => {
   const dispatch = useDispatch();
   const navigation: any = useNavigation();
 
-  // State for user profile
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const textColor = isDarkMode ? "#E0E0E0" : "#000000";
-  const secondaryTextColor = isDarkMode ? "#9E9E9E" : "#616161";
+  // Define black-and-white color scheme
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const textColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Muted for contrast
+  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const dividerColor = isDarkMode ? "#FFFFFF" : "#000000";
+
   const isRTL = i18n.language === "ar";
   const textAlignStyle = isRTL ? "right" : "left";
 
-  // Fetch user data
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        // Get session token from AsyncStorage
         const sessionToken = await AsyncStorage.getItem("sessionToken");
 
         if (!sessionToken) {
           throw new Error("No session token found");
         }
 
-        // Fetch user data
         const response = await axios.get(
           "https://backend.j-byu.shop/api/users",
           {
@@ -64,7 +66,6 @@ const PageFour = () => {
           }
         );
 
-        // Set user profile
         setUserProfile({
           id: response.data.id,
           name: response.data.name,
@@ -75,7 +76,7 @@ const PageFour = () => {
         });
 
         setIsLoading(false);
-      } catch (err:any) {
+      } catch (err: any) {
         console.error("Error fetching user profile:", err);
         setError(err.message);
         setIsLoading(false);
@@ -85,32 +86,25 @@ const PageFour = () => {
     fetchUserProfile();
   }, []);
 
-  // Logout handler
   const handleLogout = async () => {
     try {
-      // Remove tokens and user data from AsyncStorage
       await AsyncStorage.removeItem("sessionToken");
       await AsyncStorage.removeItem("userId");
-
-      // Dispatch action to update app state
       dispatch(setPassHome(false));
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <VStack
         flex={1}
         justifyContent="center"
         alignItems="center"
-        style={[
-          styles.mainContainer,
-          isDarkMode ? styles.darkBckground : styles.lightBckground,
-        ]}>
-        <Spinner color="#F7CF9D" size="lg" />
+        style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
+      >
+        <Spinner color={buttonBgColor} size="lg" />
         <Text color={textColor} marginTop={4}>
           {t("Loading")}
         </Text>
@@ -118,21 +112,24 @@ const PageFour = () => {
     );
   }
 
-  // Error state
   if (error || !userProfile) {
     return (
       <VStack
         flex={1}
         justifyContent="center"
         alignItems="center"
-        style={[
-          styles.mainContainer,
-          isDarkMode ? styles.darkBckground : styles.lightBckground,
-        ]}>
+        style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
+      >
         <Text color="red.500" bold>
           {t("error_fetch_profile")}
         </Text>
-        <Button onPress={handleLogout} marginTop={4} variant="outline">
+        <Button
+          onPress={handleLogout}
+          marginTop={4}
+          variant="outline"
+          borderColor={buttonBgColor}
+          _text={{ color: buttonTextColor }}
+        >
           {t("Logout")}
         </Button>
       </VStack>
@@ -142,12 +139,10 @@ const PageFour = () => {
   return (
     <VStack
       space={5}
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}
+      style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
       paddingX={6}
-      paddingY={4}>
+      paddingY={4}
+    >
       {/* Profile Header */}
       <HStack justifyContent="space-between" alignItems="center">
         <HStack space={4} alignItems="center">
@@ -158,12 +153,11 @@ const PageFour = () => {
                 color: textColor,
                 fontSize: 20,
                 fontWeight: "bold",
-           
-              }}>
+              }}
+            >
               {userProfile?.name || t("Guest User")}
             </Text>
-            <Text
-              style={{ color: secondaryTextColor}}>
+            <Text style={{ color: secondaryTextColor }}>
               {userProfile?.address || "لا وجود للعنوان"}
             </Text>
             <Text style={{ color: textColor, textAlign: textAlignStyle }}>
@@ -172,18 +166,19 @@ const PageFour = () => {
           </VStack>
         </HStack>
         <Button variant="ghost" onPress={() => navigation.navigate("profil")}>
-          <Text style={{ color: textColor }}>{t("Edit")}</Text>
+          <Text style={{ color: buttonBgColor }}>{t("Edit")}</Text>
         </Button>
       </HStack>
 
-      <Divider bgColor="#F7CF9D" />
+      <Divider bgColor={dividerColor} />
 
       {/* Policy Section */}
       <VStack space={3}>
         <Text
           bold
           fontSize="xl"
-          style={{ color: textColor, textAlign: textAlignStyle }}>
+          style={{ color: textColor, textAlign: textAlignStyle }}
+        >
           {t("Policy")}
         </Text>
         <HStack justifyContent="space-between" alignItems="center">
@@ -191,7 +186,7 @@ const PageFour = () => {
             {t("Privacy Policy")}
           </Text>
           <Button variant="ghost" onPress={() => navigation.navigate("Policy")}>
-            <Text style={{ color: "#F7CF9D" }}>{t("View")}</Text>
+            <Text style={{ color: buttonBgColor }}>{t("View")}</Text>
           </Button>
         </HStack>
         <HStack justifyContent="space-between" alignItems="center">
@@ -200,8 +195,9 @@ const PageFour = () => {
           </Text>
           <Button
             variant="ghost"
-            onPress={() => navigation.navigate("TermsAndCondition")}>
-            <Text style={{ color: "#F7CF9D" }}>{t("View")}</Text>
+            onPress={() => navigation.navigate("TermsAndCondition")}
+          >
+            <Text style={{ color: buttonBgColor }}>{t("View")}</Text>
           </Button>
         </HStack>
       </VStack>
@@ -211,7 +207,8 @@ const PageFour = () => {
         <Text
           bold
           fontSize="xl"
-          style={{ color: textColor, textAlign: textAlignStyle }}>
+          style={{ color: textColor, textAlign: textAlignStyle }}
+        >
           {t("Order Tracking")}
         </Text>
         <HStack justifyContent="space-between" alignItems="center">
@@ -219,7 +216,7 @@ const PageFour = () => {
             {t("my_orders")}
           </Text>
           <Button variant="ghost" onPress={() => navigation.navigate("Orders")}>
-            <Text style={{ color: "#F7CF9D" }}>{t("View")}</Text>
+            <Text style={{ color: buttonBgColor }}>{t("View")}</Text>
           </Button>
         </HStack>
       </VStack>
@@ -229,17 +226,19 @@ const PageFour = () => {
         <Text
           bold
           fontSize="xl"
-          style={{ color: textColor, textAlign: textAlignStyle }}>
-          {t("Favorites")} {/* Add translation key for "Favorites" */}
+          style={{ color: textColor, textAlign: textAlignStyle }}
+        >
+          {t("Favorites")}
         </Text>
         <HStack justifyContent="space-between" alignItems="center">
           <Text style={{ color: textColor, textAlign: textAlignStyle }}>
-            {t("my_favorites")} {/* Add translation key for "My Favorites" */}
+            {t("my_favorites")}
           </Text>
           <Button
             variant="ghost"
-            onPress={() => navigation.navigate("MyFavourite")}>
-            <Text style={{ color: "#F7CF9D" }}>{t("View")}</Text>
+            onPress={() => navigation.navigate("MyFavourite")}
+          >
+            <Text style={{ color: buttonBgColor }}>{t("View")}</Text>
           </Button>
         </HStack>
       </VStack>
@@ -247,9 +246,10 @@ const PageFour = () => {
       {/* Logout Button */}
       <Button
         variant="solid"
-        bgColor="#F7CF9D"
+        bg={buttonBgColor}
         onPress={handleLogout}
-        _text={{ color: "white", fontWeight: "bold" }}>
+        _text={{ color: buttonTextColor, fontWeight: "bold" }}
+      >
         {t("Logout")}
       </Button>
     </VStack>

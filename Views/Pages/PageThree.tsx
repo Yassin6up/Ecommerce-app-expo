@@ -39,29 +39,26 @@ const PageThree = () => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
-  const [deliveryPrice, setDeliveryPrice] = useState<number>(0); // Use camelCase and type as number
+  const [deliveryPrice, setDeliveryPrice] = useState<number>(0);
 
-  console.log(cartItems)
+  console.log(cartItems);
+
   useEffect(() => {
     const fetchDeliveryFees = async () => {
       try {
         const response = await axios.get('https://backend.j-byu.shop/api/settings/delivryFees');
-        console.log('API Response:', response.data); // Debug: Check the response structure
-        // Assuming response.data is a number or an object like { deliveryFees: 3 }
-
-        const fee =  Number(response?.data) 
+        console.log('API Response:', response.data);
+        const fee = Number(response?.data);
         setDeliveryPrice(fee);
-        
       } catch (error) {
         console.error('Error fetching delivery fees:', error);
-        setDeliveryPrice(0); // Fallback to 0 on error
+        setDeliveryPrice(0);
       }
     };
 
     fetchDeliveryFees();
   }, []);
 
-  // Calculate subtotal (items only) and total with delivery for selected items
   const selectedSubtotal = cartItems
     .filter((item) => selectedItems.includes(item.id))
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -112,13 +109,13 @@ const PageThree = () => {
       orders: selectedOrderItems.map((item) => ({
         vendor_id: 1,
         product_id: item.id,
-        color: item.color , 
-        size : item.size,
+        color: item.color,
+        size: item.size,
         quantity: item.quantity,
         total_price: item.price * item.quantity,
         status: "pending",
       })),
-      delivery_price: deliveryPrice, // Use camelCase
+      delivery_price: deliveryPrice,
     };
 
     try {
@@ -140,7 +137,7 @@ const PageThree = () => {
       setSelectedItems([]);
       navigation.navigate("page one");
     } catch (error) {
-      console.error("Order submission error:", error.response.data);
+      console.error("Order submission error:", error.response?.data);
       toast.show({
         title: t("order_submission_failed"),
         description: error.response?.data?.message || t("unknown_error"),
@@ -152,24 +149,33 @@ const PageThree = () => {
     }
   };
 
+  // Define black-and-white color scheme
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const textColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const mutedTextColor = isDarkMode ? "#CCCCCC" : "#333333";
+  const cardBgColor = isDarkMode ? "#1A1A1A" : "#F5F5F5"; // Slightly off for contrast
+  const borderColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const buttonPressedBgColor = isDarkMode ? "#CCCCCC" : "#333333";
+
   return (
     <VStack
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}
-      flex={1}>
+      style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
+      flex={1}
+    >
       <ScrollView flex={1}>
         {cartItems.length === 0 ? (
           <Box flex={1} justifyContent="center" alignItems="center">
             <VStack space={4} alignItems="center">
-              <Text fontSize={18} color={isDarkMode ? "white" : "gray.900"}>
+              <Text fontSize={18} color={textColor}>
                 {t("no_orders")}
               </Text>
               <Button
-                colorScheme="blue"
-                onPress={() => navigation.navigate("page two")}>
-                <Text>{t("explore_products")}</Text>
+                bg={buttonBgColor}
+                onPress={() => navigation.navigate("page two")}
+              >
+                <Text color={buttonTextColor}>{t("explore_products")}</Text>
               </Button>
             </VStack>
           </Box>
@@ -177,6 +183,7 @@ const PageThree = () => {
           <>
             <Button
               variant="subtle"
+              bg={buttonBgColor}
               onPress={selectAllItems}
               leftIcon={
                 <Icon
@@ -187,35 +194,44 @@ const PageThree = () => {
                       : "check-box-outline-blank"
                   }
                   size="sm"
+                  color={buttonTextColor}
                 />
-              }>
-              {selectedItems.length === cartItems.length
-                ? t("deselect_all")
-                : t("select_all")}
+              }
+            >
+              <Text color={buttonTextColor}>
+                {selectedItems.length === cartItems.length
+                  ? t("deselect_all")
+                  : t("select_all")}
+              </Text>
             </Button>
             {cartItems.map((item) => (
               <Pressable
                 key={item.id}
-                onPress={() => toggleItemSelection(item.id)}>
+                onPress={() => toggleItemSelection(item.id)}
+              >
                 <Box
-                  bg={isDarkMode ? "gray.800" : "white"}
+                  bg={cardBgColor}
                   shadow={4}
                   rounded="xl"
                   margin={4}
                   padding={4}
                   borderWidth={1}
-                  borderColor={isDarkMode ? "gray.700" : "gray.200"}>
+                  borderColor={borderColor}
+                >
                   <HStack justifyContent="space-between" alignItems="center">
                     <Checkbox
                       value={selectedItems.includes(item.id)}
                       onChange={() => toggleItemSelection(item.id)}
                       accessibilityLabel="Select item"
+                      _checked={{ bg: buttonBgColor, borderColor: buttonBgColor }}
+                      _icon={{ color: buttonTextColor }}
                     />
                     <VStack
                       justifyContent="space-between"
                       alignItems="center"
                       space={4}
-                      flex={1}>
+                      flex={1}
+                    >
                       <Image
                         source={{
                           uri: `https://backend.j-byu.shop/api/prudact/${item.id}/img/${item.image}`,
@@ -228,18 +244,16 @@ const PageThree = () => {
                       <VStack
                         flex={1}
                         space={2}
-                        alignItems={isArabic ? "flex-end" : "flex-start"}>
-                        <Text
-                          bold
-                          fontSize={16}
-                          color={isDarkMode ? "white" : "gray.900"}>
+                        alignItems={isArabic ? "flex-end" : "flex-start"}
+                      >
+                        <Text bold fontSize={16} color={textColor}>
                           {item.name}
                         </Text>
-                        <Text color={isDarkMode ? "gray.400" : "gray.600"}>
+                        <Text color={mutedTextColor}>
                           {t("price_each", { price: item.price.toFixed(2) })}
                         </Text>
                         {item.size && (
-                          <Text>
+                          <Text color={textColor}>
                             <Text bold>{t("size")}:</Text> {item.size}
                           </Text>
                         )}
@@ -248,7 +262,8 @@ const PageThree = () => {
                         <HStack
                           alignItems="center"
                           space={2}
-                          flexDirection={isArabic ? "row-reverse" : "row"}>
+                          flexDirection={isArabic ? "row-reverse" : "row"}
+                        >
                           <Button
                             variant="outline"
                             size="sm"
@@ -264,23 +279,23 @@ const PageThree = () => {
                             borderRadius="full"
                             width={8}
                             height={8}
-                            padding={0}>
+                            padding={0}
+                            borderColor={borderColor}
+                          >
                             <Icon
                               as={MaterialIcons}
                               name="remove"
                               size="sm"
-                              color={isDarkMode ? "white" : "gray.900"}
+                              color={textColor}
                             />
                           </Button>
                           <Box
-                            bg={isDarkMode ? "gray.700" : "gray.100"}
+                            bg={isDarkMode ? "#333333" : "#E0E0E0"}
                             borderRadius="md"
                             paddingX={3}
-                            paddingY={1}>
-                            <Text
-                              bold
-                              fontSize="md"
-                              color={isDarkMode ? "white" : "gray.900"}>
+                            paddingY={1}
+                          >
+                            <Text bold fontSize="md" color={textColor}>
                               {item.quantity}
                             </Text>
                           </Box>
@@ -299,18 +314,20 @@ const PageThree = () => {
                             borderRadius="full"
                             width={8}
                             height={8}
-                            padding={0}>
+                            padding={0}
+                            borderColor={borderColor}
+                          >
                             <Icon
                               as={MaterialIcons}
                               name="add"
                               size="sm"
-                              color={isDarkMode ? "white" : "gray.900"}
+                              color={textColor}
                             />
                           </Button>
                         </HStack>
                         <Button
                           variant="subtle"
-                          bgColor="#F9D77E"
+                          bg={buttonBgColor}
                           onPress={() =>
                             dispatch(
                               removeFromCart({
@@ -321,9 +338,15 @@ const PageThree = () => {
                             )
                           }
                           leftIcon={
-                            <Icon as={MaterialIcons} name="delete" size="sm" />
-                          }>
-                          {t("remove")}
+                            <Icon
+                              as={MaterialIcons}
+                              name="delete"
+                              size="sm"
+                              color={buttonTextColor}
+                            />
+                          }
+                        >
+                          <Text color={buttonTextColor}>{t("remove")}</Text>
                         </Button>
                       </VStack>
                     </VStack>
@@ -338,42 +361,46 @@ const PageThree = () => {
       {/* Sticky Footer */}
       {cartItems.length > 0 && (
         <Box
-          bg={isDarkMode ? "gray.900" : "white"}
+          bg={cardBgColor}
           shadow={6}
           padding={4}
           borderTopWidth={1}
-          borderTopColor={isDarkMode ? "gray.700" : "gray.200"}>
+          borderTopColor={borderColor}
+        >
           <VStack space={2}>
             <HStack
               justifyContent="space-between"
               alignItems="center"
-              flexDirection={isArabic ? "row-reverse" : "row"}>
-              <Text bold fontSize="lg" color={isDarkMode ? "white" : "gray.900"}>
+              flexDirection={isArabic ? "row-reverse" : "row"}
+            >
+              <Text bold fontSize="lg" color={textColor}>
                 {t("subtotal")}
               </Text>
-              <Text bold fontSize="lg" color={isDarkMode ? "white" : "gray.900"}>
+              <Text bold fontSize="lg" color={textColor}>
                 ${selectedSubtotal.toFixed(2)}
               </Text>
             </HStack>
             <HStack
               justifyContent="space-between"
               alignItems="center"
-              flexDirection={isArabic ? "row-reverse" : "row"}>
-              <Text bold fontSize="lg" color={isDarkMode ? "white" : "gray.900"}>
+              flexDirection={isArabic ? "row-reverse" : "row"}
+            >
+              <Text bold fontSize="lg" color={textColor}>
                 {t("delivery_price")}
               </Text>
-              <Text bold fontSize="lg" color={isDarkMode ? "white" : "gray.900"}>
-                JOD{deliveryPrice?.toFixed(2)} {/* Use camelCase */}
+              <Text bold fontSize="lg" color={textColor}>
+                JOD{deliveryPrice?.toFixed(2)}
               </Text>
             </HStack>
             <HStack
               justifyContent="space-between"
               alignItems="center"
-              flexDirection={isArabic ? "row-reverse" : "row"}>
-              <Text bold fontSize="xl" color={isDarkMode ? "white" : "gray.900"}>
+              flexDirection={isArabic ? "row-reverse" : "row"}
+            >
+              <Text bold fontSize="xl" color={textColor}>
                 {t("total")}
               </Text>
-              <Text bold fontSize="xl" color="#468500">
+              <Text bold fontSize="xl" color={textColor}>
                 ${selectedTotal.toFixed(2)}
               </Text>
             </HStack>
@@ -382,36 +409,38 @@ const PageThree = () => {
           <HStack space={4} marginTop={4}>
             <Button
               variant="solid"
-              bg="#F7CF9D"
+              bg={buttonBgColor}
               onPress={() => dispatch(clearCart())}
               leftIcon={
                 <Icon
                   as={MaterialIcons}
                   name="delete-sweep"
                   size="sm"
-                  color="white"
+                  color={buttonTextColor}
                 />
               }
-              flex={1}>
-              <Text color="white" bold>
+              flex={1}
+            >
+              <Text color={buttonTextColor} bold>
                 {t("clear_cart")}
               </Text>
             </Button>
             <Button
               variant="solid"
-              bg="#F9D77E"
+              bg={isSubmitting ? buttonPressedBgColor : buttonBgColor}
               onPress={submitOrder}
               leftIcon={
                 <Icon
                   as={MaterialIcons}
                   name="local-shipping"
                   size="sm"
-                  color="#468500"
+                  color={buttonTextColor}
                 />
               }
               flex={1}
-              isDisabled={selectedItems.length === 0 || isSubmitting}>
-              <Text color="#468500" bold>
+              isDisabled={selectedItems.length === 0 || isSubmitting}
+            >
+              <Text color={buttonTextColor} bold>
                 {isSubmitting ? t("submitting") : t("send_order")}
               </Text>
             </Button>
