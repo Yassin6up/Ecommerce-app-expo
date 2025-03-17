@@ -149,7 +149,19 @@ const resources = {
   "my_favorites": "My Favorites",
   "items": "Items",
   "no_favorites_yet": "You haven't added any favorites yet.",
-  "address_required": "Please provide an address"
+  "address_required": "Please provide an address",
+  "all": "All",
+  "pending": "Pending",
+  "cancelled": "Cancelled",
+  "no_orders_for_status": "No orders found for this status",
+
+  "loading": "Loading",
+  "error_fetching_orders": "Error fetching orders",
+
+  "error_cancelling_order": "Error cancelling order",
+
+
+
 
     },
   },
@@ -299,7 +311,20 @@ const resources = {
   "my_favorites": "مفضلاتي",
   "items": "عناصر",
   "no_favorites_yet": "لم تُضف أي مفضلات بعد.",
-  "address_required": "يرجى تقديم عنوان"
+  "address_required": "يرجى تقديم عنوان",
+  "all": "الكل",
+  "pending": "قيد الانتظار",
+  "cancelled": "ملغي",
+  "no_orders_for_status": "لم يتم العثور على طلبات لهذه الحالة",
+
+ 
+
+  "loading": "جار التحميل",
+  "error_fetching_orders": "خطأ في جلب الطلبات",
+
+  "error_cancelling_order": "خطأ في إلغاء الطلب",
+
+
 
     },
   },

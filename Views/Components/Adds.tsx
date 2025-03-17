@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Dimensions, StyleSheet, ActivityIndicator } from "react-native";
 import Swiper from "react-native-swiper";
 import { useSelector } from "react-redux";
@@ -14,7 +14,7 @@ const { width } = Dimensions.get("window"); // Get the device width
 export default function Adds() {
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const { t, i18n } = useTranslation();
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const [sliders, setSliders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -24,6 +24,7 @@ export default function Adds() {
     const fetchSliders = async () => {
       try {
         const response = await axios.get("https://backend.j-byu.shop/api/sliders/all");
+        // console.log("Slider API Response:", response.data);
         setSliders(response.data);
       } catch (err) {
         setError("Failed to load sliders");
@@ -36,12 +37,28 @@ export default function Adds() {
     fetchSliders();
   }, []);
 
-  const handleBannerPress = (link:any) => {
-    const productId = link.split("/").pop();
-    if (productId) {
+  const handleBannerPress = useCallback(
+    (item: any) => {
+      if (item.link && item.link !== "null" && typeof item.link === "string") {
+       
+        const productIdMatch = item.link.match(/\/products\/(\d+)/);
+        const productId = productIdMatch ? productIdMatch[1] : null;
 
-    }
-  };
+        if (productId) {
+          // Navigate to ProductDetails with the extracted product ID
+          navigation.navigate("page two", {
+            screen: "ProductDetails",
+            params: { item, id: productId }, // Use productId from link, not item.id
+          });
+        } else {
+          console.log("No valid product ID found in link:", item.link);
+        }
+      } else {
+        console.log("No valid link for slider:", item.id);
+      }
+    },
+    [navigation]
+  );
 
   if (loading) {
     return (
@@ -72,7 +89,7 @@ export default function Adds() {
       <Animated.Text
         entering={FadeInUp.duration(800)}
         exiting={FadeOutDown.duration(600)}
-        style={{...styles.salesText,   color: isDarkMode ? "#fff" : "#000",}}
+        style={{ ...styles.salesText, color: isDarkMode ? "#fff" : "#000" }}
       >
         {t("Sales")}
       </Animated.Text>
@@ -85,13 +102,13 @@ export default function Adds() {
           showsPagination
           dotStyle={{ backgroundColor: "rgba(255, 255, 255, 0.5)" }}
           activeDotStyle={{ backgroundColor: "#F7CF9D" }}
-          width={width} // Set Swiper width to full device width
-          height={250} // You can adjust this or make it dynamic
+          width={width}
+          height={250}
         >
-          {sliders.map((slider) => (
+          {sliders.map((slider: any) => (
             <Pressable
               key={slider.id}
-              onPress={() => handleBannerPress(slider.link)}
+              onPress={() => handleBannerPress(slider)} // Pass the whole slider object
               style={styles.bannerContainer}
             >
               <Image
@@ -141,7 +158,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   salesText: {
-
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
@@ -153,7 +169,7 @@ const styles = StyleSheet.create({
     fontFamily: "Alexandria_600SemiBold",
   },
   swiperContainer: {
-    width: "100%", // Ensure the container takes full width
+    width: "100%",
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
@@ -170,11 +186,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     position: "relative",
-    width: width, // Match the device width
+    width: width,
   },
   bannerImage: {
-    width: width, // Full width of the device
-    height: 250, // You can adjust this or make it dynamic
+    width: width,
+    height: 250,
     borderRadius: 16,
   },
   textContainer: {

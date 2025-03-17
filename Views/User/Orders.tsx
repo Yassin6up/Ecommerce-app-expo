@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import axios from "axios"; // Add Axios import
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Add AsyncStorage
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RootState } from "../../store/store";
 import { removeFromCart, markAsRemoved } from "../../store/cartSlice";
 import {
@@ -14,7 +14,7 @@ import {
   Icon,
   Pressable,
   Image,
-  useToast, // Add useToast for error handling
+  useToast,
 } from "native-base";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
@@ -36,9 +36,9 @@ interface Order {
 }
 
 const Orders = () => {
-  // State for orders and loading
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [statusFilter, setStatusFilter] = useState<string>("All");
 
   const dispatch = useDispatch();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
@@ -47,26 +47,23 @@ const Orders = () => {
   const navigation: any = useNavigation();
   const toast = useToast();
 
-  // Fetch Orders
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        // Get user ID from AsyncStorage
         const userId = await AsyncStorage.getItem("userId");
 
         if (!userId) {
           throw new Error("No user ID found");
         }
 
-        // Fetch orders using Axios
         const response = await axios.get(
           `https://backend.j-byu.shop/api/orders/byUser/${userId}`
         );
 
-        // Set orders from response
+        console.log("Fetched Orders:", response.data.orders);
         setOrders(response.data.orders);
         setIsLoading(false);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching orders:", error);
         toast.show({
           title: t("error_fetching_orders"),
@@ -81,15 +78,11 @@ const Orders = () => {
 
   const handleCancelOrder = async (orderId: number) => {
     try {
-      // Call backend to cancel order
-      await axios.put(
-        `https://backend.j-byu.shop/api/orders/cancel/${orderId}`
-      );
+      await axios.put(`https://backend.j-byu.shop/api/orders/cancel/${orderId}`);
 
-      // Update local state
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === orderId ? { ...order, status: "ملغي" } : order
+          order.id === orderId ? { ...order, status: "cancelled" } : order
         )
       );
 
@@ -98,7 +91,7 @@ const Orders = () => {
         status: "success",
       });
     } catch (error) {
-      console.error("Error cancelling order:", error.response.data);
+      console.error("Error cancelling order:", error.response?.data);
       toast.show({
         title: t("error_cancelling_order"),
         status: "error",
@@ -106,7 +99,13 @@ const Orders = () => {
     }
   };
 
-  // Render loading state
+  // Filter orders based on status
+  const filteredOrders = orders.filter((order) => {
+    console.log("Order Status:", order.status, "Filter:", statusFilter);
+    if (statusFilter === "All") return true;
+    return order.status.toLowerCase() === statusFilter.toLowerCase(); // Case-insensitive comparison
+  });
+
   if (isLoading) {
     return (
       <VStack
@@ -116,7 +115,8 @@ const Orders = () => {
         ]}
         flex={1}
         justifyContent="center"
-        alignItems="center">
+        alignItems="center"
+      >
         <Text>{t("loading")}</Text>
       </VStack>
     );
@@ -130,35 +130,77 @@ const Orders = () => {
       ]}
       flex={1}
       justifyContent="center"
-      alignItems="center">
-      {orders.length === 0 ? (
+      alignItems="center"
+    >
+      {/* Status Filter Buttons */}
+      <HStack space={2} mb={4} justifyContent="center" flexWrap="wrap">
+        <Button
+          size="sm"
+          variant={statusFilter === "All" ? "solid" : "outline"}
+          colorScheme="blue"
+          onPress={() => setStatusFilter("All")}
+        >
+          {t("all")}
+        </Button>
+        <Button
+          size="sm"
+          variant={statusFilter === "pending" ? "solid" : "outline"}
+          colorScheme="orange"
+          onPress={() => setStatusFilter("pending")}
+        >
+          {t("pending")}
+        </Button>
+        <Button
+          size="sm"
+          variant={statusFilter === "on the way" ? "solid" : "outline"}
+          colorScheme="green"
+          onPress={() => setStatusFilter("on the way")}
+        >
+          {t("on_the_way")}
+        </Button>
+        <Button
+          size="sm"
+          variant={statusFilter === "cancelled" ? "solid" : "outline"}
+          colorScheme="red"
+          onPress={() => setStatusFilter("cancelled")}
+        >
+          {t("cancelled")}
+        </Button>
+      </HStack>
+
+      {filteredOrders.length === 0 ? (
         <VStack space={4} alignItems="center">
           <Text fontSize={18} color={isDarkMode ? "white" : "gray.900"}>
-            {t("no_orders")}
+            {statusFilter === "All" ? t("no_orders") : t("no_orders_for_status")}
           </Text>
           <Button
             colorScheme="blue"
-            onPress={() => navigation.navigate("page two")}>
+            onPress={() => navigation.navigate("page two")}
+          >
             <Text>{t("explore_products")}</Text>
           </Button>
         </VStack>
       ) : (
         <ScrollView flex={1} width="100%">
-          {orders.map((order) => {
+          {filteredOrders.map((order) => {
             let orderStatus = order.status;
             let statusColor = "orange.500";
 
-            switch (order.status) {
-              case "قيد التوصيل":
+            switch (order.status.toLowerCase()) {
+              case "on the way":
                 orderStatus = t("on_the_way");
                 statusColor = "green.500";
                 break;
-              case "ملغي":
+              case "cancelled":
                 orderStatus = t("cancelled");
                 statusColor = "red.500";
                 break;
+              case "pending":
+                orderStatus = t("pending");
+                statusColor = "orange.500";
+                break;
               default:
-                orderStatus = t("قيد الانتظار");
+                orderStatus = order.status; // Fallback to raw status
             }
 
             return (
@@ -170,45 +212,32 @@ const Orders = () => {
                   margin={4}
                   padding={4}
                   borderWidth={1}
-                  borderColor={isDarkMode ? "gray.700" : "gray.200"}>
+                  borderColor={isDarkMode ? "gray.700" : "gray.200"}
+                >
                   <VStack
                     justifyContent="space-between"
                     alignItems="center"
-                    space={4}>
+                    space={4}
+                  >
                     <Image
                       source={{
                         uri: (() => {
                           try {
-                            // Handle different potential image formats
                             let imageSource;
-
-                            // If images is already an array
                             if (Array.isArray(order.productImageUrl)) {
                               imageSource = order.productImageUrl[0];
+                            } else if (typeof order.productImageUrl === "string") {
+                              try {
+                                const parsedImages = JSON.parse(order.productImageUrl);
+                                imageSource = parsedImages[0];
+                              } catch {
+                                imageSource = order.productImageUrl;
+                              }
                             }
-                            // If images is a JSON string
-                            else if (
-                              typeof order.productImageUrl === "string"
-                            ) {
-                              const parsedImages = JSON.parse(
-                                order.productImageUrl
-                              );
-                              imageSource = parsedImages[0];
-                            }
-                            // If images is a single string
-                            else if (
-                              typeof order.productImageUrl === "string"
-                            ) {
-                              imageSource = order.productImageUrl;
-                            }
-
-                            // Construct full URL
                             const imageUrl = `https://backend.j-byu.shop/api/prudact/${order.productId}/img/${imageSource}`;
-
                             return imageUrl;
                           } catch (error) {
                             console.error("Image URL Error:", error);
-                            // Fallback image or null
                             return null;
                           }
                         })(),
@@ -222,26 +251,23 @@ const Orders = () => {
                     <VStack
                       flex={1}
                       space={2}
-                      alignItems={isArabic ? "flex-end" : "flex-start"}>
+                      alignItems={isArabic ? "flex-end" : "flex-start"}
+                    >
                       <Text
                         bold
                         fontSize={16}
-                        color={isDarkMode ? "white" : "gray.900"}>
+                        color={isDarkMode ? "white" : "gray.900"}
+                      >
                         {order.productName}
                       </Text>
                       <Text color={isDarkMode ? "gray.400" : "gray.600"}>
                         {order.price.toFixed(2)} JOD
                       </Text>
-
-                      {/* <Text color={isDarkMode ? "gray.400" : "gray.600"}>
-                        {t("store_name")}: {order.storeName}
-                      </Text> */}
-
                       <Text bold color={statusColor}>
                         {t("status")}: {orderStatus}
                       </Text>
 
-                      {order.status === "قيد الانتظار" && (
+                      {order.status.toLowerCase() === "pending" && (
                         <Button
                           colorScheme="red"
                           size="sm"
@@ -254,7 +280,8 @@ const Orders = () => {
                               color="white"
                             />
                           }
-                          mt={2}>
+                          mt={2}
+                        >
                           {t("cancel_order")}
                         </Button>
                       )}
