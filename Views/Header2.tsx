@@ -157,18 +157,20 @@ const Header2 = () => {
                 )}
               >
                 <Popover.Content width="150px" bg={dropdownBgColor}>
-                  <Popover.Body>
-                    <Box>
+                  <Popover.Body bg={dropdownBgColor}>
+                    <Box  bg={dropdownBgColor} >
                       <Pressable 
                         onPress={() => {
                           handleLanguageChange("ar");
                           setShowSetting(false);
                         }} 
                         mb={4}
+                    
                       >
                         <Text color={primaryTextColor}>العربية</Text>
                       </Pressable>
                       <Pressable 
+                           
                         onPress={() => {
                           handleLanguageChange("en");
                           setShowSetting(false);

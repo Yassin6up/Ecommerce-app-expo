@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import Parts from "./Parts/Parts";
 import Header2 from "./Header2";
 import UserDetail from "./User/UserDetail";
+import { I18nManager } from "react-native";
 
 interface Screen {
   name: string;
@@ -28,17 +29,20 @@ const Tab = createBottomTabNavigator();
 const Pages: React.FC = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [focusedTab, setFocusedTab] = useState<string>("");
 
   const handleTabPress = (name: string) => {
     setFocusedTab(name);
   };
 
+  // Check if the current language is Arabic (RTL)
+  const isArabic = i18n.language === "ar" || I18nManager.isRTL;
+
   // Define black-and-white color scheme
-  const tabBarBgColor = isDarkMode ? "#000000" : "#FFFFFF"; // Tab bar background
-  const focusedColor = isDarkMode ? "#FFFFFF" : "#000000"; // Focused tab color
-  const unfocusedColor = isDarkMode ? "#CCCCCC" : "#333333"; // Unfocused tab color (muted for contrast)
+  const tabBarBgColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const focusedColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const unfocusedColor = isDarkMode ? "#CCCCCC" : "#333333";
 
   const screens: Screen[] = [
     {
@@ -138,8 +142,9 @@ const Pages: React.FC = () => {
                 h={3}
                 position="absolute"
                 rounded="full"
-                backgroundColor="#FFCC8B" // Retained for cart indicator
-                right={-4}
+                backgroundColor="#FFCC8B"
+                right={isArabic ? undefined : -4}
+                left={isArabic ? -4 : undefined}
                 top={-2}
                 zIndex={87}
               />
@@ -189,6 +194,9 @@ const Pages: React.FC = () => {
     },
   ];
 
+  // Reverse the screens array if Arabic
+  const orderedScreens = isArabic ? [...screens].reverse() : screens;
+
   return (
     <Tab.Navigator
       initialRouteName="page one"
@@ -198,10 +206,10 @@ const Pages: React.FC = () => {
           backgroundColor: tabBarBgColor,
           borderTopWidth: 0,
         },
-        tabBarLabel: () => null, // Still null as per original
+        tabBarLabel: () => null,
       })}
     >
-      {screens.map((screen: Screen, index: number) => (
+      {orderedScreens.map((screen: Screen, index: number) => (
         <Tab.Screen
           key={index}
           options={screen.options}

@@ -10,6 +10,7 @@ import {
   Switch,
   Divider,
   Spinner,
+  Pressable
 } from "native-base";
 import styles from "../Styles";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { setPassHome } from "../../store/PassHomeSlice";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 // Define User interface
 interface UserProfile {
@@ -123,15 +125,17 @@ const PageFour = () => {
         <Text color="red.500" bold>
           {t("error_fetch_profile")}
         </Text>
-        <Button
+        <Pressable
           onPress={handleLogout}
           marginTop={4}
           variant="outline"
-          borderColor={buttonBgColor}
-          _text={{ color: buttonTextColor }}
+          borderColor={'red.500'}
+      
         >
-          {t("Logout")}
-        </Button>
+        <Text color={'white'}>
+        {t("Logout")}
+          </Text>  
+        </Pressable>
       </VStack>
     );
   }

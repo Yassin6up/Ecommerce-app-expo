@@ -118,7 +118,7 @@ export default function Login() {
 
         await AsyncStorage.setItem("sessionToken", sessionToken);
         await AsyncStorage.setItem("userId", userId.toString());
-        showToast(t("login_successful"), isDarkMode ? "#FFFFFF" : "#000000");
+        showToast(t("login_successful"),  "#000000" );
         dispatch(setPassHome(true));
         // navigation.navigate("page one", {});
       }

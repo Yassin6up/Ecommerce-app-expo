@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "J-buy",
+    "name": "J buy",
     "slug": "j-buy",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -27,7 +27,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "b52aca20-21f5-4286-a6d6-4c5a8e7a68a8"
+        "projectId": "d5654c4a-3b3b-46d3-a703-63ddad231535"
       }
     },
     "owner": "salaheddinet"
