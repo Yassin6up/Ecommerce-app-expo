@@ -32,6 +32,10 @@ const Header2 = () => {
 
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
+    navigation.navigate("page two", { 
+      screen: "men", 
+      params: { isSearch: true, searchText: text } 
+    });
   };
 
   const handleSearchSubmit = () => {
