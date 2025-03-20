@@ -17,8 +17,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.png",
-        "backgroundColor": "#080705"
+        "foregroundImage": "./assets/icone.png"
+    
       },
       "package": "com.salaheddinet.task"
     },

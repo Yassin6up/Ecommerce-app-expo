@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import styles from "../Styles";
 import { useTranslation } from "react-i18next";
@@ -22,10 +22,10 @@ import i18next from "i18next";
 // Define the product type
 interface Product {
   id: number;
-  nameKey: string;
-  image: string | number;
-  new_price: number;
+  title: string;
+  price: number;
   old_price?: number;
+  images: string | string[];
 }
 
 const MenParts = () => {
@@ -39,58 +39,50 @@ const MenParts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { categoryId, isSearch, searchText } = route.params;
+  const { categoryId, isSearch, searchText } = route.params as {
+    categoryId?: number;
+    isSearch?: boolean;
+    searchText?: string;
+  };
+
+  // State to track if search results are empty
+  const [hasSearchResults, setHasSearchResults] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchProductsByCategory = async () => {
+    const fetchProducts = async () => {
       try {
         setError(null);
+        setIsLoading(true);
 
-        // Get category ID from route params
-        if (!categoryId) {
-          throw new Error("No category ID provided");
+        let response;
+        if (isSearch) {
+          // Fetch products by search text
+          response = await axios.get(
+            `https://backend.j-byu.shop/api/products/all?search=${searchText}`
+          );
+          const searchProducts = response.data.products || [];
+          setHasSearchResults(searchProducts.length > 0); // Update search results state
+          setProducts(searchProducts);
+        } else {
+          // Fetch products by category ID
+          if (!categoryId) throw new Error("No category ID provided");
+          response = await axios.get(
+            `https://backend.j-byu.shop/api/products/byCatgId/${categoryId}`
+          );
+          setProducts(response.data);
+          setHasSearchResults(true); // Reset search results state for category view
         }
-
-        // Make API call
-        const response = await axios.get(
-          `https://backend.j-byu.shop/api/products/byCatgId/${categoryId}`
-        );
-
-        // Set products from API response
-        setProducts(response.data);
-        setIsLoading(false);
       } catch (err) {
         console.error("Error fetching products:", err);
-        setError("لم يتم العتور على منتجات");
+        setError(t("error.fetch_products"));
+        setHasSearchResults(false);
+      } finally {
         setIsLoading(false);
       }
     };
 
-    const fetchProductsByTitle = async () => {
-      try {
-        setError(null);
-
-        // Make API call
-        const response = await axios.get(
-          `https://backend.j-byu.shop/api/products/all?search=${searchText}`
-        );
-
-        // Set products from API response
-        setProducts(response.data.products);
-        setIsLoading(false);
-      } catch (err) {
-        console.error("Error fetching products:", err);
-        setError("لم يتم العتور على منتجات");
-        setIsLoading(false);
-      }
-    };
-
-    if (isSearch) {
-      fetchProductsByTitle();
-    } else {
-      fetchProductsByCategory();
-    }
-  }, [route.params]);
+    fetchProducts();
+  }, [route.params]); // Re-fetch when route params change
 
   // Loading state
   if (isLoading) {
@@ -99,8 +91,11 @@ const MenParts = () => {
         style={[
           styles.mainContainer,
           isDarkMode ? styles.darkBckground : styles.lightBckground,
-        ]}>
-        <Text>{t("Loading")}</Text>
+        ]}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Text color={isDarkMode ? "white" : "black"}>{t("loading")}</Text>
       </Stack>
     );
   }
@@ -112,8 +107,29 @@ const MenParts = () => {
         style={[
           styles.mainContainer,
           isDarkMode ? styles.darkBckground : styles.lightBckground,
-        ]}>
+        ]}
+        justifyContent="center"
+        alignItems="center"
+      >
         <Text color="red.500">{error}</Text>
+      </Stack>
+    );
+  }
+
+  // No search results state
+  if (isSearch && !hasSearchResults) {
+    return (
+      <Stack
+        style={[
+          styles.mainContainer,
+          isDarkMode ? styles.darkBckground : styles.lightBckground,
+        ]}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Text color={isDarkMode ? "white" : "black"} fontSize="lg">
+          {t("no_products_found", { query: searchText })}
+        </Text>
       </Stack>
     );
   }
@@ -123,128 +139,122 @@ const MenParts = () => {
       style={[
         styles.mainContainer,
         isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}>
+      ]}
+    >
+      {/* Back button */}
       <Stack w={"full"} mb={4} position={"fixed"}>
         <Pressable onPress={() => navigation.goBack()}>
           <ArrowLeft size="32" color="#F7CF9D" />
         </Pressable>
       </Stack>
+
+      {/* Product list */}
       <ScrollView>
         <VStack space={6} padding={4}>
-          {products?.map((product) => {
-            return (
-              <Pressable
-                key={product.id}
-                onPress={() =>
-                  navigation.navigate("ProductDetails", { id: product.id })
-                }>
-                <Box
-                  bg={isDarkMode ? "gray.900" : "white"}
-                  shadow={8}
-                  rounded="2xl"
-                  p={5}
-                  borderWidth={1}
-                  borderColor={isDarkMode ? "gray.700" : "gray.100"}
-                  overflow="hidden"
-                  position="relative">
-                  <HStack space={4} alignItems="center">
-                    <Box rounded="xl" overflow="hidden" shadow={4}>
-                      <Image
-                        source={{
-                          uri: (() => {
-                            try {
-                              // Handle different potential image formats
-                              let imageSource;
-
-                              // If images is already an array
-                              if (Array.isArray(product.images)) {
-                                imageSource = product.images[0];
-                              }
-                              // If images is a JSON string
-                              else if (typeof product.images === "string") {
-                                const parsedImages = JSON.parse(product.images);
-                                imageSource = parsedImages[0];
-                              }
-                              // If images is a single string
-                              else if (typeof product.images === "string") {
-                                imageSource = product.images;
-                              }
-
-                              // Construct full URL
-                              const imageUrl = `https://backend.j-byu.shop/api/prudact/${product.id}/img/${imageSource}`;
-
-                              return imageUrl;
-                            } catch (error) {
-                              console.error("Image URL Error:", error);
-                              // Fallback image or null
-                              return null;
+          {products.map((product) => (
+            <Pressable
+              key={product.id}
+              onPress={() =>
+                navigation.navigate("ProductDetails", { id: product.id })
+              }
+            >
+              <Box
+                bg={isDarkMode ? "gray.900" : "white"}
+                shadow={8}
+                rounded="2xl"
+                p={5}
+                borderWidth={1}
+                borderColor={isDarkMode ? "gray.700" : "gray.100"}
+                overflow="hidden"
+                position="relative"
+              >
+                <HStack space={4} alignItems="center">
+                  {/* Product image */}
+                  <Box rounded="xl" overflow="hidden" shadow={4}>
+                    <Image
+                      source={{
+                        uri: (() => {
+                          try {
+                            let imageSource;
+                            if (Array.isArray(product.images)) {
+                              imageSource = product.images[0];
+                            } else if (typeof product.images === "string") {
+                              const parsedImages = JSON.parse(product.images);
+                              imageSource = parsedImages[0];
+                            } else {
+                              imageSource = product.images;
                             }
-                          })(),
-                        }}
-                        alt={product.id.toString()}
-                        size="xl"
-                        resizeMode="cover"
-                        style={{ width: 120, height: 200 }}
-                        onError={(e) =>
-                          console.error(
-                            "Image Load Error:",
-                            e.nativeEvent.error
-                          )
-                        }
-                      />
-                    </Box>
+                            return `https://backend.j-byu.shop/api/prudact/${product.id}/img/${imageSource}`;
+                          } catch (error) {
+                            console.error("Image URL Error:", error);
+                            return null;
+                          }
+                        })(),
+                      }}
+                      alt={product.id.toString()}
+                      size="xl"
+                      resizeMode="cover"
+                      style={{ width: 120, height: 200 }}
+                      onError={(e) =>
+                        console.error("Image Load Error:", e.nativeEvent.error)
+                      }
+                    />
+                  </Box>
 
-                    <VStack flex={1} space={2}>
+                  {/* Product details */}
+                  <VStack flex={1} space={2}>
+                    <Text
+                      bold
+                      fontSize={16}
+                      color={isDarkMode ? "white" : "gray.900"}
+                      fontFamily="body"
+                      textAlign={isRTL ? "right" : "left"}
+                    >
+                      {product.title}
+                    </Text>
+                    <HStack alignItems="center" space={2}>
                       <Text
+                        color={isDarkMode ? "#DCAE74" : "#468500"}
                         bold
-                        fontSize={16}
-                        color={isDarkMode ? "white" : "gray.900"}
-                        fontFamily="body"
-                        textAlign={isRTL ? "right" : "left"}>
-                        {product.title}
+                        fontSize="2xl"
+                      >
+                        ${product.price}
                       </Text>
-                      <HStack alignItems="center" space={2}>
-                        <Text
-                          color={isDarkMode ? "#DCAE74" : "#468500"}
-                          bold
-                          fontSize="2xl">
-                          ${product.price}
+                      {product.old_price && (
+                        <Text color="gray.500" strikeThrough fontSize="lg">
+                          ${product.old_price}
                         </Text>
-                        {product.old_price && (
-                          <Text color="gray.500" strikeThrough fontSize="lg">
-                            ${product.old_price}
-                          </Text>
-                        )}
-                      </HStack>
-                      <Button
-                        onPress={() =>
-                          navigation.navigate("ProductDetails", {
-                            product,
-                            id: product.id,
-                          })
-                        }
-                        variant="solid"
-                        bgColor="#F7CF9D"
-                        mt={2}
-                        _hover={{
-                          bg: "#F9D77E",
-                          shadow: 6,
-                        }}
-                        _pressed={{
-                          bg: "#F9D77E",
-                        }}
-                        rounded="full"
-                        shadow={3}>
-                        <Text bold fontSize="md" color="white">
-                          {t("Add_to_cart")}
-                        </Text>
-                      </Button>
-                    </VStack>
-                  </HStack>
-                </Box>
-              </Pressable>
-            );
-          })}
+                      )}
+                    </HStack>
+                    <Button
+                      onPress={() =>
+                        navigation.navigate("ProductDetails", {
+                          product,
+                          id: product.id,
+                        })
+                      }
+                      variant="solid"
+                      bgColor="#F7CF9D"
+                      mt={2}
+                      _hover={{
+                        bg: "#F9D77E",
+                        shadow: 6,
+                      }}
+                      _pressed={{
+                        bg: "#F9D77E",
+                      }}
+                      rounded="full"
+                      shadow={3}
+                    >
+                      <Text bold fontSize="md" color="white">
+                        {t("Add_to_cart")}
+                      </Text>
+                    </Button>
+                  </VStack>
+                </HStack>
+              </Box>
+            </Pressable>
+          ))}
         </VStack>
       </ScrollView>
     </Stack>

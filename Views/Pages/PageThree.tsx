@@ -125,17 +125,44 @@ const PageThree = () => {
         orderData
       );
 
-      toast.show({
-        title: t("order_submitted_success"),
-        status: "success",
+      // Custom persistent toast with X and Cancel buttons
+      const toastId = toast.show({
         placement: "top",
+        duration: null, // Keeps toast visible until manually closed
+        render: () => (
+          <Box
+            bg="green.500"
+            px={4}
+            py={3}
+            rounded="md"
+            shadow={4}
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Text color="white" bold mr={4}>
+              {t("order_submitted_success")}
+            </Text>
+            <HStack space={2}>
+              <Pressable
+                onPress={() => {
+                  toast.close(toastId); // Close the toast
+                  navigation.navigate("page one"); // Navigate after closing
+                }}
+                _pressed={{ opacity: 0.7 }}
+              >
+                <Icon as={MaterialIcons} name="close" size="sm" color="white" />
+              </Pressable>
+            </HStack>
+          </Box>
+        ),
       });
 
+      // Remove selected items from cart
       selectedItems.forEach((itemId) => {
         dispatch(removeFromCart({ id: itemId }));
       });
       setSelectedItems([]);
-      navigation.navigate("page one");
     } catch (error) {
       console.error("Order submission error:", error.response?.data);
       toast.show({

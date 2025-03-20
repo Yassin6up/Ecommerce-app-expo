@@ -43,14 +43,13 @@ const ProductDetails = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [isFavorite, setFave] = useState(false);
+  const [mainImage, setMainImage] = useState<string>("");
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
-  const userId = useSelector((state: RootState) => state.auth?.user?.id);
   const isRTL = i18next.language === "ar";
 
-  // Define black-and-white color scheme
   const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
-  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Titles, prices
-  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Descriptions
+  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333";
   const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
   const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
   const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
@@ -72,6 +71,7 @@ const ProductDetails = () => {
         };
         setFave(response.data.isSaved);
         setProduct(productData);
+        setMainImage(productData.images[0]);
       } catch (err: any) {
         setError(t("product_fetch_error"));
         console.error("Product fetch error:", err.response?.data);
@@ -92,7 +92,7 @@ const ProductDetails = () => {
         id: product.id,
         name: product.title,
         price: product.price,
-        image: product.images[0],
+        image: mainImage,
         quantity: 1,
         vendorWhatsApp: product.vendorWhatsApp,
         vendorPhoneNumber: product.vendorPhoneNumber,
@@ -101,7 +101,6 @@ const ProductDetails = () => {
       })
     );
   };
-
   const handleToggleFavorite = async () => {
     if (!product) return;
     const userId = await AsyncStorage.getItem("userId");
@@ -164,6 +163,26 @@ const ProductDetails = () => {
     );
   }
 
+  const handleImageSelect = (image: string) => {
+    setMainImage(image);
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.mainContainer, { justifyContent: "center", backgroundColor }]}>
+        <ActivityIndicator size="large" color={primaryTextColor} />
+      </View>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <View style={[styles.mainContainer, { backgroundColor }]}>
+        <Text style={{ color: "red" }}>{error || t("product_not_found")}</Text>
+      </View>
+    );
+  }
+
   return (
     <VStack style={[styles.mainContainer, { backgroundColor }]}>
       <Stack w={"full"} mb={4} position={"fixed"}>
@@ -177,32 +196,41 @@ const ProductDetails = () => {
           width={"full"}
           justifyContent={"space-between"}
           alignItems={"center"}
+          space={2}
         >
           <Image
             source={{
-              uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${product.images[0]}`,
+              uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${mainImage}`,
             }}
             width={250}
-            height={310}
+            height={310 }
             rounded={4}
             resizeMode="cover"
             alt={product.title}
           />
-          <VStack space={2}>
-            {product.images.slice(0, 3).map((img: string, idx: number) => (
-              <Image
-                key={idx}
-                source={{
-                  uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${img}`,
-                }}
-                width={100}
-                height={100}
-                rounded={4}
-                resizeMode="cover"
-                alt={`${product.title}-${idx}`}
-              />
-            ))}
-          </VStack>
+          <ScrollView  showsHorizontalScrollIndicator={false} height={300}>
+            <VStack space={12}>
+              {product.images.map((img: string, idx: number) => (
+                <Pressable
+                  key={idx}
+                  onPress={() => handleImageSelect(img)}
+                >
+                  <Image
+                    source={{
+                      uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${img}`,
+                    }}
+                    width={120}
+                    height={120}
+                    rounded={4}
+                    resizeMode="cover"
+                    alt={`${product.title}-${idx}`}
+                    borderWidth={mainImage === img ? 3 : 0}
+                    borderColor={mainImage === img ? "green" : "transparent"}
+                  />
+                </Pressable>
+              ))}
+            </VStack>
+          </ScrollView>
         </HStack>
 
         <HStack justifyContent="space-between" alignItems="center">

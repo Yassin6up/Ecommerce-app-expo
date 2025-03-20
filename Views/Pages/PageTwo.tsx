@@ -39,8 +39,6 @@ const PageTwo = () => {
   useEffect(() => {
     dispatch(fetchCategories())
       .unwrap()
-      .then((data) => console.log("Fetched categories:", data))
-      .catch((error) => console.log("Error fetching categories:", error));
   }, [dispatch]);
 
   // Function to fetch children categories for a specific parent

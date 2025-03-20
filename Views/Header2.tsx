@@ -34,17 +34,25 @@ const Header2 = () => {
     setSearchQuery(text);
     navigation.navigate("page two", { 
       screen: "men", 
-      params: { isSearch: true, searchText: text } 
+      params: { 
+        isSearch: true, 
+        searchText: text,
+        // Add timestamp to force re-render
+        timestamp: Date.now() 
+      } 
     });
   };
 
   const handleSearchSubmit = () => {
     const trimmedQuery = searchQuery.trim();
     if (trimmedQuery) {
-      console.log("Searching for:", trimmedQuery);
       navigation.navigate("page two", { 
         screen: "men", 
-        params: { isSearch: true, searchText: trimmedQuery } 
+        params: { 
+          isSearch: true, 
+          searchText: trimmedQuery,
+          timestamp: Date.now()
+        } 
       });
       Keyboard.dismiss();
     }

@@ -160,6 +160,18 @@ const resources = {
 
   "error_cancelling_order": "Error cancelling order",
 
+  "error": {
+    "fetch_products": "Failed to fetch products"
+  },
+  "no_products_found": "No products found for '{{query}}'",
+  "add_to_cart": "Add to Cart",
+  "back": "Back",
+  "price": "Price",
+  "old_price": "Old Price",
+  "search_placeholder": "Search products...",
+  "new_arrivals": "New Arrivals",
+
+
 
 
 
@@ -323,6 +335,17 @@ const resources = {
   "error_fetching_orders": "خطأ في جلب الطلبات",
 
   "error_cancelling_order": "خطأ في إلغاء الطلب",
+
+    "error": {
+      "fetch_products": "فشل في جلب المنتجات"
+    },
+    "no_products_found": "لم يتم العثور على منتجات لـ '{{query}}'",
+    "add_to_cart": "أضف إلى السلة",
+    "back": "رجوع",
+    "price": "السعر",
+    "old_price": "السعر القديم",
+    "search_placeholder": "ابحث عن المنتجات...",
+    "new_arrivals": "الوافدون الجدد",
 
 
 
