@@ -11,7 +11,7 @@ const Stack = createNativeStackNavigator<any>();
 
 const AuthPages: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="Register">
+    <Stack.Navigator initialRouteName="Login">
       <Stack.Screen
         name="Register"
         component={Register}

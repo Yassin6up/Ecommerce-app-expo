@@ -10,8 +10,9 @@ import {
   Switch,
   Divider,
   Spinner,
-  Pressable
+  Pressable,
 } from "native-base";
+import { BackHandler } from "react-native"; // Import BackHandler
 import styles from "../Styles";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/store";
@@ -19,7 +20,6 @@ import { useTranslation } from "react-i18next";
 import { setPassHome } from "../../store/PassHomeSlice";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 
 // Define User interface
 interface UserProfile {
@@ -44,7 +44,7 @@ const PageFour = () => {
   // Define black-and-white color scheme
   const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
-  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Muted for contrast
+  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333";
   const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
   const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
   const dividerColor = isDarkMode ? "#FFFFFF" : "#000000";
@@ -86,7 +86,19 @@ const PageFour = () => {
     };
 
     fetchUserProfile();
-  }, []);
+
+    // Handle back button press
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        navigation.navigate("page one"); // Navigate to PageOne
+        return true; // Prevent default behavior (exit app)
+      }
+    );
+
+    // Cleanup the event listener on unmount
+    return () => backHandler.remove();
+  }, [navigation]); // Add navigation as a dependency
 
   const handleLogout = async () => {
     try {
@@ -129,12 +141,12 @@ const PageFour = () => {
           onPress={handleLogout}
           marginTop={4}
           variant="outline"
-          borderColor={'red.500'}
-      
+          borderColor={"red.500"}
+          backgroundColor={"red.100"}
+          padding={4}
+          rounded={8}
         >
-        <Text color={'white'}>
-        {t("Logout")}
-          </Text>  
+          <Text color={"red.500"}>{t("Logout")}</Text>
         </Pressable>
       </VStack>
     );

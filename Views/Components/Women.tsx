@@ -13,7 +13,7 @@ const CARD_WIDTH = width * 0.8;
 const CARD_SPACING = 12;
 
 export default function Women() {
-  const { t } = useTranslation();
+  const { t,i18n } = useTranslation();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const navigation: any = useNavigation();
   const [womenProducts, setWomenProducts] = useState<any[]>([]);
@@ -27,8 +27,8 @@ export default function Women() {
   const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
   const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
   const highlightColor = isDarkMode ? "#FFFFFF" : "#000000"; // For "منزلي" text
-
-  const WOMEN_CATEGORY_ID = 3;
+  const isRTL = i18n.language === "ar";
+  const WOMEN_CATEGORY_ID = 1;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -92,7 +92,7 @@ export default function Women() {
             })
           }
         >
-          <HStack alignItems={"center"} justifyContent={"space-between"}>
+          <HStack alignItems={"center"} justifyContent={"space-between"} flexDirection={isRTL?'row-reverse':'row'}>
             <Text color={buttonTextColor} fontSize={12}>
               {t("show_all")}
             </Text>

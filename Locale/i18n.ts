@@ -170,6 +170,8 @@ const resources = {
   "old_price": "Old Price",
   "search_placeholder": "Search products...",
   "new_arrivals": "New Arrivals",
+  "dont_have_account": "Don't have an account?",
+  "signup": "Sign up"
 
 
 
@@ -346,7 +348,8 @@ const resources = {
     "old_price": "السعر القديم",
     "search_placeholder": "ابحث عن المنتجات...",
     "new_arrivals": "الوافدون الجدد",
-
+"dont_have_account": "ليس لديك حساب؟",
+  "signup": "اشترك"
 
 
     },

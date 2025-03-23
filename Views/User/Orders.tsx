@@ -144,17 +144,17 @@ const Orders = () => {
         </Button>
         <Button
           size="sm"
-          variant={statusFilter === "pending" ? "solid" : "outline"}
+          variant={statusFilter === "قيد الانتظار" ? "solid" : "outline"}
           colorScheme="orange"
-          onPress={() => setStatusFilter("pending")}
+          onPress={() => setStatusFilter("قيد الانتظار")}
         >
           {t("pending")}
         </Button>
         <Button
           size="sm"
-          variant={statusFilter === "on the way" ? "solid" : "outline"}
+          variant={statusFilter === "قيد التوصيل" ? "solid" : "outline"}
           colorScheme="green"
-          onPress={() => setStatusFilter("on the way")}
+          onPress={() => setStatusFilter("قيد التوصيل")}
         >
           {t("on_the_way")}
         </Button>
@@ -187,7 +187,7 @@ const Orders = () => {
             let statusColor = "orange.500";
 
             switch (order.status.toLowerCase()) {
-              case "on the way":
+              case "قيد التوصيل":
                 orderStatus = t("on_the_way");
                 statusColor = "green.500";
                 break;
@@ -195,7 +195,7 @@ const Orders = () => {
                 orderStatus = t("cancelled");
                 statusColor = "red.500";
                 break;
-              case "pending":
+              case "قيد الانتظار":
                 orderStatus = t("pending");
                 statusColor = "orange.500";
                 break;
@@ -267,7 +267,7 @@ const Orders = () => {
                         {t("status")}: {orderStatus}
                       </Text>
 
-                      {order.status.toLowerCase() === "pending" && (
+                      {order.status.toLowerCase() === "قيد الانتظار" && (
                         <Button
                           colorScheme="red"
                           size="sm"

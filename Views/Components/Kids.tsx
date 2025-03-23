@@ -13,7 +13,7 @@ const CARD_WIDTH = width * 0.8;
 const CARD_SPACING = 12;
 
 export default function Kids() {
-  const { t } = useTranslation();
+  const { t,i18n } = useTranslation();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const navigation = useNavigation<any>();
   const [kidsProducts, setKidsProducts] = useState<any[]>([]);
@@ -27,7 +27,7 @@ export default function Kids() {
   const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
   const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
   const highlightColor = isDarkMode ? "#FFFFFF" : "#000000"; // For "New" text
-
+  const isRTL = i18n.language === "ar";
   const KIDS_CATEGORY_ID = 2;
 
   useEffect(() => {
@@ -137,6 +137,7 @@ export default function Kids() {
         w={"full"}
         alignItems={"center"}
         justifyContent={"space-between"}
+        flexDirection={isRTL?'row-reverse':'row'}
         my={4}
       >
         <Text color={primaryTextColor} fontSize={20}>
@@ -156,7 +157,7 @@ export default function Kids() {
           }
           _pressed={{ opacity: 0.7 }}
         >
-          <HStack alignItems={"center"} justifyContent={"space-between"}>
+          <HStack alignItems={"center"} justifyContent={"space-between"} >
             <Text color={buttonTextColor} fontSize={12}>
               {t("show_all")}
             </Text>

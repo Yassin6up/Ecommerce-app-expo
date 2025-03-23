@@ -130,7 +130,6 @@ const ProductDetails = () => {
       );
 
       if (response.status === 201) {
-        console.log("Product saved successfully:", response.data);
       } else {
         console.log("Product removed from saved list:", response.data);
       }
@@ -271,6 +270,7 @@ const ProductDetails = () => {
         <Text
           color={secondaryTextColor}
           textAlign={isRTL ? "right" : "left"}
+          marginTop={8}
         >
           {product.description}
         </Text>

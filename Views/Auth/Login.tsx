@@ -154,16 +154,16 @@ export default function Login() {
 
   // Define black-and-white color scheme
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
-  const inputBorderColor = isDarkMode ? "#FFFFFF" : "#000000"; // Updated to black/white
-  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF"; // Background
-  const iconColor = isDarkMode ? "#FFFFFF" : "#000000"; // Icons
-  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000"; // Button background
-  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF"; // Button text (inverted)
-  const buttonPressedBgColor = isDarkMode ? "#CCCCCC" : "#333333"; // Pressed state
+  const inputBorderColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const buttonPressedBgColor = isDarkMode ? "#CCCCCC" : "#333333";
 
   return (
     <VStack
-      style={[styles.mainContainer, { backgroundColor: backgroundColor }]} // Direct background
+      style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
       flex={1}
     >
       <StatusBar style={Platform.OS === "ios" ? "dark" : "auto"} />
@@ -256,12 +256,33 @@ export default function Login() {
           <Text
             fontSize="14px"
             textAlign={isArabic ? "right" : "left"}
-            color={buttonBgColor} // Matches button for consistency
+            color={buttonBgColor}
             underline
           >
             {t("forgot_password")}
           </Text>
         </Pressable>
+        <Stack
+        w="full"
+        direction={isArabic ? "row-reverse" : "row"}
+        justifyContent="center"
+        alignItems="center"
+        mt="20px"
+      >
+        <Text fontSize="14px" color={textColor}>
+          {t("dont_have_account")}
+        </Text>
+        <Pressable onPress={() => navigation.navigate("Register")}>
+          <Text
+            fontSize="14px"
+            color={buttonBgColor}
+            underline
+            ml="5px"
+          >
+            {t("signup")}
+          </Text>
+        </Pressable>
+      </Stack>
       </VStack>
       <Button
         width="full"
@@ -277,6 +298,8 @@ export default function Login() {
           {t("login")}
         </Text>
       </Button>
+      {/* Add "Don't have an account? Sign up" */}
+  
     </VStack>
   );
 }

@@ -3,9 +3,10 @@ import { Dimensions, StyleSheet, ActivityIndicator } from "react-native";
 import Swiper from "react-native-swiper";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { VStack, Image, Text, Pressable, Box } from "native-base";
+import { VStack, Image, Text, Pressable, Box,Stack } from "native-base";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
+
 import Animated, { FadeInUp, FadeOutDown } from "react-native-reanimated";
 import axios from "axios";
 
@@ -86,14 +87,29 @@ export default function Adds() {
       alignItems="center"
       justifyContent="center"
     >
-      <Animated.Text
+      {/* <Animated.Text
         entering={FadeInUp.duration(800)}
         exiting={FadeOutDown.duration(600)}
         style={{ ...styles.salesText, color: isDarkMode ? "#fff" : "#000" }}
       >
         {t("Sales")}
-      </Animated.Text>
-
+      </Animated.Text> */}
+      <VStack
+        w={"full"}
+        alignItems={"center"}
+        justifyContent={"center"}
+        mb={8}>
+        <Text
+          style={[
+            isDarkMode ? styles.darkText : styles.lightText,
+            {
+              fontSize: 20,
+            },
+          ]}>
+          {t("Sales")}
+        </Text>
+       
+      </VStack>
       <Box style={styles.swiperContainer}>
         <Swiper
           loop
@@ -202,4 +218,10 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
   },
+  lightText:{
+    color:'black',
+},
+darkText:{
+    color:'white',
+},
 });

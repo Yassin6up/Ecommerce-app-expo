@@ -142,7 +142,7 @@ const Pages: React.FC = () => {
                 h={3}
                 position="absolute"
                 rounded="full"
-                backgroundColor="#FFCC8B"
+                backgroundColor="#EB2525"
                 right={isArabic ? undefined : -4}
                 left={isArabic ? -4 : undefined}
                 top={-2}

@@ -13,7 +13,7 @@ const CARD_WIDTH = width * 0.8;
 const CARD_SPACING = 12;
 
 export default function Men() {
-  const { t } = useTranslation();
+  const { t,i18n } = useTranslation();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const navigation = useNavigation<any>();
   const [menProducts, setMenProducts] = useState<any[]>([]);
@@ -27,7 +27,7 @@ export default function Men() {
   const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
   const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
   const highlightColor = isDarkMode ? "#FFFFFF" : "#000000"; // For "New" text
-
+  const isRTL = i18n.language === "ar";
   const MEN_CATEGORY_ID = 1;
 
   useEffect(() => {
@@ -137,6 +137,7 @@ export default function Men() {
         w={"full"}
         alignItems={"center"}
         justifyContent={"space-between"}
+        flexDirection={isRTL?'row-reverse':'row'}
         my={4}
       >
         <Text color={primaryTextColor} fontSize={20}>
