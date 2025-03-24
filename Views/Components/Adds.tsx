@@ -135,23 +135,7 @@ export default function Adds() {
                 style={styles.bannerImage}
                 resizeMode="cover"
               />
-              <Box style={styles.textContainer}>
-                <Text
-                  fontSize="xl"
-                  fontWeight="bold"
-                  color="white"
-                  textAlign={isArabic ? "right" : "left"}
-                >
-                  {slider.text}
-                </Text>
-                <Text
-                  fontSize="md"
-                  color="white"
-                  textAlign={isArabic ? "right" : "left"}
-                >
-                  {slider.description}
-                </Text>
-              </Box>
+              
             </Pressable>
           ))}
         </Swiper>

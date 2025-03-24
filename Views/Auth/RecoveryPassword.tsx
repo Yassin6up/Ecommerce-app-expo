@@ -3,6 +3,7 @@ import {
   StatusBar as RNStatusBar,
   Platform,
   KeyboardAvoidingView,
+  Keyboard
 } from "react-native";
 import styles from "../Styles";
 import {
@@ -116,18 +117,22 @@ export default function RecoveryPassword() {
     }
   };
 
-  const resendVerificationCode = async () => {
+  const resendVerificationCode = async (phoneNumber) => {
+    
     try {
-      await axios.post(
+      const response = await axios.post(
         "https://backend.j-byu.shop/api/resend-verification-code",
-        { phone: phoneNumber }
+        { phone:  phoneNumber }
       );
+
+      console.log(response.data)
 
       setTimer(120);
       setCanResend(false);
       setStep(2);
       showToast(t("code_resent"), "green.500");
     } catch (error: any) {
+      console.log(error.response?.data)
       showToast(error.response?.data?.message || t("resend_error"), "red.500");
     }
   };
@@ -137,7 +142,7 @@ export default function RecoveryPassword() {
       try {
         const validatedPhone = validatePhoneNumber(phoneNumber);
         setPhoneNumber(validatedPhone);
-        resendVerificationCode();
+        resendVerificationCode(validatedPhone);
       } catch (error) {
         showToast(t("invalid_phone_number"), "red.500");
       }
@@ -236,6 +241,7 @@ export default function RecoveryPassword() {
               borderColor={inputBorderColor}
               keyboardType="phone-pad"
               color={textColor}
+              
             />
           </>
         )}
@@ -253,7 +259,7 @@ export default function RecoveryPassword() {
               color={textColor}
             />
             <Button
-              onPress={resendVerificationCode}
+              onPress={()=>resendVerificationCode(phoneNumber)}
               disabled={!canResend}
               backgroundColor={canResend ? buttonBgColor : disabledButtonColor}
             >
