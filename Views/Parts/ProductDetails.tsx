@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
+  BackHandler, // Add this import
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
@@ -32,7 +33,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProductDetails = () => {
-  const navigation: any = useNavigation();
+  const navigation = useNavigation(); // Remove the `any` type for better type safety if possible
   const route = useRoute<any>();
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -53,6 +54,22 @@ const ProductDetails = () => {
   const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
   const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
   const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
+
+  // Handle back button press
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("parts"); // Navigate to "parts" page
+      return true; // Prevent default behavior (going back to the previous screen)
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    // Cleanup the event listener when the component unmounts
+    return () => backHandler.remove();
+  }, [navigation]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -101,6 +118,7 @@ const ProductDetails = () => {
       })
     );
   };
+
   const handleToggleFavorite = async () => {
     if (!product) return;
     const userId = await AsyncStorage.getItem("userId");
@@ -130,6 +148,7 @@ const ProductDetails = () => {
       );
 
       if (response.status === 201) {
+        // Handle success if needed
       } else {
         console.log("Product removed from saved list:", response.data);
       }
@@ -166,22 +185,6 @@ const ProductDetails = () => {
     setMainImage(image);
   };
 
-  if (loading) {
-    return (
-      <View style={[styles.mainContainer, { justifyContent: "center", backgroundColor }]}>
-        <ActivityIndicator size="large" color={primaryTextColor} />
-      </View>
-    );
-  }
-
-  if (error || !product) {
-    return (
-      <View style={[styles.mainContainer, { backgroundColor }]}>
-        <Text style={{ color: "red" }}>{error || t("product_not_found")}</Text>
-      </View>
-    );
-  }
-
   return (
     <VStack style={[styles.mainContainer, { backgroundColor }]}>
       <Stack w={"full"} mb={4} position={"fixed"}>
@@ -202,18 +205,15 @@ const ProductDetails = () => {
               uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${mainImage}`,
             }}
             width={250}
-            height={310 }
+            height={310}
             rounded={4}
             resizeMode="cover"
             alt={product.title}
           />
-          <ScrollView  showsHorizontalScrollIndicator={false} height={300}>
+          <ScrollView showsHorizontalScrollIndicator={false} height={300}>
             <VStack space={12}>
               {product.images.map((img: string, idx: number) => (
-                <Pressable
-                  key={idx}
-                  onPress={() => handleImageSelect(img)}
-                >
+                <Pressable key={idx} onPress={() => handleImageSelect(img)}>
                   <Image
                     source={{
                       uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${img}`,

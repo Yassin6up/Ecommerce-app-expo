@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { fetchCategories } from "../../store/categories/categoriesSlice";
 import { ArrowLeft, ArrowDown2, ArrowUp2 } from "iconsax-react-native";
 import { useNavigation } from "@react-navigation/native";
+import { BackHandler } from "react-native"; // Add this import
 
 // Define an interface for category structure
 interface Category {
@@ -36,9 +37,26 @@ const PageTwo = () => {
     [key: string]: boolean;
   }>({});
 
+  // Handle back button press
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("page one"); // Navigate to "page one" page
+      return true; // Prevent default behavior (going back to the previous screen)
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    // Cleanup the event listener when the component unmounts
+    return () => backHandler.remove();
+  }, [navigation]);
+
   useEffect(() => {
     dispatch(fetchCategories())
       .unwrap()
+      .catch((error) => console.error("Failed to fetch categories:", error));
   }, [dispatch]);
 
   // Function to fetch children categories for a specific parent
@@ -98,7 +116,8 @@ const PageTwo = () => {
       style={[
         styles.mainContainer,
         isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}>
+      ]}
+    >
       <VStack space={4} py={8}>
         {/* Loading State */}
         {loading && <Text textAlign="center">Loading categories...</Text>}
@@ -116,9 +135,10 @@ const PageTwo = () => {
                   rounded={4}
                   bgColor={"#171717"}
                   alignItems={"center"}
-                  justifyContent={"space-between"}>
+                  justifyContent={"space-between"}
+                >
                   <ArrowLeft size="24" color="#fff" variant="Bold" />
-                  <Text fontWeight={"bold"} fontSize={16} color={'white'}>
+                  <Text fontWeight={"bold"} fontSize={16} color={"white"}>
                     {category.name}
                   </Text>
 
@@ -142,24 +162,28 @@ const PageTwo = () => {
                   ) : (
                     childCategories[category.id]?.map((child: Category) => (
                       <Pressable
+                        width={"full"}
+                        alignItems={"flex-end"}
                         onPress={() =>
                           navigation.navigate("page two", {
                             screen: "men",
                             params: { categoryId: child.id },
                           })
-                        }>
+                        }
+                      >
                         <HStack
                           key={child.id}
-                          w={"full"}
-                          px={8} // Indent child category
+                          w={"70%"}
+                          px={8}
                           py={2}
                           rounded={4}
                           my={2}
                           bgColor={"#212121"}
                           alignItems={"center"}
-                          justifyContent={"space-between"}>
+                          justifyContent={"space-between"}
+                        >
                           <ArrowLeft size="20" color="#fff" variant="Bold" />
-                          <Text fontWeight={"bold"} fontSize={14} color={'white'}>
+                          <Text fontWeight={"bold"} fontSize={12} color={"white"}>
                             {child.name}
                           </Text>
                         </HStack>

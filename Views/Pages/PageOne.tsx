@@ -20,7 +20,7 @@ const PageOne = () => {
       <Adds />
       <NewProducts />
       <Men  />
-      <Kids  />
+      {/* <Kids  /> */}
    
     </ScrollView>
   );
