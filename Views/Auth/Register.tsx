@@ -308,7 +308,7 @@ export default function Register() {
               placeholder={isArabic ? "اختر المدينة" : "Select City"}
               onValueChange={(itemValue) => setSelectedCity(itemValue)}
               _selectedItem={{
-                bg: buttonBgColor, // Match button color
+                bg: "amber.100", // Match button color
               }}
               textAlign={isArabic ? "right" : "left"}
               color={textColor}

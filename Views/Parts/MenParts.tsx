@@ -18,6 +18,7 @@ import {
 } from "native-base";
 import { ArrowLeft } from "iconsax-react-native";
 import i18next from "i18next";
+import { BackHandler } from "react-native"; // Import BackHandler
 
 // Define the product type
 interface Product {
@@ -48,6 +49,22 @@ const MenParts = () => {
   // State to track if search results are empty
   const [hasSearchResults, setHasSearchResults] = useState<boolean>(true);
 
+  // Handle hardware back button press
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("parts"); // Navigate to PageTwo on back press
+      return true; // Prevent default behavior (e.g., exiting the app)
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    // Cleanup the event listener when the component unmounts
+    return () => backHandler.remove();
+  }, [navigation]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -72,10 +89,16 @@ const MenParts = () => {
           setProducts(response.data);
           setHasSearchResults(true); // Reset search results state for category view
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching products:", err);
-        setError(t("error.fetch_products"));
-        setHasSearchResults(false);
+        // Check if the error is a 404
+        if (err.response && err.response.status === 404 && !isSearch) {
+          setError(t("no_products_in_category")); // Custom message for 404 in category view
+          setProducts([]); // Clear products to show no results
+        } else {
+          setError(t("error.fetch_products")); // Generic error for other cases
+          setHasSearchResults(false);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -143,7 +166,7 @@ const MenParts = () => {
     >
       {/* Back button */}
       <Stack w={"full"} mb={4} position={"fixed"}>
-        <Pressable onPress={() => navigation.goBack()}>
+        <Pressable onPress={() => navigation.navigate("PageTwo")}>
           <ArrowLeft size="32" color="#F7CF9D" />
         </Pressable>
       </Stack>

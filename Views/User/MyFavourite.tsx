@@ -6,6 +6,7 @@ import styles from "../Styles";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BackHandler } from "react-native"; 
 import {
   ScrollView,
   Stack,
@@ -44,7 +45,20 @@ const MyFavourite = () => {
   useEffect(() => {
     fetchFavorites();
   }, []);
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("UserPage"); 
+      return true; 
+    };
 
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    // Cleanup the event listener when the component unmounts
+    return () => backHandler.remove();
+  }, [navigation]);
   const fetchFavorites = async () => {
     try {
       setLoading(true);

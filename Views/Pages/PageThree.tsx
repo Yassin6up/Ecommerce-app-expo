@@ -26,7 +26,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import styles from "../Styles";
 import { useNavigation } from "@react-navigation/native";
-
+import { BackHandler } from "react-native"; 
 const PageThree = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const dispatch = useDispatch();
@@ -52,6 +52,19 @@ const PageThree = () => {
     };
     fetchDeliveryFees();
   }, []);
+    useEffect(() => {
+      const backAction = () => {
+        navigation.navigate("page one"); 
+        return true; 
+      };
+  
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction
+      );
+  
+      return () => backHandler.remove();
+    }, [navigation]);
 
   const selectedSubtotal = cartItems
     .filter((item) => selectedItems.includes(item.id))
@@ -87,7 +100,7 @@ const PageThree = () => {
       toast.show({ title: t("login_required"), status: "error", placement: "top" });
       return;
     }
-
+  
     const selectedOrderItems = cartItems.filter((item) => selectedItems.includes(item.id));
     const orderData = {
       session_token: sessionToken,
@@ -102,26 +115,60 @@ const PageThree = () => {
       })),
       delivery_price: deliveryPrice,
     };
-
+  
     try {
       setIsSubmitting(true);
-      await axios.post("https://backend.j-byu.shop/api/orders", orderData);
-      const toastId = toast.show({
-        placement: "top",
-        duration: null,
-        render: () => (
-          <Box bg="green.500" px={4} py={3} rounded="md" shadow={4} flexDirection="row" alignItems="center" justifyContent="space-between">
-            <Text color="white" bold mr={4}>{t("order_submitted_success")}</Text>
-            <Pressable onPress={() => { toast.close(toastId); navigation.navigate("page one"); }} _pressed={{ opacity: 0.7 }}>
-              <Icon as={MaterialIcons} name="close" size="sm" color="white" />
-            </Pressable>
-          </Box>
-        ),
-      });
-      selectedItems.forEach((itemId) => dispatch(removeFromCart({ id: itemId })));
-      setSelectedItems([]);
+      // Submit the order to the backend
+      const response = await axios.post("https://backend.j-byu.shop/api/orders", orderData);
+  
+      // Ensure the response is successful (optional: check status code or response data)
+      if (response.status === 200 || response.status === 201) {
+        // Batch remove all selected items from the cart in a single action
+        selectedItems.forEach((itemId) => {
+          const item = cartItems.find((i) => i.id === itemId);
+          if (item) {
+            dispatch(removeFromCart({ id: itemId, size: item.size, color: item.color }));
+          }
+        });
+  
+        // Clear selected items
+        setSelectedItems([]);
+  
+        // Show success toast and navigate only after state updates
+        const toastId = toast.show({
+          placement: "top",
+          duration: null,
+          render: () => (
+            <Box
+              bg="green.500"
+              px={4}
+              py={3}
+              rounded="md"
+              shadow={4}
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Text color="white" bold mr={4}>
+                {t("order_submitted_success")}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  toast.close(toastId);
+                  navigation.navigate("page one");
+                }}
+                _pressed={{ opacity: 0.7 }}
+              >
+                <Icon as={MaterialIcons} name="close" size="sm" color="white" />
+              </Pressable>
+            </Box>
+          ),
+        });
+      } else {
+        throw new Error("Unexpected response status");
+      }
     } catch (error) {
-      console.error("Order submission error:", error.response?.data);
+      console.error("Order submission error:", error.response?.data || error.message);
       toast.show({
         title: t("order_submission_failed"),
         description: error.response?.data?.message || t("unknown_error"),

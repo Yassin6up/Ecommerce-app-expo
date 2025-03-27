@@ -69,13 +69,7 @@ export default function NewProducts() {
     );
   }
 
-  if (status === "loading") {
-    return (
-      <View style={[styles.mainContainer, { justifyContent: "center" }]}>
-        <ActivityIndicator size="large" color="black" />
-      </View>
-    );
-  }
+
 
   const renderSwiperItem = (item: any) => {
     let images: string[] = [];

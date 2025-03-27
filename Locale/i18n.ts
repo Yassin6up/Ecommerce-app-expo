@@ -171,7 +171,11 @@ const resources = {
   "search_placeholder": "Search products...",
   "new_arrivals": "New Arrivals",
   "dont_have_account": "Don't have an account?",
-  "signup": "Sign up"
+  "signup": "Sign up",
+  "no_products_in_category": "No products exist in this category",
+  "You are offline. Please check your internet connection.": "You are offline. Please check your internet connection.",
+  "no_sections": "No sections",
+ 
 
 
 
@@ -339,7 +343,8 @@ const resources = {
   "error_cancelling_order": "خطأ في إلغاء الطلب",
 
     "error": {
-      "fetch_products": "فشل في جلب المنتجات"
+      "fetch_products": "فشل في جلب المنتجات",
+      
     },
     "no_products_found": "لم يتم العثور على منتجات لـ '{{query}}'",
     "add_to_cart": "أضف إلى السلة",
@@ -349,7 +354,10 @@ const resources = {
     "search_placeholder": "ابحث عن المنتجات...",
     "new_arrivals": "الوافدون الجدد",
 "dont_have_account": "ليس لديك حساب؟",
-  "signup": "اشترك"
+  "signup": "اشترك",
+"no_products_in_category": "لا توجد منتجات في هذه الفئة",
+"You are offline. Please check your internet connection.": "أنت غير متصل بالإنترنت. يرجى التحقق من اتصالك.",
+"no_sections": "لا يوجد أقسام",
 
 
     },

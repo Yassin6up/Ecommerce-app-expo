@@ -1,6 +1,6 @@
 import { View, Text, VStack, HStack, ScrollView, Pressable } from "native-base";
 import React, { useEffect, useState } from "react";
-import axios from "axios"; // Make sure to install axios
+import axios from "axios";
 import styles from "../Styles";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../store/store";
@@ -8,9 +8,8 @@ import { useTranslation } from "react-i18next";
 import { fetchCategories } from "../../store/categories/categoriesSlice";
 import { ArrowLeft, ArrowDown2, ArrowUp2 } from "iconsax-react-native";
 import { useNavigation } from "@react-navigation/native";
-import { BackHandler } from "react-native"; // Add this import
+import { BackHandler } from "react-native";
 
-// Define an interface for category structure
 interface Category {
   id: string;
   name: string;
@@ -26,7 +25,6 @@ const PageTwo = () => {
   const categories = useSelector((state: RootState) => state.categories.items);
   const loading = useSelector((state: RootState) => state.categories.loading);
 
-  // State to manage expanded categories and their children
   const [expandedCategories, setExpandedCategories] = useState<{
     [key: string]: boolean;
   }>({});
@@ -37,19 +35,13 @@ const PageTwo = () => {
     [key: string]: boolean;
   }>({});
 
-  // Handle back button press
   useEffect(() => {
     const backAction = () => {
-      navigation.navigate("page one"); // Navigate to "page one" page
-      return true; // Prevent default behavior (going back to the previous screen)
+      navigation.navigate("page one");
+      return true;
     };
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    // Cleanup the event listener when the component unmounts
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
     return () => backHandler.remove();
   }, [navigation]);
 
@@ -59,24 +51,19 @@ const PageTwo = () => {
       .catch((error) => console.error("Failed to fetch categories:", error));
   }, [dispatch]);
 
-  // Function to fetch children categories for a specific parent
   const fetchChildCategories = async (categoryId: string) => {
-    // Prevent multiple simultaneous loading
     if (loadingChildren[categoryId]) return;
 
     try {
-      // Set loading state for this category
       setLoadingChildren((prev) => ({
         ...prev,
         [categoryId]: true,
       }));
 
-      // Fetch child categories
       const response = await axios.get(
         `https://backend.j-byu.shop/api/categories/children/${categoryId}`
       );
 
-      // Update child categories state
       setChildCategories((prev) => ({
         ...prev,
         [categoryId]: response.data,
@@ -84,7 +71,6 @@ const PageTwo = () => {
     } catch (error) {
       console.error("Error fetching child categories:", error);
     } finally {
-      // Reset loading state
       setLoadingChildren((prev) => ({
         ...prev,
         [categoryId]: false,
@@ -92,17 +78,14 @@ const PageTwo = () => {
     }
   };
 
-  // Toggle function to expand/collapse categories with children
   const toggleCategory = (category: Category) => {
     const categoryId = category.id;
 
-    // Toggle expanded state
     setExpandedCategories((prev) => ({
       ...prev,
       [categoryId]: !prev[categoryId],
     }));
 
-    // If expanding and no children loaded yet, fetch them
     if (
       !expandedCategories[categoryId] &&
       (!childCategories[categoryId] || childCategories[categoryId].length === 0)
@@ -119,10 +102,8 @@ const PageTwo = () => {
       ]}
     >
       <VStack space={4} py={8}>
-        {/* Loading State */}
-        {loading && <Text textAlign="center">Loading categories...</Text>}
+        {loading && <Text textAlign="center">{t("loading")}</Text>}
 
-        {/* API Categories */}
         {!loading &&
           categories.length > 0 &&
           categories.map((category) => (
@@ -141,8 +122,6 @@ const PageTwo = () => {
                   <Text fontWeight={"bold"} fontSize={16} color={"white"}>
                     {category.name}
                   </Text>
-
-                  {/* Show dropdown icon only if category has children */}
                   {category.children?.length > 0 &&
                     (expandedCategories[category.id] ? (
                       <ArrowUp2 size="24" color="#000" />
@@ -152,15 +131,14 @@ const PageTwo = () => {
                 </HStack>
               </Pressable>
 
-              {/* Render child categories if expanded */}
               {expandedCategories[category.id] && (
                 <View>
                   {loadingChildren[category.id] ? (
-                    <Text textAlign="center" py={2}>
-                      Loading children...
+                    <Text textAlign="center" py={2} color="amber.700">
+                      {t("loading")}
                     </Text>
-                  ) : (
-                    childCategories[category.id]?.map((child: Category) => (
+                  ) : childCategories[category.id]?.length > 0 ? (
+                    childCategories[category.id].map((child: Category) => (
                       <Pressable
                         width={"full"}
                         alignItems={"flex-end"}
@@ -189,6 +167,10 @@ const PageTwo = () => {
                         </HStack>
                       </Pressable>
                     ))
+                  ) : (
+                    <Text textAlign="center" py={2} color="red.500">
+                      {t("no_sections")}
+                    </Text>
                   )}
                 </View>
               )}

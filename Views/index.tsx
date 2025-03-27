@@ -1,5 +1,5 @@
 import { Stack, View } from "native-base";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text } from "native-base";
 import {
   BottomTabNavigationOptions,
@@ -8,15 +8,14 @@ import {
 import { User, Home, Discover, ShoppingCart } from "iconsax-react-native";
 import PageOne from "./Pages/PageOne";
 import PageThree from "./Pages/PageThree";
-import Header from "./Header";
-import styles from "./Styles";
+import Header2 from "./Header2";
+import UserDetail from "./User/UserDetail";
+import Parts from "./Parts/Parts";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useTranslation } from "react-i18next";
-import Parts from "./Parts/Parts";
-import Header2 from "./Header2";
-import UserDetail from "./User/UserDetail";
-import { I18nManager } from "react-native";
+import { I18nManager, StyleSheet } from "react-native";
+import NetInfo from "@react-native-community/netinfo"; // Import NetInfo
 
 interface Screen {
   name: string;
@@ -31,6 +30,7 @@ const Pages: React.FC = () => {
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const { t, i18n } = useTranslation();
   const [focusedTab, setFocusedTab] = useState<string>("");
+  const [isOnline, setIsOnline] = useState<boolean>(true); // State to track online/offline status
 
   const handleTabPress = (name: string) => {
     setFocusedTab(name);
@@ -43,6 +43,16 @@ const Pages: React.FC = () => {
   const tabBarBgColor = isDarkMode ? "#000000" : "#FFFFFF";
   const focusedColor = isDarkMode ? "#FFFFFF" : "#000000";
   const unfocusedColor = isDarkMode ? "#CCCCCC" : "#333333";
+
+  // Use NetInfo to monitor network status
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(state.isConnected ?? false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
 
   const screens: Screen[] = [
     {
@@ -197,6 +207,17 @@ const Pages: React.FC = () => {
   // Reverse the screens array if Arabic
   const orderedScreens = isArabic ? [...screens].reverse() : screens;
 
+  // Render offline message or tab navigator based on network status
+  if (!isOnline) {
+    return (
+      <View style={styles.offlineContainer}>
+        <Text fontSize="lg" color={isDarkMode ? "#FFFFFF" : "#000000"}>
+          {t("You are offline. Please check your internet connection.")}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <Tab.Navigator
       initialRouteName="page one"
@@ -225,5 +246,14 @@ const Pages: React.FC = () => {
     </Tab.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  offlineContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5", // You can adjust this based on your theme
+  },
+});
 
 export default Pages;

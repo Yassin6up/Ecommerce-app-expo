@@ -66,13 +66,6 @@ export default function Kids() {
     [navigation]
   );
 
-  if (loading) {
-    return (
-      <View style={[styles.mainContainer, { justifyContent: "center", backgroundColor }]}>
-        <ActivityIndicator size="large" color={primaryTextColor} />
-      </View>
-    );
-  }
 
   if (error) {
     return (

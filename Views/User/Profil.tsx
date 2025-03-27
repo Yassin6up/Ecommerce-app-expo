@@ -24,7 +24,7 @@ import {
 import { ArrowLeft, Location } from "iconsax-react-native";
 import * as ImagePicker from "expo-image-picker";
 import i18next from "i18next";
-
+import { BackHandler } from "react-native"; 
 interface UserData {
   name: string;
   address: string;
@@ -36,7 +36,20 @@ const Profil = () => {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
   const toast = useToast();
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("UserPage"); 
+      return true; 
+    };
 
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    // Cleanup the event listener when the component unmounts
+    return () => backHandler.remove();
+  }, [navigation]);
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const dispatch = useDispatch();
 
@@ -252,7 +265,7 @@ const Profil = () => {
               placeholder={isRTL ? "اختر المدينة" : "Select City"}
               onValueChange={(itemValue) => setSelectedCity(itemValue)}
               _selectedItem={{
-                bg: primaryTextColor,
+                bg: "amber.100",
               }}
               textAlign={isRTL ? "right" : "left"}
               color={primaryTextColor}

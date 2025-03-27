@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useEffect} from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -14,18 +14,31 @@ import {
   HStack,
 } from "native-base";
 import i18next from "i18next";
-
+import { BackHandler } from "react-native"; 
 const Policy = () => {
   const isRTL = i18next.language === "ar";
   const { t } = useTranslation();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
-
+const navigation:any = useNavigation()
   // Define black-and-white color scheme with secondary color
   const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
   const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // For titles and bold text
   const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // For content text
   const dividerColor = isDarkMode ? "#FFFFFF" : "#000000";
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("UserPage"); 
+      return true; 
+    };
 
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    // Cleanup the event listener when the component unmounts
+    return () => backHandler.remove();
+  }, [navigation]);
   return (
     <Stack
       style={[styles.mainContainer, { backgroundColor: backgroundColor }]}

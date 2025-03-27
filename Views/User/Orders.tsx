@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RootState } from "../../store/store";
-import { removeFromCart, markAsRemoved } from "../../store/cartSlice";
 import {
   Box,
   Text,
@@ -20,8 +19,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import styles from "../Styles";
+import { BackHandler } from "react-native";
 
-// Define interface for Order
 interface Order {
   id: number;
   userId: number;
@@ -40,7 +39,6 @@ const Orders = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [statusFilter, setStatusFilter] = useState<string>("All");
 
-  const dispatch = useDispatch();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
@@ -51,10 +49,7 @@ const Orders = () => {
     const fetchOrders = async () => {
       try {
         const userId = await AsyncStorage.getItem("userId");
-
-        if (!userId) {
-          throw new Error("No user ID found");
-        }
+        if (!userId) throw new Error("No user ID found");
 
         const response = await axios.get(
           `https://backend.j-byu.shop/api/orders/byUser/${userId}`
@@ -65,10 +60,7 @@ const Orders = () => {
         setIsLoading(false);
       } catch (error: any) {
         console.error("Error fetching orders:", error);
-        toast.show({
-          title: t("error_fetching_orders"),
-          status: "error",
-        });
+        toast.show({ title: t("error_fetching_orders"), status: "error" });
         setIsLoading(false);
       }
     };
@@ -76,43 +68,55 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
+  useEffect(() => {
+    const backAction = () => {
+      navigation.navigate("UserPage");
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+    return () => backHandler.remove();
+  }, [navigation]);
+
   const handleCancelOrder = async (orderId: number) => {
     try {
       await axios.put(`https://backend.j-byu.shop/api/orders/cancel/${orderId}`);
-
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderId ? { ...order, status: "cancelled" } : order
         )
       );
-
-      toast.show({
-        title: t("order_cancelled_success"),
-        status: "success",
-      });
+      toast.show({ title: t("order_cancelled_success"), status: "success" });
     } catch (error) {
       console.error("Error cancelling order:", error.response?.data);
-      toast.show({
-        title: t("error_cancelling_order"),
-        status: "error",
-      });
+      toast.show({ title: t("error_cancelling_order"), status: "error" });
     }
   };
 
-  // Filter orders based on status
+  // Normalize status to a consistent key
+  const normalizeStatus = (status: string): string => {
+    const statusMap: { [key: string]: string } = {
+      "قيد الانتظار": "pending",
+      pending: "pending",
+      "قيد التوصيل": "on_the_way",
+      on_the_way: "on_the_way",
+      cancelled: "cancelled",
+      ملغى: "cancelled",
+    };
+    return statusMap[status.toLowerCase()] || status.toLowerCase();
+  };
+
+  // Filter orders based on normalized status
   const filteredOrders = orders.filter((order) => {
-    console.log("Order Status:", order.status, "Filter:", statusFilter);
+    const normalizedStatus = normalizeStatus(order.status);
     if (statusFilter === "All") return true;
-    return order.status.toLowerCase() === statusFilter.toLowerCase(); // Case-insensitive comparison
+    return normalizedStatus === normalizeStatus(statusFilter);
   });
 
   if (isLoading) {
     return (
       <VStack
-        style={[
-          styles.mainContainer,
-          isDarkMode ? styles.darkBckground : styles.lightBckground,
-        ]}
+        style={[styles.mainContainer, isDarkMode ? styles.darkBckground : styles.lightBckground]}
         flex={1}
         justifyContent="center"
         alignItems="center"
@@ -124,16 +128,13 @@ const Orders = () => {
 
   return (
     <VStack
-      style={[
-        styles.mainContainer,
-        isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}
+      style={[styles.mainContainer, isDarkMode ? styles.darkBckground : styles.lightBckground]}
       flex={1}
-      justifyContent="center"
       alignItems="center"
+      // Remove justifyContent="center" from here to allow top alignment
     >
-      {/* Status Filter Buttons */}
-      <HStack space={2} mb={4} justifyContent="center" flexWrap="wrap">
+      {/* Filter Buttons - Always at the top */}
+      <HStack space={2} mt={4} mb={4} justifyContent="center" flexWrap="wrap" width="100%">
         <Button
           size="sm"
           variant={statusFilter === "All" ? "solid" : "outline"}
@@ -144,23 +145,23 @@ const Orders = () => {
         </Button>
         <Button
           size="sm"
-          variant={statusFilter === "قيد الانتظار" ? "solid" : "outline"}
+          variant={normalizeStatus(statusFilter) === "pending" ? "solid" : "outline"}
           colorScheme="orange"
-          onPress={() => setStatusFilter("قيد الانتظار")}
+          onPress={() => setStatusFilter("pending")}
         >
           {t("pending")}
         </Button>
         <Button
           size="sm"
-          variant={statusFilter === "قيد التوصيل" ? "solid" : "outline"}
+          variant={normalizeStatus(statusFilter) === "on_the_way" ? "solid" : "outline"}
           colorScheme="green"
-          onPress={() => setStatusFilter("قيد التوصيل")}
+          onPress={() => setStatusFilter("on_the_way")}
         >
           {t("on_the_way")}
         </Button>
         <Button
           size="sm"
-          variant={statusFilter === "cancelled" ? "solid" : "outline"}
+          variant={normalizeStatus(statusFilter) === "cancelled" ? "solid" : "outline"}
           colorScheme="red"
           onPress={() => setStatusFilter("cancelled")}
         >
@@ -168,39 +169,38 @@ const Orders = () => {
         </Button>
       </HStack>
 
+      {/* Content Area - Takes remaining space */}
       {filteredOrders.length === 0 ? (
-        <VStack space={4} alignItems="center">
+        <VStack flex={1} justifyContent="center" alignItems="center" width="100%">
           <Text fontSize={18} color={isDarkMode ? "white" : "gray.900"}>
             {statusFilter === "All" ? t("no_orders") : t("no_orders_for_status")}
           </Text>
-          <Button
-            colorScheme="blue"
-            onPress={() => navigation.navigate("page two")}
-          >
+          <Button mt={4} colorScheme="blue" onPress={() => navigation.navigate("page two")}>
             <Text>{t("explore_products")}</Text>
           </Button>
         </VStack>
       ) : (
         <ScrollView flex={1} width="100%">
           {filteredOrders.map((order) => {
-            let orderStatus = order.status;
+            const normalizedStatus = normalizeStatus(order.status);
+            let displayStatus = "";
             let statusColor = "orange.500";
 
-            switch (order.status.toLowerCase()) {
-              case "قيد التوصيل":
-                orderStatus = t("on_the_way");
+            switch (normalizedStatus) {
+              case "pending":
+                displayStatus = t("pending");
+                statusColor = "orange.500";
+                break;
+              case "on_the_way":
+                displayStatus = t("on_the_way");
                 statusColor = "green.500";
                 break;
               case "cancelled":
-                orderStatus = t("cancelled");
+                displayStatus = t("cancelled");
                 statusColor = "red.500";
                 break;
-              case "قيد الانتظار":
-                orderStatus = t("pending");
-                statusColor = "orange.500";
-                break;
               default:
-                orderStatus = order.status; // Fallback to raw status
+                displayStatus = order.status; // Fallback
             }
 
             return (
@@ -214,11 +214,7 @@ const Orders = () => {
                   borderWidth={1}
                   borderColor={isDarkMode ? "gray.700" : "gray.200"}
                 >
-                  <VStack
-                    justifyContent="space-between"
-                    alignItems="center"
-                    space={4}
-                  >
+                  <VStack justifyContent="space-between" alignItems="center" space={4}>
                     <Image
                       source={{
                         uri: (() => {
@@ -234,8 +230,7 @@ const Orders = () => {
                                 imageSource = order.productImageUrl;
                               }
                             }
-                            const imageUrl = `https://backend.j-byu.shop/api/prudact/${order.productId}/img/${imageSource}`;
-                            return imageUrl;
+                            return `https://backend.j-byu.shop/api/prudact/${order.productId}/img/${imageSource}`;
                           } catch (error) {
                             console.error("Image URL Error:", error);
                             return null;
@@ -247,39 +242,22 @@ const Orders = () => {
                       height={200}
                       borderRadius={8}
                     />
-
-                    <VStack
-                      flex={1}
-                      space={2}
-                      alignItems={isArabic ? "flex-end" : "flex-start"}
-                    >
-                      <Text
-                        bold
-                        fontSize={16}
-                        color={isDarkMode ? "white" : "gray.900"}
-                      >
+                    <VStack flex={1} space={2} alignItems={isArabic ? "flex-end" : "flex-start"}>
+                      <Text bold fontSize={16} color={isDarkMode ? "white" : "gray.900"}>
                         {order.productName}
                       </Text>
                       <Text color={isDarkMode ? "gray.400" : "gray.600"}>
                         {order.price.toFixed(2)} JOD
                       </Text>
                       <Text bold color={statusColor}>
-                        {t("status")}: {orderStatus}
+                        {t("status")}: {displayStatus}
                       </Text>
-
-                      {order.status.toLowerCase() === "قيد الانتظار" && (
+                      {normalizedStatus === "pending" && (
                         <Button
                           colorScheme="red"
                           size="sm"
                           onPress={() => handleCancelOrder(order.id)}
-                          leftIcon={
-                            <Icon
-                              as={MaterialIcons}
-                              name="cancel"
-                              size="sm"
-                              color="white"
-                            />
-                          }
+                          leftIcon={<Icon as={MaterialIcons} name="cancel" size="sm" color="white" />}
                           mt={2}
                         >
                           {t("cancel_order")}
