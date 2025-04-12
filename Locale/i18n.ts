@@ -175,6 +175,8 @@ const resources = {
   "no_products_in_category": "No products exist in this category",
   "You are offline. Please check your internet connection.": "You are offline. Please check your internet connection.",
   "no_sections": "No sections",
+  "delete_account": "Delete Account",
+  "repback_account": "Restore Account"
  
 
 
@@ -358,6 +360,8 @@ const resources = {
 "no_products_in_category": "لا توجد منتجات في هذه الفئة",
 "You are offline. Please check your internet connection.": "أنت غير متصل بالإنترنت. يرجى التحقق من اتصالك.",
 "no_sections": "لا يوجد أقسام",
+"delete_account": "حذف الحساب",
+  "repback_account": "استعادة الحساب"
 
 
     },

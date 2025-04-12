@@ -12,7 +12,7 @@ import {
   Spinner,
   Pressable,
 } from "native-base";
-import { BackHandler } from "react-native"; // Import BackHandler
+import { BackHandler } from "react-native";
 import styles from "../Styles";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/store";
@@ -21,7 +21,6 @@ import { setPassHome } from "../../store/PassHomeSlice";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Define User interface
 interface UserProfile {
   id: number;
   name: string;
@@ -29,6 +28,7 @@ interface UserProfile {
   phone?: string;
   address?: string;
   profileImage?: string;
+  deleted_at?: string | null; // Add deleted_at to track soft-delete status
 }
 
 const PageFour = () => {
@@ -40,8 +40,8 @@ const PageFour = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAccountDeleted, setIsAccountDeleted] = useState<boolean>(false);
 
-  // Define black-and-white color scheme
   const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
   const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333";
@@ -56,26 +56,33 @@ const PageFour = () => {
     const fetchUserProfile = async () => {
       try {
         const sessionToken = await AsyncStorage.getItem("sessionToken");
+        const userId = await AsyncStorage.getItem("userId");
 
-        if (!sessionToken) {
-          throw new Error("No session token found");
+        if (!sessionToken || !userId) {
+          throw new Error("No session token or user ID found");
         }
 
-        const response = await axios.get(
-          "https://backend.j-byu.shop/api/users",
-          {
-            params: { token: sessionToken },
-          }
-        );
+        // Fetch user profile with session token
+        const response = await axios.get("https://backend.j-byu.shop/api/users", {
+          params: { token: sessionToken },
+        });
 
-        setUserProfile({
+        const profile: UserProfile = {
           id: response.data.id,
           name: response.data.name,
           email: response.data.email,
           phone: response.data.phone,
           address: response.data.address,
           profileImage: response.data.profileImage,
-        });
+          deleted_at: response.data.deleted_at, // Backend should return deleted_at
+        };
+
+        setUserProfile(profile);
+        setIsAccountDeleted(!!profile.deleted_at); // Set based on deleted_at
+        await AsyncStorage.setItem(
+          "isAccountDeleted",
+          profile.deleted_at ? "true" : "false"
+        );
 
         setIsLoading(false);
       } catch (err: any) {
@@ -87,26 +94,83 @@ const PageFour = () => {
 
     fetchUserProfile();
 
-    // Handle back button press
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        navigation.navigate("page one"); // Navigate to PageOne
-        return true; // Prevent default behavior (exit app)
-      }
-    );
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", () => {
+      navigation.navigate("page one");
+      return true;
+    });
 
-    // Cleanup the event listener on unmount
     return () => backHandler.remove();
-  }, [navigation]); // Add navigation as a dependency
+  }, [navigation]);
 
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem("sessionToken");
       await AsyncStorage.removeItem("userId");
+      await AsyncStorage.removeItem("isAccountDeleted");
       dispatch(setPassHome(false));
     } catch (error) {
       console.error("Logout error:", error);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const sessionToken = await AsyncStorage.getItem("sessionToken");
+      const userId = await AsyncStorage.getItem("userId");
+
+      if (!userId || !sessionToken) {
+        throw new Error("No user ID or session token found");
+      }
+
+      // Call soft-delete API with authentication
+      await axios.delete(
+        `https://backend.j-byu.shop/api/user/${userId}/soft-delete`,
+        {
+          headers: { Authorization: `Bearer ${sessionToken}` },
+        }
+      );
+
+      // Update local state
+      setIsAccountDeleted(true);
+      await AsyncStorage.setItem("isAccountDeleted", "true");
+
+      // Update user profile to reflect deleted_at
+      setUserProfile((prev) =>
+        prev ? { ...prev, deleted_at: new Date().toISOString() } : prev
+      );
+    } catch (error: any) {
+      console.error("Error soft-deleting account:", error);
+      setError(error.response?.data?.message || "Failed to delete account");
+    }
+  };
+
+  const handleRestoreAccount = async () => {
+    try {
+      const sessionToken = await AsyncStorage.getItem("sessionToken");
+      const userId = await AsyncStorage.getItem("userId");
+
+      if (!userId || !sessionToken) {
+        throw new Error("No user ID or session token found");
+      }
+
+      // Call restore API with authentication
+      await axios.post(
+        `https://backend.j-byu.shop/api/user/${userId}/restore`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${sessionToken}` },
+        }
+      );
+
+      // Update local state
+      setIsAccountDeleted(false);
+      await AsyncStorage.setItem("isAccountDeleted", "false");
+
+      // Update user profile to clear deleted_at
+      setUserProfile((prev) => (prev ? { ...prev, deleted_at: null } : prev));
+    } catch (error: any) {
+      console.error("Error restoring account:", error);
+      setError(error.response?.data?.message || "Failed to restore account");
     }
   };
 
@@ -135,7 +199,7 @@ const PageFour = () => {
         style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
       >
         <Text color="red.500" bold>
-          {t("error_fetch_profile")}
+          {error || t("error_fetch_profile")}
         </Text>
         <Pressable
           onPress={handleLogout}
@@ -267,6 +331,16 @@ const PageFour = () => {
         _text={{ color: buttonTextColor, fontWeight: "bold" }}
       >
         {t("Logout")}
+      </Button>
+
+      {/* Delete/Restore Account Button */}
+      <Button
+        variant="solid"
+        bg={isAccountDeleted ? "green.500" : "red.500"}
+        onPress={isAccountDeleted ? handleRestoreAccount : handleDeleteAccount}
+        _text={{ color: buttonTextColor, fontWeight: "bold" }}
+      >
+        {t(isAccountDeleted ? "repback_account" : "delete_account")}
       </Button>
     </VStack>
   );

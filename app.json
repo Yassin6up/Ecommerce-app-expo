@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "J buy",
-    "slug": "j-buy",
+    "slug": "j-buy2",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
@@ -18,16 +18,15 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icone.png"
-    
       },
-      "package": "com.salaheddinet.task"
+    "package": "com.kreypton.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "d5654c4a-3b3b-46d3-a703-63ddad231535"
+        "projectId": "9b3ec316-14a6-414e-bf48-ca4da5f495e2"
       }
     },
     "owner": "salaheddinet"
