@@ -13,13 +13,17 @@
       "backgroundColor": "#080705"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kreypton.jbuy",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icone.png"
       },
-    "package": "com.kreypton.app"
+      "package": "com.Kreypton.jbuy"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -103,7 +103,7 @@ export default function NewProducts() {
         <Text
           style={{
             color: isDarkMode ? "#fff" : "#000",
-            fontSize: 16,
+            fontSize: 14,
             textAlign: "center",
             marginTop: 8,
           }}>
@@ -116,7 +116,7 @@ export default function NewProducts() {
             textAlign: "center",
             marginTop: 4,
           }}>
-          ${item.price}
+          {item.price} JOD
         </Text>
       </Pressable>
     );
@@ -155,7 +155,7 @@ export default function NewProducts() {
           horizontal={true}
           loop={true}
           containerStyle={{
-            height: 300,
+            height: 345,
             width: "100%",
           }}
           dot={

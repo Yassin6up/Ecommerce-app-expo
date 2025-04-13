@@ -240,8 +240,8 @@ const PageThree = () => {
                         borderRadius={8}
                       />
                       <VStack flex={1} space={2} alignItems={isArabic ? "flex-end" : "flex-start"}>
-                        <Text bold fontSize={16} color={textColor}>{item.name}</Text>
-                        <Text color={mutedTextColor}>{t("price_each", { price: item.price.toFixed(2) })}</Text>
+                        <Text bold fontSize={16} color={textColor} textAlign={isArabic?'right':'left'}>{item.name}</Text>
+                        <Text color={mutedTextColor}>{t("price_each", { price: item.price.toFixed(2) })} </Text>
                         {item.size && (
                           <Text color={textColor}><Text bold>{t("size")}:</Text> {item.size}</Text>
                         )}
@@ -298,15 +298,15 @@ const PageThree = () => {
           <VStack space={2}>
             <HStack justifyContent="space-between" alignItems="center" flexDirection={isArabic ? "row-reverse" : "row"}>
               <Text bold fontSize="lg" color={textColor}>{t("subtotal")}</Text>
-              <Text bold fontSize="lg" color={textColor}>${selectedSubtotal.toFixed(2)}</Text>
+              <Text bold fontSize="lg" color={textColor}>{selectedSubtotal.toFixed(2)} JOD </Text>
             </HStack>
             <HStack justifyContent="space-between" alignItems="center" flexDirection={isArabic ? "row-reverse" : "row"}>
-              <Text bold fontSize="lg" color={textColor}>{t("delivery_price")}</Text>
-              <Text bold fontSize="lg" color={textColor}>JOD{deliveryPrice?.toFixed(2)}</Text>
+              <Text bold fontSize="lg" color={textColor}>{t("delivery_price")} JOD</Text>
+              <Text bold fontSize="lg" color={textColor}>{deliveryPrice?.toFixed(2)} JOD </Text>
             </HStack>
             <HStack justifyContent="space-between" alignItems="center" flexDirection={isArabic ? "row-reverse" : "row"}>
               <Text bold fontSize="xl" color={textColor}>{t("total")}</Text>
-              <Text bold fontSize="xl" color={textColor}>${selectedTotal.toFixed(2)}</Text>
+              <Text bold fontSize="xl" color={textColor}>{selectedTotal.toFixed(2)} JOD </Text>
             </HStack>
           </VStack>
           <HStack space={4} marginTop={4}>

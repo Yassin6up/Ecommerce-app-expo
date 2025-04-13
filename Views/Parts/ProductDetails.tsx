@@ -264,7 +264,7 @@ const ProductDetails = () => {
           fontSize="2xl"
           textAlign={isRTL ? "right" : "left"}
         >
-          ${product.price}
+          {product.price} JOD
         </Text>
 
         <Text

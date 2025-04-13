@@ -241,11 +241,11 @@ const MenParts = () => {
                         bold
                         fontSize="2xl"
                       >
-                        ${product.price}
+                        {product.price} JOD
                       </Text>
                       {product.old_price && (
                         <Text color="gray.500" strikeThrough fontSize="lg">
-                          ${product.old_price}
+                          {product.old_price} JOD
                         </Text>
                       )}
                     </HStack>

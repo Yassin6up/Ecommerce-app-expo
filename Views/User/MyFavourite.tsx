@@ -192,7 +192,7 @@ const MyFavourite = () => {
                           color={primaryTextColor}
                           textAlign={isRTL ? "right" : "left"}
                         >
-                          ${item.price}
+                          {item.price} JOD
                         </Text>
                         {item.size && (
                           <Text

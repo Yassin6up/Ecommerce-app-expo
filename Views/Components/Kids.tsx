@@ -116,7 +116,7 @@ export default function Kids() {
               color={primaryTextColor}
               fontSize={18}
             >
-              ${item.price}
+              {item.price} JOD 
             </Text>
           </VStack>
         </HStack>
