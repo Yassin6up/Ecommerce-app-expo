@@ -167,11 +167,7 @@ export default function Login() {
       flex={1}
     >
       <StatusBar style={Platform.OS === "ios" ? "dark" : "auto"} />
-      <Stack w={"full"} mb={4} position={"fixed"}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <ArrowLeft size="32" color={iconColor} />
-        </Pressable>
-      </Stack>
+
       <Stack w="full" justifyContent="center" alignItems="center">
         <Text fontWeight={700} fontSize="16px" color={textColor}>
           {t("login")}

@@ -199,7 +199,7 @@ const PageFour = () => {
         style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
       >
         <Text color="red.500" bold>
-          {error || t("error_fetch_profile")}
+          { t("error_fetch_profile")}
         </Text>
         <Pressable
           onPress={handleLogout}
@@ -210,7 +210,7 @@ const PageFour = () => {
           padding={4}
           rounded={8}
         >
-          <Text color={"red.500"}>{t("Logout")}</Text>
+          <Text color={"red.500"}>{t("login")}</Text>
         </Pressable>
       </VStack>
     );

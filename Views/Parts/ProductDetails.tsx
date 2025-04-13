@@ -5,7 +5,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   Animated,
-  BackHandler, // Add this import
+  BackHandler,
+  Alert, // For login prompt
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,9 +32,10 @@ import { ArrowLeft, Heart } from "iconsax-react-native";
 import i18next from "i18next";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setPassHome } from "../../store/PassHomeSlice";
 
 const ProductDetails = () => {
-  const navigation = useNavigation(); // Remove the `any` type for better type safety if possible
+  const navigation:any = useNavigation();
   const route = useRoute<any>();
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -58,8 +60,8 @@ const ProductDetails = () => {
   // Handle back button press
   useEffect(() => {
     const backAction = () => {
-      navigation.navigate("parts"); // Navigate to "parts" page
-      return true; // Prevent default behavior (going back to the previous screen)
+      navigation.navigate("parts");
+      return true;
     };
 
     const backHandler = BackHandler.addEventListener(
@@ -67,7 +69,6 @@ const ProductDetails = () => {
       backAction
     );
 
-    // Cleanup the event listener when the component unmounts
     return () => backHandler.remove();
   }, [navigation]);
 
@@ -75,7 +76,12 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         const { id } = route.params;
-        const userId = await AsyncStorage.getItem("userId");
+        let userId = await AsyncStorage.getItem("userId");
+
+        // Use userId = "0" for non-logged-in users
+        if (!userId) {
+          userId = "0";
+        }
 
         const response = await axios.get(
           `https://backend.j-byu.shop/api/products/${id}`,
@@ -120,8 +126,29 @@ const ProductDetails = () => {
   };
 
   const handleToggleFavorite = async () => {
-    if (!product) return;
     const userId = await AsyncStorage.getItem("userId");
+
+    // Check if user is logged in
+    if (!userId) {
+      Alert.alert(
+        t("please_login_title"),
+        t("please_login_message"),
+        [
+          { text: t("cancel"), style: "cancel" },
+          {
+            text: t("login"),
+            onPress: () => {
+              // Navigate to Login screen in AuthPages
+       dispatch(setPassHome(false));
+            },
+          },
+        ],
+        { cancelable: true }
+      );
+      return;
+    }
+
+    if (!product) return;
 
     Animated.sequence([
       Animated.timing(scaleValue, {
@@ -148,9 +175,9 @@ const ProductDetails = () => {
       );
 
       if (response.status === 201) {
-        // Handle success if needed
+        dispatch(addToFavorites({ productId: product.id }));
       } else {
-        console.log("Product removed from saved list:", response.data);
+        dispatch(removeFromFavorites({ productId: product.id }));
       }
     } catch (error: any) {
       setFave(isFavorite); // Revert on failure
@@ -167,7 +194,9 @@ const ProductDetails = () => {
 
   if (loading) {
     return (
-      <View style={[styles.mainContainer, { justifyContent: "center", backgroundColor }]}>
+      <View
+        style={[styles.mainContainer, { justifyContent: "center", backgroundColor }]}
+      >
         <ActivityIndicator size="large" color={primaryTextColor} />
       </View>
     );
@@ -193,7 +222,10 @@ const ProductDetails = () => {
         </Pressable>
       </Stack>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
         <HStack
           width={"full"}
           justifyContent={"space-between"}
@@ -210,7 +242,11 @@ const ProductDetails = () => {
             resizeMode="cover"
             alt={product.title}
           />
-          <ScrollView showsHorizontalScrollIndicator={false} height={300}>
+          <ScrollView
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            height={300}
+          >
             <VStack space={12}>
               {product.images.map((img: string, idx: number) => (
                 <Pressable key={idx} onPress={() => handleImageSelect(img)}>
@@ -231,16 +267,7 @@ const ProductDetails = () => {
             </VStack>
           </ScrollView>
         </HStack>
-
-        <HStack justifyContent="space-between" alignItems="center">
-          <Text
-            fontSize={28}
-            marginTop={2}
-            color={primaryTextColor}
-            textAlign={isRTL ? "right" : "left"}
-          >
-            {product.title}
-          </Text>
+        <Stack width={"full"} alignItems={"center"} justifyContent={"center"}>
           <Animated.View
             style={[
               customStyles.favoriteButton,
@@ -256,6 +283,16 @@ const ProductDetails = () => {
               />
             </Pressable>
           </Animated.View>
+        </Stack>
+        <HStack justifyContent="space-between" alignItems="center">
+          <Text
+            fontSize={18}
+            marginTop={2}
+            color={primaryTextColor}
+            textAlign={isRTL ? "right" : "left"}
+          >
+            {product.title}
+          </Text>
         </HStack>
 
         <Text

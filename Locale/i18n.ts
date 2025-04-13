@@ -127,7 +127,7 @@ const resources = {
       next: "Next",
       save_changes_error: "Failed to save changes",
       error_no_token: "No session token found",
-      error_fetch_profile: "Failed to fetch profile",
+      error_fetch_profile: "Please login",
       save_changes_success: "Changes saved successfully",
       select_all: "Select All",
       deselect_all: "Deselect All",
@@ -176,7 +176,11 @@ const resources = {
   "You are offline. Please check your internet connection.": "You are offline. Please check your internet connection.",
   "no_sections": "No sections",
   "delete_account": "Delete Account",
-  "repback_account": "Restore Account"
+  "repback_account": "Restore Account",
+  "please_login": "Please Login",
+  detail:"Detail",
+  "please_login_title": "Login Required",
+  "please_login_message": "Please log in to add this product to your favorites."
  
 
 
@@ -309,7 +313,7 @@ const resources = {
       next: "التالي",
       save_changes_error: "فشل حفظ التغييرات",
       error_no_token: "لم يتم العثور على رمز الجلسة",
-      error_fetch_profile: "فشل في جلب الملف الشخصي",
+      error_fetch_profile: "يرجى تسجيل الدخول",
       save_changes_success: "تم حفظ التغييرات بنجاح",
       select_all: "اختر الكل",
       deselect_all: "إلغاء اختيار الكل",
@@ -361,7 +365,11 @@ const resources = {
 "You are offline. Please check your internet connection.": "أنت غير متصل بالإنترنت. يرجى التحقق من اتصالك.",
 "no_sections": "لا يوجد أقسام",
 "delete_account": "حذف الحساب",
-  "repback_account": "استعادة الحساب"
+  "repback_account": "استعادة الحساب",
+  "please_login": "الرجاء تسجيل الدخول",
+    detail:"التفاصيل",
+    "please_login_title": "تسجيل الدخول مطلوب",
+  "please_login_message": "يرجى تسجيل الدخول لإضافة هذا المنتج إلى المفضلة.",
 
 
     },

@@ -5,7 +5,7 @@ interface PassHomeState {
 }
 
 const initialState: PassHomeState = {
-  value: false,
+  value: true,
 };
 
 const passHomeSlice = createSlice({

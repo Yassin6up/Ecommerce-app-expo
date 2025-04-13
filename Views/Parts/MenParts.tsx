@@ -166,7 +166,7 @@ const MenParts = () => {
     >
       {/* Back button */}
       <Stack w={"full"} mb={4} position={"fixed"}>
-        <Pressable onPress={() => navigation.navigate("PageTwo")}>
+        <Pressable onPress={() => navigation.goBack()}>
           <ArrowLeft size="32" color="#F7CF9D" />
         </Pressable>
       </Stack>
@@ -270,7 +270,7 @@ const MenParts = () => {
                       shadow={3}
                     >
                       <Text bold fontSize="md" color="white">
-                        {t("Add_to_cart")}
+                        {t("detail")}
                       </Text>
                     </Button>
                   </VStack>

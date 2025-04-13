@@ -27,7 +27,7 @@ useEffect(()=>{
 
 
   return (
-    pass && passHome ? <Pages /> : <AuthPages />
+ passHome ? <Pages /> : <AuthPages />
   );
   
 }
