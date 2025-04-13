@@ -17,7 +17,11 @@
       "bundleIdentifier": "com.kreypton.jbuy",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+            "adaptiveIcon": {
+        "foregroundImage": "./assets/icone.png"
       }
+      
     },
     "android": {
       "adaptiveIcon": {
