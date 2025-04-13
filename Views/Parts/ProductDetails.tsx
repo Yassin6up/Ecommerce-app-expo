@@ -313,70 +313,70 @@ const ProductDetails = () => {
         </Text>
 
         {/* Color Selection */}
-        {JSON.parse(product.colors) && (
-          <VStack mt={4} space={2}>
-            <Text
-              fontSize="lg"
-              fontWeight="bold"
-              color={primaryTextColor}
-              textAlign={isRTL ? "right" : "left"}
-            >
-              {t("Select_Color")}
-            </Text>
-            <HStack space={3}>
-              {JSON.parse(product.colors)?.map((color: string) => (
-                <Pressable
-                  key={color}
-                  onPress={() => setSelectedColor(color)}
-                  style={[
-                    customStyles.colorButton,
-                    { backgroundColor: color },
-                    selectedColor === color && {
-                      borderColor: "green",
-                      borderWidth: 3,
-                    },
-                  ]}
-                />
-              ))}
-            </HStack>
-          </VStack>
-        )}
+        {product.colors && JSON.parse(product.colors)?.length > 0 && (
+  <VStack mt={4} space={2}>
+    <Text
+      fontSize="lg"
+      fontWeight="bold"
+      color={primaryTextColor}
+      textAlign={isRTL ? "right" : "left"}
+    >
+      {t("Select_Color")}
+    </Text>
+    <HStack space={3}>
+      {JSON.parse(product.colors)?.map((color: string) => (
+        <Pressable
+          key={color}
+          onPress={() => setSelectedColor(color)}
+          style={[
+            customStyles.colorButton,
+            { backgroundColor: color },
+            selectedColor === color && {
+              borderColor: "green",
+              borderWidth: 3,
+            },
+          ]}
+        />
+      ))}
+    </HStack>
+  </VStack>
+)}
 
         {/* Size Selection */}
-        {JSON.parse(product.sizes) && (
-          <VStack mt={4} space={2}>
-            <Text
-              fontSize="lg"
-              fontWeight="bold"
-              color={primaryTextColor}
-              textAlign={isRTL ? "right" : "left"}
-            >
-              {t("Select_Size")}
-            </Text>
-            <HStack space={3}>
-              {JSON.parse(product.sizes)?.map((size: string) => (
-                <Pressable
-                  key={size}
-                  onPress={() => setSelectedSize(size)}
-                  style={[
-                    customStyles.sizeButton,
-                    {
-                      backgroundColor: isDarkMode ? "#1A1A1A" : "#F5F5F5",
-                      borderColor: selectedSize === size ? "green" : iconColor,
-                    },
-                  ]}
-                >
-                  <Text
-                    color={primaryTextColor}
-                    fontWeight={selectedSize === size ? "bold" : "normal"}
-                  >
-                    {size}
-                  </Text>
-                </Pressable>
-              ))}
-            </HStack>
-          </VStack>
-        )}
+        {product.sizes && JSON.parse(product.sizes)?.length > 0 && (
+  <VStack mt={4} space={2}>
+    <Text
+      fontSize="lg"
+      fontWeight="bold"
+      color={primaryTextColor}
+      textAlign={isRTL ? "right" : "left"}
+    >
+      {t("Select_Size")}
+    </Text>
+    <HStack space={3}>
+      {JSON.parse(product.sizes)?.map((size: string) => (
+        <Pressable
+          key={size}
+          onPress={() => setSelectedSize(size)}
+          style={[
+            customStyles.sizeButton,
+            {
+              backgroundColor: isDarkMode ? "#1A1A1A" : "#F5F5F5",
+              borderColor: selectedSize === size ? "green" : iconColor,
+            },
+          ]}
+        >
+          <Text
+            color={primaryTextColor}
+            fontWeight={selectedSize === size ? "bold" : "normal"}
+          >
+            {size}
+          </Text>
+        </Pressable>
+      ))}
+    </HStack>
+  </VStack>
+)}
       </ScrollView>
 
       <View style={button.fixedButtonContainer}>
