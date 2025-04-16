@@ -2,7 +2,7 @@
   "expo": {
     "name": "J buy",
     "slug": "j-buy2",
-    "version": "3.0.0",
+    "version": "3",
     "orientation": "portrait",
     "icon": "./assets/icone.png",
     "userInterfaceStyle": "dark",
@@ -30,7 +30,7 @@
         "foregroundImage": "./assets/icone.png",
          "backgroundColor": "#000000"
       },
-      "package": "com.Kreypton.jbuy"
+      "package": "com.salaheddinet.task"
     },
     "web": {
       "favicon": "./assets/favicon.png"
