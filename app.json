@@ -2,7 +2,7 @@
   "expo": {
     "name": "J buy",
     "slug": "j-buy2",
-    "version": "3",
+    "version": "3.0.0",
     "orientation": "portrait",
     "icon": "./assets/icone.png",
     "userInterfaceStyle": "dark",
@@ -26,6 +26,7 @@
       
     },
     "android": {
+      "versionCode":3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icone.png",
          "backgroundColor": "#000000"
