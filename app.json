@@ -2,10 +2,11 @@
   "expo": {
     "name": "J buy",
     "slug": "j-buy2",
-    "version": "2",
+    "version": "3",
     "orientation": "portrait",
     "icon": "./assets/icone.png",
     "userInterfaceStyle": "dark",
+     "backgroundColor": "#000000",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/logo.png",
@@ -19,13 +20,15 @@
         "ITSAppUsesNonExemptEncryption": false
       },
             "adaptiveIcon": {
-        "foregroundImage": "./assets/icone.png"
+        "foregroundImage": "./assets/icone.png",
+         "backgroundColor": "#000000"
       }
       
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icone.png"
+        "foregroundImage": "./assets/icone.png",
+         "backgroundColor": "#000000"
       },
       "package": "com.Kreypton.jbuy"
     },
