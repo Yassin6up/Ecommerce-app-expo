@@ -8,7 +8,7 @@ import {
   BackHandler,
   Alert, // For login prompt
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
+import { StackActions, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
 import {
@@ -267,23 +267,20 @@ const ProductDetails = () => {
             </VStack>
           </ScrollView>
         </HStack>
-        <Stack width={"full"} alignItems={"center"} justifyContent={"center"}>
-          <Animated.View
-            style={[
-              customStyles.favoriteButton,
-              { backgroundColor: isDarkMode ? "#1A1A1A" : "#F5F5F5" },
-              { transform: [{ scale: scaleValue }] },
-            ]}
-          >
-            <Pressable onPress={handleToggleFavorite}>
-              <Heart
-                size="28"
-                color={iconColor}
-                variant={isFavorite ? "Bold" : "Outline"}
-              />
-            </Pressable>
-          </Animated.View>
+        <Stack width={'full'} alignItems={'flex-end'}>
+        <Stack  alignItems={'center'} justifyContent={'center'} backgroundColor={'gray.300'} w={46} h={46} rounded={'full'}  >
+     
+     <Pressable onPress={handleToggleFavorite}>
+       <Heart
+         size="32"
+         color={iconColor}
+         variant={isFavorite ? "Bold" : "Outline"}
+       />
+     </Pressable>
+
+ </Stack>
         </Stack>
+     
         <HStack justifyContent="space-between" alignItems="center">
           <Text
             fontSize={18}

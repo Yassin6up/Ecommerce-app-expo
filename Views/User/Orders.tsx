@@ -86,7 +86,7 @@ const Orders = () => {
       await axios.put(`https://backend.j-byu.shop/api/orders/cancel/${orderId}`);
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.id === orderId ? { ...order, status: "cancelled" } : order
+          order.id === orderId ? { ...order, status: "ملغي" } : order
         )
       );
       toast.show({ title: t("order_cancelled_success"), status: "success" });

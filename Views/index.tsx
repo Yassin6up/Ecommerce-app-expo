@@ -15,7 +15,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useTranslation } from "react-i18next";
 import { I18nManager, StyleSheet } from "react-native";
-import NetInfo from "@react-native-community/netinfo"; // Import NetInfo
+import NetInfo from "@react-native-community/netinfo";
 
 interface Screen {
   name: string;
@@ -30,7 +30,7 @@ const Pages: React.FC = () => {
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const { t, i18n } = useTranslation();
   const [focusedTab, setFocusedTab] = useState<string>("");
-  const [isOnline, setIsOnline] = useState<boolean>(true); // State to track online/offline status
+  const [isOnline, setIsOnline] = useState<boolean>(true);
 
   const handleTabPress = (name: string) => {
     setFocusedTab(name);
@@ -148,16 +148,26 @@ const Pages: React.FC = () => {
           <Stack position={"relative"}>
             {cartItems.length > 0 && (
               <Stack
-                w={3}
-                h={3}
+                w={4} // Increased size for better visibility
+                h={4}
                 position="absolute"
                 rounded="full"
                 backgroundColor="#EB2525"
-                right={isArabic ? undefined : -4}
-                left={isArabic ? -4 : undefined}
-                top={-2}
+                right={isArabic ? undefined : -8} // Adjusted positioning
+                left={isArabic ? -8 : undefined}
+                top={-6}
                 zIndex={87}
-              />
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Text
+                  color="#FFFFFF"
+                  fontSize="8px" // Small font size for the number
+                  fontWeight="bold"
+                >
+                  {cartItems.length}
+                </Text>
+              </Stack>
             )}
             <ShoppingCart
               width="22"
