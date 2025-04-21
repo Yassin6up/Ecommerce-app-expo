@@ -104,40 +104,57 @@ export default function Login() {
   };
 
   const login = async () => {
+    console.log("Login button pressed");
+    console.log("PhoneNumber:", phoneNumber, "ValidatedPhone:", validatedPhone, "Password:", password);
+  
+    // Check if phone number is empty or invalid
     if (!phoneNumber.trim() || phoneNumber === "+962") {
+      console.log("Phone number empty or invalid");
       showToast(t("phone_required"), "red.500");
       return;
     }
     if (!password.trim()) {
+      console.log("Password empty");
       showToast(t("password_required"), "red.500");
       return;
     }
     if (!validatedPhone) {
+      console.log("Validated phone not set");
       showToast(t("invalid_phone_number"), "red.500");
       return;
     }
-
+  
     try {
+      console.log("Making API call with phone:", validatedPhone);
       const response = await axios.post("https://backend.j-byu.shop/api/login", {
         phone: validatedPhone,
         password: password,
       });
-
-      if (response.status === 200) {
-        const { sessionToken, userId, needVerification } = response.data;
-
+  
+      console.log("API response:", response.status, response.data);
+  
+      // Handle 200 or 202 status
+      if (response.status === 200 || response.status === 202) {
+        const { needVerification, sessionToken, userId } = response.data;
+  
         if (needVerification) {
+          console.log("Phone not verified, navigating to Confirmation");
           showToast(t("phone_not_verified"), "yellow.500");
           navigation.navigate("Confirmation", { phone: validatedPhone });
           return;
         }
-
-        await AsyncStorage.setItem("sessionToken", sessionToken);
-        await AsyncStorage.setItem("userId", userId.toString());
-        showToast(t("login_successful"), "#000000");
-        dispatch(setPassHome(true));
+  
+        // Successful login (only for 200 status)
+        if (response.status === 200) {
+          console.log("Login successful");
+          await AsyncStorage.setItem("sessionToken", sessionToken);
+          await AsyncStorage.setItem("userId", userId.toString());
+          showToast(t("login_successful"), "#000000");
+          dispatch(setPassHome(true));
+        }
       }
     } catch (error: any) {
+      console.log("API call failed:", error.message, error.response?.data);
       let errorMessage = t("login_failed");
       if (error.response) {
         errorMessage = error.response.data?.message || t("login_failed");
@@ -145,6 +162,7 @@ export default function Login() {
           error.response.status === 403 &&
           error.response.data?.message === "User not verified"
         ) {
+          console.log("403: User not verified, navigating to Confirmation");
           showToast(t("phone_not_verified"), "yellow.500");
           navigation.navigate("Confirmation", { phone: validatedPhone });
           return;
@@ -155,7 +173,6 @@ export default function Login() {
       showToast(errorMessage, "red.500");
     }
   };
-
   const showToast = (message: string, bgColor: string) => {
     toast.show({
       placement: "top",
