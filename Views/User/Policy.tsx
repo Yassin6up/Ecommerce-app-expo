@@ -12,9 +12,11 @@ import {
   Divider,
   Box,
   HStack,
+  Pressable
 } from "native-base";
 import i18next from "i18next";
 import { BackHandler } from "react-native"; 
+import { ArrowLeft } from "iconsax-react-native";
 const Policy = () => {
   const isRTL = i18next.language === "ar";
   const { t } = useTranslation();
@@ -25,6 +27,8 @@ const navigation:any = useNavigation()
   const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // For titles and bold text
   const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // For content text
   const dividerColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000"; // Icons
+  
   useEffect(() => {
     const backAction = () => {
       navigation.navigate("UserPage"); 
@@ -43,6 +47,11 @@ const navigation:any = useNavigation()
     <Stack
       style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
     >
+                  <Stack w={"full"} mb={4} position={"fixed"}>
+              <Pressable onPress={() => navigation.goBack()}>
+                <ArrowLeft size="32" color={iconColor} />
+              </Pressable>
+            </Stack>
       <ScrollView paddingX={4} paddingY={6}>
         {/* Title */}
         <VStack space={4}>

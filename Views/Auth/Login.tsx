@@ -21,22 +21,33 @@ import { useTranslation } from "react-i18next";
 import { setPassHome } from "../../store/PassHomeSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
+// Define navigation param list (adjust based on your app's navigation structure)
+type RootStackParamList = {
+  Confirmation: { phone: string };
+  Register: undefined;
+  recoveryPassword: undefined;
+  // Add other screens as needed
+};
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const validatePhoneNumber = (phone: string): string => {
-  let processedPhone = phone.replace(/[\s\-()]/g, '');
+  let processedPhone = phone.replace(/[\s\-()]/g, "");
   if (/^\+9620[678]/.test(processedPhone)) {
-    processedPhone = '+962' + processedPhone.substring(5);
+    processedPhone = "+962" + processedPhone.substring(5);
   }
   if (/^009620[678]/.test(processedPhone)) {
-    processedPhone = '+962' + processedPhone.substring(6);
+    processedPhone = "+962" + processedPhone.substring(6);
   }
-  const cleanedPhone = processedPhone.replace(/\D/g, '');
-  if (processedPhone.startsWith('+962')) {
+  const cleanedPhone = processedPhone.replace(/\D/g, "");
+  if (processedPhone.startsWith("+962")) {
     if (/^\+962(7\d{8}|6\d{7}|8\d{7})$/.test(processedPhone)) {
       return processedPhone;
     }
   }
-  if (cleanedPhone.startsWith('00962')) {
+  if (cleanedPhone.startsWith("00962")) {
     const formattedPhone = `+962${cleanedPhone.slice(5)}`;
     if (/^\+962(7\d{8}|6\d{7}|8\d{7})$/.test(formattedPhone)) {
       return formattedPhone;
@@ -48,17 +59,17 @@ const validatePhoneNumber = (phone: string): string => {
   if (/^(7\d{8}|6\d{7}|8\d{7})$/.test(cleanedPhone)) {
     return `+962${cleanedPhone}`;
   }
-  throw new Error('Invalid Jordanian phone number');
+  throw new Error("Invalid Jordanian phone number");
 };
 
 export default function Login() {
   const dispatch = useDispatch();
   const toast = useToast();
-  const navigation: any = useNavigation();
-
+  const navigation = useNavigation<NavigationProp>();
   const { t, i18n } = useTranslation();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("+962");
+  const [validatedPhone, setValidatedPhone] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
@@ -67,29 +78,33 @@ export default function Login() {
 
   const handlePhoneChange = (text: string) => {
     let processedText = text;
-    if (processedText.indexOf('+') > 0) {
-      processedText = processedText.replace(/\+/g, '');
+    if (processedText.indexOf("+") > 0) {
+      processedText = processedText.replace(/\+/g, "");
     }
-    const numericText = processedText.replace(/[^\d+]/g, '');
-    const formattedText = numericText.startsWith('+') 
-      ? numericText 
-      : (numericText.length > 0 ? `+${numericText}` : '');
+    const numericText = processedText.replace(/[^\d+]/g, "");
+    const formattedText = numericText.startsWith("+")
+      ? numericText
+      : numericText.length > 0
+      ? `+${numericText}`
+      : "";
     setPhoneNumber(formattedText);
-    if (formattedText && formattedText !== '+') {
+    if (formattedText && formattedText !== "+") {
       try {
-        const validatedPhone = validatePhoneNumber(formattedText);
-        setPhoneNumber(validatedPhone);
-        setPhoneError('');
+        const validPhone = validatePhoneNumber(formattedText);
+        setValidatedPhone(validPhone);
+        setPhoneError("");
       } catch (error: any) {
-        setPhoneError(error.message);
+        setValidatedPhone("");
+        setPhoneError(t("invalid_phone_number"));
       }
     } else {
-      setPhoneError('');
+      setValidatedPhone("");
+      setPhoneError("");
     }
   };
 
   const login = async () => {
-    if (!phoneNumber.trim()) {
+    if (!phoneNumber.trim() || phoneNumber === "+962") {
       showToast(t("phone_required"), "red.500");
       return;
     }
@@ -97,41 +112,47 @@ export default function Login() {
       showToast(t("password_required"), "red.500");
       return;
     }
+    if (!validatedPhone) {
+      showToast(t("invalid_phone_number"), "red.500");
+      return;
+    }
 
     try {
-      const formattedPhone = validatePhoneNumber(phoneNumber);
-      const response = await axios.post(
-        "https://backend.j-byu.shop/api/login",
-        {
-          phone: formattedPhone,
-          password: password,
-        }
-      );
+      const response = await axios.post("https://backend.j-byu.shop/api/login", {
+        phone: validatedPhone,
+        password: password,
+      });
 
       if (response.status === 200) {
         const { sessionToken, userId, needVerification } = response.data;
 
         if (needVerification) {
-          navigation.navigate("Confirmation", { phone: formattedPhone });
+          showToast(t("phone_not_verified"), "yellow.500");
+          navigation.navigate("Confirmation", { phone: validatedPhone });
           return;
         }
 
         await AsyncStorage.setItem("sessionToken", sessionToken);
         await AsyncStorage.setItem("userId", userId.toString());
-        showToast(t("login_successful"),  "#000000" );
+        showToast(t("login_successful"), "#000000");
         dispatch(setPassHome(true));
-        // navigation.navigate("page one", {});
       }
     } catch (error: any) {
+      let errorMessage = t("login_failed");
       if (error.response) {
-        const errorMessage = error.response.data.message || t("login failed");
-        showToast(errorMessage, "red.500");
-        if (error.response.status === 403 && error.response.data.message === "User not verified") {
-          navigation.navigate("Confirmation", { phone: phoneNumber });
+        errorMessage = error.response.data?.message || t("login_failed");
+        if (
+          error.response.status === 403 &&
+          error.response.data?.message === "User not verified"
+        ) {
+          showToast(t("phone_not_verified"), "yellow.500");
+          navigation.navigate("Confirmation", { phone: validatedPhone });
+          return;
         }
       } else {
-        showToast(t("network error"), "red.500");
+        errorMessage = t("network_error");
       }
+      showToast(errorMessage, "red.500");
     }
   };
 
@@ -144,7 +165,7 @@ export default function Login() {
           px="2"
           py="1"
           rounded="sm"
-          _text={{ color: "#FFFFFF" }} // White text for contrast
+          _text={{ color: "#FFFFFF" }}
         >
           {message}
         </Box>
@@ -167,7 +188,11 @@ export default function Login() {
       flex={1}
     >
       <StatusBar style={Platform.OS === "ios" ? "dark" : "auto"} />
-
+      <Stack w={"full"} mb={4} position={"fixed"}>
+        <Pressable onPress={() => dispatch(setPassHome(true))}>
+          <ArrowLeft size="32" color={iconColor} />
+        </Pressable>
+      </Stack>
       <Stack w="full" justifyContent="center" alignItems="center">
         <Text fontWeight={700} fontSize="16px" color={textColor}>
           {t("login")}
@@ -191,7 +216,6 @@ export default function Login() {
             textAlign={isArabic ? "right" : "left"}
             flex={1}
             value={phoneNumber}
-            defaultValue="+962"
             onChangeText={handlePhoneChange}
             keyboardType="phone-pad"
             variant="unstyled"
@@ -248,7 +272,10 @@ export default function Login() {
           </Pressable>
         </Box>
         {/* Forgot Password */}
-        <Pressable onPress={() => navigation.navigate("recoveryPassword")} mt="5px">
+        <Pressable
+          onPress={() => navigation.navigate("recoveryPassword")}
+          mt="5px"
+        >
           <Text
             fontSize="14px"
             textAlign={isArabic ? "right" : "left"}
@@ -259,26 +286,21 @@ export default function Login() {
           </Text>
         </Pressable>
         <Stack
-        w="full"
-        direction={isArabic ? "row-reverse" : "row"}
-        justifyContent="center"
-        alignItems="center"
-        mt="20px"
-      >
-        <Text fontSize="14px" color={textColor}>
-          {t("dont_have_account")}
-        </Text>
-        <Pressable onPress={() => navigation.navigate("Register")}>
-          <Text
-            fontSize="14px"
-            color={buttonBgColor}
-            underline
-            ml="5px"
-          >
-            {t("signup")}
+          w="full"
+          direction={isArabic ? "row-reverse" : "row"}
+          justifyContent="center"
+          alignItems="center"
+          mt="20px"
+        >
+          <Text fontSize="14px" color={textColor}>
+            {t("dont_have_account")}
           </Text>
-        </Pressable>
-      </Stack>
+          <Pressable onPress={() => navigation.navigate("Register")}>
+            <Text fontSize="14px" color={buttonBgColor} underline ml="5px">
+              {t("signup")}
+            </Text>
+          </Pressable>
+        </Stack>
       </VStack>
       <Button
         width="full"
@@ -290,12 +312,14 @@ export default function Login() {
         onPressOut={() => setIsPressed(false)}
         onPress={login}
       >
-        <Text fontSize="16px" fontFamily="Alexandria_700Bold" color={buttonTextColor}>
+        <Text
+          fontSize="16px"
+          fontFamily="Alexandria_700Bold"
+          color={buttonTextColor}
+        >
           {t("login")}
         </Text>
       </Button>
-      {/* Add "Don't have an account? Sign up" */}
-  
     </VStack>
   );
 }

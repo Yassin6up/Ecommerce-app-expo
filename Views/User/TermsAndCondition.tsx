@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import styles from "../Styles";
+import { ArrowLeft } from "iconsax-react-native";
 import { useTranslation } from "react-i18next";
 import {
   ScrollView,
@@ -10,6 +11,7 @@ import {
   Text,
   VStack,
   Divider,
+  Pressable
 } from "native-base";
 import i18next from "i18next";
 import { BackHandler } from "react-native"; 
@@ -22,7 +24,8 @@ const navigation:any = useNavigation()
   const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF"; // Pure black/white for background
   const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Pure black/white for bold text
   const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Muted shades for content text
-  const dividerColor = isDarkMode ? "#FFFFFF" : "#000000"; // Pure black/white for dividers
+  const dividerColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000"; // Icons // Pure black/white for dividers
   useEffect(() => {
     const backAction = () => {
       navigation.navigate("UserPage"); 
@@ -41,6 +44,11 @@ const navigation:any = useNavigation()
     <Stack
       style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
     >
+                  <Stack w={"full"} mb={4} position={"fixed"}>
+              <Pressable onPress={() => navigation.goBack()}>
+                <ArrowLeft size="32" color={iconColor} />
+              </Pressable>
+            </Stack>
       <ScrollView paddingX={4} paddingY={6}>
         {/* Title */}
         <VStack space={4}>

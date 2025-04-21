@@ -20,7 +20,7 @@ import {
 import { useDispatch } from "react-redux";
 import { setPassHome } from "../../store/PassHomeSlice";
 import { StatusBar } from "expo-status-bar";
-import { Mobile, Eye, EyeSlash } from "iconsax-react-native";
+import { Mobile, Eye, EyeSlash,ArrowLeft } from "iconsax-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -53,7 +53,7 @@ export default function RecoveryPassword() {
           px="2"
           py="1"
           rounded="sm"
-          _text={{ color: "#FFFFFF" }} // White text for contrast
+          _text={{ color: "#FFFFFF" }}
         >
           {message}
         </Box>
@@ -220,6 +220,11 @@ export default function RecoveryPassword() {
       style={[styles.mainContainer, { backgroundColor: backgroundColor }]} // Direct background
       flex={1}
     >
+             <Stack w={"full"} mb={4} position={"fixed"}>
+                    <Pressable onPress={() => navigation.goBack()}>
+                      <ArrowLeft size="32" color={iconColor} />
+                    </Pressable>
+                  </Stack>
       <StatusBar style={Platform.OS === "ios" ? "dark" : "auto"} />
       <Stack w="full" justifyContent="center" alignItems="center">
         <Text fontWeight={700} fontSize="16px" color={textColor}>
@@ -257,6 +262,7 @@ export default function RecoveryPassword() {
               onChangeText={setCode}
               borderColor={inputBorderColor}
               color={textColor}
+             keyboardType="numeric"
             />
             <Button
               onPress={()=>resendVerificationCode(phoneNumber)}

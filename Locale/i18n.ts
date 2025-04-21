@@ -180,7 +180,12 @@ const resources = {
   "please_login": "Please Login",
   detail:"Detail",
   "please_login_title": "Login Required",
-  "please_login_message": "Please log in to add this product to your favorites."
+  "please_login_message": "Please log in to add this product to your favorites.",
+  "phone_not_verified": "Please verify your phone number to continue.",
+  "confirm_order_title": "Confirm Order",
+  "confirm_order_message": "Are you sure you want to send this order?",
+  "ok": "OK"
+ 
  
 
 
@@ -370,6 +375,10 @@ const resources = {
     detail:"التفاصيل",
     "please_login_title": "تسجيل الدخول مطلوب",
   "please_login_message": "يرجى تسجيل الدخول لإضافة هذا المنتج إلى المفضلة.",
+  "phone_not_verified": "يرجى التحقق من رقم هاتفك للمتابعة.",
+  "confirm_order_title": "تأكيد الطلب",
+  "confirm_order_message": "هل أنت متأكد أنك تريد إرسال هذا الطلب؟",
+  "ok": "موافق"
 
 
     },

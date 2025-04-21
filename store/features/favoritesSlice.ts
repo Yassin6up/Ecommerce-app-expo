@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface FavoriteItem {
-  id: number;
+  id: any;
   title: string;
   price: number;
   image: string;

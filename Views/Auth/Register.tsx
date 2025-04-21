@@ -16,6 +16,7 @@ import {
   Select,
 } from "native-base";
 import { StatusBar } from "expo-status-bar";
+import { ArrowLeft } from "iconsax-react-native";
 import { UserSquare, Mobile, Lock, Location } from "iconsax-react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/store";
@@ -177,6 +178,11 @@ export default function Register() {
       style={[styles.mainContainer, { backgroundColor: backgroundColor }]} // Direct background color
       flex={1}
     >
+            <Stack w={"full"} mb={4} position={"fixed"}>
+              <Pressable onPress={() => navigation.goBack()}>
+                <ArrowLeft size="32" color={iconColor} />
+              </Pressable>
+            </Stack>
       <ScrollView>
         <StatusBar style={Platform.OS === "ios" ? "dark" : "auto"} />
         <Stack w="full" justifyContent="center" alignItems="center">

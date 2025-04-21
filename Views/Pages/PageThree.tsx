@@ -26,20 +26,20 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import styles from "../Styles";
 import { useNavigation } from "@react-navigation/native";
-import { BackHandler } from "react-native";
+import { Alert, BackHandler } from "react-native"; // Import Alert
 import { setPassHome } from "../../store/PassHomeSlice";
+
 const PageThree = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const dispatch = useDispatch();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
-  const navigation:any = useNavigation();
+  const navigation: any = useNavigation();
   const [selectedItems, setSelectedItems] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
   const [deliveryPrice, setDeliveryPrice] = useState(0);
-  
 
   useEffect(() => {
     const fetchDeliveryFees = async () => {
@@ -72,15 +72,15 @@ const PageThree = () => {
   }, [navigation]);
 
   const selectedSubtotal = cartItems
-    .filter((item:any) => selectedItems.includes(item.id))
+    .filter((item: any) => selectedItems.includes(item.id))
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
   const selectedTotal =
     selectedItems.length > 0 ? selectedSubtotal + deliveryPrice : 0;
 
-  const toggleItemSelection = (itemId:any) => {
-    setSelectedItems((prev:any) =>
+  const toggleItemSelection = (itemId: any) => {
+    setSelectedItems((prev: any) =>
       prev.includes(itemId)
-        ? prev.filter((id:any) => id !== itemId)
+        ? prev.filter((id: any) => id !== itemId)
         : [...prev, itemId]
     );
   };
@@ -90,7 +90,7 @@ const PageThree = () => {
       console.log("Deselecting all items");
       setSelectedItems([]);
     } else {
-      const allIds:any = cartItems.map((item) => item.id);
+      const allIds: any = cartItems.map((item) => item.id);
       console.log("Selecting all items:", allIds);
       setSelectedItems(allIds);
     }
@@ -122,14 +122,11 @@ const PageThree = () => {
             </Box>
           ),
         });
-       
-   
-          navigation.navigate("page Four");
-      
+        navigation.navigate("page Four");
         return;
       }
 
-      const selectedOrderItems = cartItems.filter((item:any) =>
+      const selectedOrderItems = cartItems.filter((item: any) =>
         selectedItems.includes(item.id)
       );
       const orderData = {
@@ -214,9 +211,7 @@ const PageThree = () => {
             </Box>
           ),
         });
-  
-          navigation.navigate("page Four");
-     
+        navigation.navigate("page Four");
       } else {
         toast.show({
           placement: "top",
@@ -230,6 +225,25 @@ const PageThree = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSubmitOrder = () => {
+    // Show confirmation alert before submitting the order
+    Alert.alert(
+      t("confirm_order_title"), // Title: "Confirm Order"
+      t("confirm_order_message"), // Message: "Are you sure you want to send this order?"
+      [
+        {
+          text: t("cancel"), // Cancel button
+          style: "cancel",
+        },
+        {
+          text: t("ok"), // OK button
+          onPress: submitOrder, // Call submitOrder if user confirms
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
@@ -509,7 +523,7 @@ const PageThree = () => {
             <Button
               variant="solid"
               bg={isSubmitting ? buttonPressedBgColor : buttonBgColor}
-              onPress={submitOrder}
+              onPress={handleSubmitOrder} // Use handleSubmitOrder instead of submitOrder
               leftIcon={
                 <Icon
                   as={MaterialIcons}

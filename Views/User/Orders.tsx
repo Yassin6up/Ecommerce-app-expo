@@ -14,12 +14,14 @@ import {
   Pressable,
   Image,
   useToast,
+  Stack
 } from "native-base";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
 import styles from "../Styles";
 import { BackHandler } from "react-native";
+import { ArrowLeft } from "iconsax-react-native";
 
 interface Order {
   id: number;
@@ -44,6 +46,7 @@ const Orders = () => {
   const isArabic = i18n.language === "ar";
   const navigation: any = useNavigation();
   const toast = useToast();
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000"; // Icons
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -134,6 +137,11 @@ const Orders = () => {
       // Remove justifyContent="center" from here to allow top alignment
     >
       {/* Filter Buttons - Always at the top */}
+      <Stack w={"full"} mb={4} position={"fixed"}>
+              <Pressable onPress={() => navigation.goBack()}>
+                <ArrowLeft size="32" color={iconColor} />
+              </Pressable>
+            </Stack>
       <HStack space={2} mt={4} mb={4} justifyContent="center" flexWrap="wrap" width="100%">
         <Button
           size="sm"
