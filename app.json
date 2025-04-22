@@ -1,17 +1,17 @@
 {
   "expo": {
     "name": "J buy",
-    "slug": "j-buy2",
+    "slug": "j-buy",
     "version": "3.0.2",
     "orientation": "portrait",
     "icon": "./assets/icone.png",
     "userInterfaceStyle": "dark",
-     "backgroundColor": "#000000",
-    "newArchEnabled": true,
+    "backgroundColor": "#000000",
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "black"
+      "backgroundColor": "#000000"
     },
     "ios": {
       "supportsTablet": true,
@@ -19,17 +19,16 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-            "adaptiveIcon": {
-        "foregroundImage": "./assets/icone.png",
-         "backgroundColor": "#000000"
-      }
-      
-    },
-    "android": {
-      "versionCode":4,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icone.png",
-         "backgroundColor": "#000000"
+        "backgroundColor": "#000000"
+      }
+    },
+    "android": {
+      "versionCode": 4,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icone.png",
+        "backgroundColor": "#000000"
       },
       "package": "com.knjo.buyjo"
     },
@@ -38,10 +37,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": "9b3ec316-14a6-414e-bf48-ca4da5f495e2"
+        "projectId": "aba96dbc-307b-43ae-80a2-c1fa8ef31cc1"
       }
     },
-    "owner": "salaheddinet"
+    "owner": "alcaranoisco"
   },
   "assetBundlePatterns": [
     "**/*"
