@@ -184,7 +184,10 @@ const resources = {
   "phone_not_verified": "Please verify your phone number to continue.",
   "confirm_order_title": "Confirm Order",
   "confirm_order_message": "Are you sure you want to send this order?",
-  "ok": "OK"
+  "ok": "OK",
+  "product_added_to_cart": "Product added to cart!",
+  "please_select": "Please select",
+
  
  
 
@@ -378,7 +381,10 @@ const resources = {
   "phone_not_verified": "يرجى التحقق من رقم هاتفك للمتابعة.",
   "confirm_order_title": "تأكيد الطلب",
   "confirm_order_message": "هل أنت متأكد أنك تريد إرسال هذا الطلب؟",
-  "ok": "موافق"
+  "ok": "موافق",
+  "product_added_to_cart": "تمت إضافة المنتج إلى السلة!",
+  "please_select": "يرجى الاختيار"
+  
 
 
     },

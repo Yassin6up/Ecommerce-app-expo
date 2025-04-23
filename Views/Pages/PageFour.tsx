@@ -12,7 +12,7 @@ import {
   Spinner,
   Pressable,
 } from "native-base";
-import { BackHandler } from "react-native";
+import { BackHandler, Linking, Alert } from "react-native";
 import styles from "../Styles";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../store/store";
@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { setPassHome } from "../../store/PassHomeSlice";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Headphone } from "iconsax-react-native";
 
 interface UserProfile {
   id: number;
@@ -51,6 +52,23 @@ const PageFour = () => {
 
   const isRTL = i18n.language === "ar";
   const textAlignStyle = isRTL ? "right" : "left";
+
+  const handleWhatsAppPress = async () => {
+    const phoneNumber = "+962771112167"; // Specified phone number
+    const whatsappURL = `whatsapp://send?phone=${phoneNumber}`;
+
+    try {
+      const supported = await Linking.canOpenURL(whatsappURL);
+      if (supported) {
+        await Linking.openURL(whatsappURL);
+      } else {
+        Alert.alert(t("error"), t("whatsapp_not_installed"));
+      }
+    } catch (error) {
+      console.error("Error opening WhatsApp:", error);
+      Alert.alert(t("error"), t("failed_to_open_whatsapp"));
+    }
+  };
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -101,6 +119,8 @@ const PageFour = () => {
 
     return () => backHandler.remove();
   }, [navigation]);
+
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000"; // Icons
 
   const handleLogout = async () => {
     try {
@@ -199,7 +219,7 @@ const PageFour = () => {
         style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
       >
         <Text color="red.500" bold>
-          { t("error_fetch_profile")}
+          {t("error_fetch_profile")}
         </Text>
         <Pressable
           onPress={handleLogout}
@@ -245,9 +265,14 @@ const PageFour = () => {
             </Text>
           </VStack>
         </HStack>
-        <Button variant="ghost" onPress={() => navigation.navigate("profil")}>
-          <Text style={{ color: buttonBgColor }}>{t("Edit")}</Text>
-        </Button>
+        <VStack alignItems={"center"}>
+          <Pressable onPress={handleWhatsAppPress}>
+            <Headphone size="32" color={iconColor} variant="Bold" />
+          </Pressable>
+          <Button variant="ghost" onPress={() => navigation.navigate("profil")}>
+            <Text style={{ color: buttonBgColor }}>{t("Edit")}</Text>
+          </Button>
+        </VStack>
       </HStack>
 
       <Divider bgColor={dividerColor} />

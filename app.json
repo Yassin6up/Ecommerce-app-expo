@@ -2,7 +2,7 @@
   "expo": {
     "name": "J buy",
     "slug": "j-buy",
-    "version": "3.0.2",
+    "version": "3.0.3",
     "orientation": "portrait",
     "icon": "./assets/icone.png",
     "userInterfaceStyle": "dark",

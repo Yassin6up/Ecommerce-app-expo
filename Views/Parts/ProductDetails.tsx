@@ -25,6 +25,8 @@ import {
   ScrollView,
   Button,
   Stack,
+  Box, // For toast
+  useToast, // For toast
 } from "native-base";
 import styles from "../Styles";
 import { useNavigation } from "@react-navigation/native";
@@ -35,10 +37,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setPassHome } from "../../store/PassHomeSlice";
 
 const ProductDetails = () => {
-  const navigation:any = useNavigation();
+  const navigation: any = useNavigation();
   const route = useRoute<any>();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const toast = useToast(); // Initialize useToast
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -110,6 +113,40 @@ const ProductDetails = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
+
+    // Check if colors and/or sizes exist
+    const hasColors = product.colors && JSON.parse(product.colors)?.length > 0;
+    const hasSizes = product.sizes && JSON.parse(product.sizes)?.length > 0;
+
+    // Validate selections
+    let missingSelections = [];
+    if (hasColors && !selectedColor) {
+      missingSelections.push(t("color"));
+    }
+    if (hasSizes && !selectedSize) {
+      missingSelections.push(t("size"));
+    }
+
+    // If there are missing selections, show a toast and prevent adding to cart
+    if (missingSelections.length > 0) {
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Box
+            bg="red.500"
+            px="2"
+            py="1"
+            rounded="sm"
+            _text={{ color: "#FFFFFF" }}
+          >
+            {t("please_select")} {missingSelections.join(" & ")}
+          </Box>
+        ),
+      });
+      return;
+    }
+
+    // If all required selections are made, proceed to add to cart
     dispatch(
       addToCart({
         id: product.id,
@@ -123,6 +160,22 @@ const ProductDetails = () => {
         size: selectedSize || undefined,
       })
     );
+
+    // Show success toast notification
+    toast.show({
+      placement: "top",
+      render: () => (
+        <Box
+          bg="green.500"
+          px="2"
+          py="1"
+          rounded="sm"
+          _text={{ color: "#FFFFFF" }}
+        >
+          {t("product_added_to_cart")}
+        </Box>
+      ),
+    });
   };
 
   const handleToggleFavorite = async () => {
@@ -139,7 +192,7 @@ const ProductDetails = () => {
             text: t("login"),
             onPress: () => {
               // Navigate to Login screen in AuthPages
-       dispatch(setPassHome(false));
+              dispatch(setPassHome(false));
             },
           },
         ],
@@ -268,19 +321,24 @@ const ProductDetails = () => {
           </ScrollView>
         </HStack>
         <Stack width={'full'} alignItems={'flex-end'}>
-        <Stack  alignItems={'center'} justifyContent={'center'} backgroundColor={'gray.300'} w={46} h={46} rounded={'full'}  >
-     
-     <Pressable onPress={handleToggleFavorite}>
-       <Heart
-         size="32"
-         color={iconColor}
-         variant={isFavorite ? "Bold" : "Outline"}
-       />
-     </Pressable>
-
- </Stack>
+          <Stack
+            alignItems={'center'}
+            justifyContent={'center'}
+            backgroundColor={'gray.300'}
+            w={46}
+            h={46}
+            rounded={'full'}
+          >
+            <Pressable onPress={handleToggleFavorite}>
+              <Heart
+                size="32"
+                color={iconColor}
+                variant={isFavorite ? "Bold" : "Outline"}
+              />
+            </Pressable>
+          </Stack>
         </Stack>
-     
+
         <HStack justifyContent="space-between" alignItems="center">
           <Text
             fontSize={18}
@@ -311,69 +369,73 @@ const ProductDetails = () => {
 
         {/* Color Selection */}
         {product.colors && JSON.parse(product.colors)?.length > 0 && (
-  <VStack mt={4} space={2}>
-    <Text
-      fontSize="lg"
-      fontWeight="bold"
-      color={primaryTextColor}
-      textAlign={isRTL ? "right" : "left"}
-    >
-      {t("Select_Color")}
-    </Text>
-    <HStack space={3}>
-      {JSON.parse(product.colors)?.map((color: string) => (
-        <Pressable
-          key={color}
-          onPress={() => setSelectedColor(color)}
-          style={[
-            customStyles.colorButton,
-            { backgroundColor: color },
-            selectedColor === color && {
-              borderColor: "green",
-              borderWidth: 3,
-            },
-          ]}
-        />
-      ))}
-    </HStack>
-  </VStack>
-)}
+          <VStack mt={4} space={2}>
+            <Text
+              fontSize="lg"
+              fontWeight="bold"
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
+              {t("Select_Color")}
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <HStack space={3}>
+                {JSON.parse(product.colors)?.map((color: string) => (
+                  <Pressable
+                    key={color}
+                    onPress={() => setSelectedColor(color)}
+                    style={[
+                      customStyles.colorButton,
+                      { backgroundColor: color },
+                      selectedColor === color && {
+                        borderColor: "green",
+                        borderWidth: 3,
+                      },
+                    ]}
+                  />
+                ))}
+              </HStack>
+            </ScrollView>
+          </VStack>
+        )}
 
         {/* Size Selection */}
         {product.sizes && JSON.parse(product.sizes)?.length > 0 && (
-  <VStack mt={4} space={2}>
-    <Text
-      fontSize="lg"
-      fontWeight="bold"
-      color={primaryTextColor}
-      textAlign={isRTL ? "right" : "left"}
-    >
-      {t("Select_Size")}
-    </Text>
-    <HStack space={3}>
-      {JSON.parse(product.sizes)?.map((size: string) => (
-        <Pressable
-          key={size}
-          onPress={() => setSelectedSize(size)}
-          style={[
-            customStyles.sizeButton,
-            {
-              backgroundColor: isDarkMode ? "#1A1A1A" : "#F5F5F5",
-              borderColor: selectedSize === size ? "green" : iconColor,
-            },
-          ]}
-        >
-          <Text
-            color={primaryTextColor}
-            fontWeight={selectedSize === size ? "bold" : "normal"}
-          >
-            {size}
-          </Text>
-        </Pressable>
-      ))}
-    </HStack>
-  </VStack>
-)}
+          <VStack mt={4} space={2}>
+            <Text
+              fontSize="lg"
+              fontWeight="bold"
+              color={primaryTextColor}
+              textAlign={isRTL ? "right" : "left"}
+            >
+              {t("Select_Size")}
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <HStack space={3}>
+                {JSON.parse(product.sizes)?.map((size: string) => (
+                  <Pressable
+                    key={size}
+                    onPress={() => setSelectedSize(size)}
+                    style={[
+                      customStyles.sizeButton,
+                      {
+                        backgroundColor: isDarkMode ? "#1A1A1A" : "#F5F5F5",
+                        borderColor: selectedSize === size ? "green" : iconColor,
+                      },
+                    ]}
+                  >
+                    <Text
+                      color={primaryTextColor}
+                      fontWeight={selectedSize === size ? "bold" : "normal"}
+                    >
+                      {size}
+                    </Text>
+                  </Pressable>
+                ))}
+              </HStack>
+            </ScrollView>
+          </VStack>
+        )}
       </ScrollView>
 
       <View style={button.fixedButtonContainer}>
