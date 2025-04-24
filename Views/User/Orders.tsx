@@ -105,6 +105,7 @@ const Orders = () => {
       on_the_way: "on_the_way",
       cancelled: "cancelled",
       ملغى: "cancelled",
+      "غير مكتمل": "cancelled", // Add mapping for "غير مكتمل" to "cancelled"
     };
     return statusMap[status.toLowerCase()] || status.toLowerCase();
   };
@@ -134,14 +135,13 @@ const Orders = () => {
       style={[styles.mainContainer, isDarkMode ? styles.darkBckground : styles.lightBckground]}
       flex={1}
       alignItems="center"
-      // Remove justifyContent="center" from here to allow top alignment
     >
       {/* Filter Buttons - Always at the top */}
       <Stack w={"full"} mb={4} position={"fixed"}>
-              <Pressable onPress={() => navigation.goBack()}>
-                <ArrowLeft size="32" color={iconColor} />
-              </Pressable>
-            </Stack>
+        <Pressable onPress={() => navigation.goBack()}>
+          <ArrowLeft size="32" color={iconColor} />
+        </Pressable>
+      </Stack>
       <HStack space={2} mt={4} mb={4} justifyContent="center" flexWrap="wrap" width="100%">
         <Button
           size="sm"

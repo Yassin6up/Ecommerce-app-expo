@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
 import {
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+  Keyboard,
+} from "react-native";
+import {
   Box,
   Button,
   FormControl,
@@ -12,7 +18,6 @@ import {
   Pressable,
   Input,
 } from "native-base";
-import { Keyboard } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 import { Formik } from "formik";
@@ -155,12 +160,12 @@ const Confirmation = ({ navigation, route }: any) => {
 
   // Define black-and-white color scheme
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
-  const inputBorderColor = isDarkMode ? "#FFFFFF" : "#000000"; // Updated to black/white
-  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF"; // Background
-  const iconColor = isDarkMode ? "#FFFFFF" : "#000000"; // Icons
-  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000"; // Button background
-  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF"; // Button text (inverted)
-  const buttonPressedBgColor = isDarkMode ? "#CCCCCC" : "#333333"; // Pressed state
+  const inputBorderColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
+  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
+  const buttonPressedBgColor = isDarkMode ? "#CCCCCC" : "#333333";
 
   const formatTimer = () => {
     const minutes = Math.floor(timer / 60);
@@ -169,138 +174,153 @@ const Confirmation = ({ navigation, route }: any) => {
   };
 
   return (
-    <VStack
-      style={[styles.mainContainer, { backgroundColor: backgroundColor }]} // Direct background
-      flex={1}
+    <KeyboardAvoidingView
+      behavior="padding"
+      keyboardVerticalOffset={Platform.OS === "android" ? -90 : 0}
+      style={{ flex: 1 }}
     >
-      <StatusBar style="auto" />
-      <Stack w={"full"} mb={4} position={"fixed"}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <ArrowLeft size="32" color={iconColor} />
-        </Pressable>
-      </Stack>
-      <Stack w="full" justifyContent="center" alignItems="center">
-        <Text fontWeight={700} fontSize="16px" color={textColor}>
-          {t("confirm_code")}
-        </Text>
-      </Stack>
-
-      <Stack h="full" w="full">
-        <Stack w="full" justifyContent="center" alignItems="center" mt={10}>
-          <Text color={textColor}>{t("enter_code", { phone: phone })}</Text>
-        </Stack>
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <VStack
+          style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
+          flex={1}
         >
-          {({ handleSubmit, errors, touched, setFieldValue, values }) => (
-            <>
-              <VStack space="16px">
-                <FormControl
-                  isInvalid={!!(errors.otp && touched.otp)}
-                  marginTop="48px"
-                >
-                  <Stack alignItems="center" justifyContent="center">
-                    <Input
-                      value={values.otp}
-                      onChangeText={(text) => {
-                        const digitsOnly = text.replace(/[^0-9]/g, "").substring(0, 6);
-                        setFieldValue("otp", digitsOnly);
-                        if (digitsOnly.length === 6) {
-                          Keyboard.dismiss();
-                        }
-                      }}
-                      keyboardType="number-pad"
-                      maxLength={6}
-                      textAlign="center"
-                      fontSize="24px"
-                      width="200px"
-                      borderBottomWidth="2"
-                      borderBottomColor={inputBorderColor}
-                      color={textColor}
-                      _focus={{
-                        borderBottomColor: inputBorderColor,
-                      }}
-                      letterSpacing="8px"
-                      fontWeight="bold"
-                      variant="underlined"
-                      placeholder="••••••"
-                    />
-                  </Stack>
-                  <FormControl.ErrorMessage
-                    leftIcon={<WarningOutlineIcon size="xs" />}
-                  >
-                    {errors.otp}
-                  </FormControl.ErrorMessage>
-                </FormControl>
-              </VStack>
+          <StatusBar style="auto" />
+          <Stack w={"full"} mb={4} position={"fixed"}>
+            <Pressable onPress={() => navigation.goBack()}>
+              <ArrowLeft size="32" color={iconColor} />
+            </Pressable>
+          </Stack>
+          <Stack w="full" justifyContent="center" alignItems="center">
+            <Text fontWeight={700} fontSize="16px" color={textColor}>
+              {t("confirm_code")}
+            </Text>
+          </Stack>
 
-              <HStack
-                paddingTop="24px"
-                w="full"
-                alignItems="center"
-                justifyContent="center"
-              >
-                {!canResend ? (
-                  <Text color={textColor}>
-                    {t("resend_in")} {formatTimer()}
-                  </Text>
-                ) : (
-                  <Text color={textColor}>
-                    {t("did_not_receive_code")}
-                    <Text
-                      underline
-                      style={{ color: buttonBgColor }} // Matches button for consistency
-                      onPress={resendVerificationCode}
+          <Stack h="full" w="full">
+            <Stack w="full" justifyContent="center" alignItems="center" mt={10}>
+              <Text color={textColor}>{t("enter_code", { phone: phone })}</Text>
+            </Stack>
+            <Formik
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ handleSubmit, errors, touched, setFieldValue, values }) => (
+                <>
+                  <VStack space="16px">
+                    <FormControl
+                      isInvalid={!!(errors.otp && touched.otp)}
+                      marginTop="48px"
                     >
-                      {" "}
-                      {t("resend")}
-                    </Text>
-                  </Text>
-                )}
-              </HStack>
+                      <Stack alignItems="center" justifyContent="center">
+                        <Input
+                          value={values.otp}
+                          onChangeText={(text) => {
+                            const digitsOnly = text
+                              .replace(/[^0-9]/g, "")
+                              .substring(0, 6);
+                            setFieldValue("otp", digitsOnly);
+                            if (digitsOnly.length === 6) {
+                              Keyboard.dismiss();
+                            }
+                          }}
+                          keyboardType="number-pad"
+                          maxLength={6}
+                          textAlign="center"
+                          fontSize="24px"
+                          width="200px"
+                          borderBottomWidth="2"
+                          borderBottomColor={inputBorderColor}
+                          color={textColor}
+                          _focus={{
+                            borderBottomColor: inputBorderColor,
+                          }}
+                          letterSpacing="8px"
+                          fontWeight="bold"
+                          variant="underlined"
+                          placeholder="••••••"
+                        />
+                      </Stack>
+                      <FormControl.ErrorMessage
+                        leftIcon={<WarningOutlineIcon size="xs" />}
+                      >
+                        {errors.otp}
+                      </FormControl.ErrorMessage>
+                    </FormControl>
+                  </VStack>
 
-              <VStack
-                my="32px"
-                space="20px"
-                alignItems="center"
-                bottom={20}
-                left={-3}
-                position="absolute"
-                width="full"
-              >
-                <Button
-                  width="full"
-                  backgroundColor={isPressed ? buttonPressedBgColor : buttonBgColor}
-                  rounded="12px"
-                  mt="20px"
-                  py="16px"
-                  onPressIn={() => setIsPressed(true)}
-                  onPressOut={() => setIsPressed(false)}
-                  isDisabled={values.otp.length < 6}
-                  onPress={() => handleSubmit()}
-                >
                   <HStack
-                    alignItems="center"
-                    justifyContent="space-between"
+                    paddingTop="24px"
                     w="full"
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    <Text
-                      fontSize="16px"
-                      fontFamily="Alexandria_700Bold"
-                      color={buttonTextColor}
-                    >
-                      {t("confirm")}
-                    </Text>
+                    {!canResend ? (
+                      <Text color={textColor}>
+                        {t("resend_in")} {formatTimer()}
+                      </Text>
+                    ) : (
+                      <Text color={textColor}>
+                        {t("did_not_receive_code")}
+                        <Text
+                          underline
+                          style={{ color: buttonBgColor }}
+                          onPress={resendVerificationCode}
+                        >
+                          {" "}
+                          {t("resend")}
+                        </Text>
+                      </Text>
+                    )}
                   </HStack>
-                </Button>
-              </VStack>
-            </>
-          )}
-        </Formik>
-      </Stack>
-    </VStack>
+
+                  <VStack
+                    my="32px"
+                    space="20px"
+                    alignItems="center"
+                    bottom={20}
+                    left={-3}
+                    position="absolute"
+                    width="full"
+                  >
+                    <Button
+                      width="full"
+                      backgroundColor={
+                        isPressed ? buttonPressedBgColor : buttonBgColor
+                      }
+                      rounded="12px"
+                      mt="20px"
+                      py="16px"
+                      onPressIn={() => setIsPressed(true)}
+                      onPressOut={() => setIsPressed(false)}
+                      isDisabled={values.otp.length < 6}
+                      onPress={() => handleSubmit()}
+                    >
+                      <HStack
+                        alignItems="center"
+                        justifyContent="space-between"
+                        w="full"
+                      >
+                        <Text
+                          fontSize="16px"
+                          fontFamily="Alexandria_700Bold"
+                          color={buttonTextColor}
+                        >
+                          {t("confirm")}
+                        </Text>
+                      </HStack>
+                    </Button>
+                  </VStack>
+                </>
+              )}
+            </Formik>
+          </Stack>
+        </VStack>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 

@@ -11,6 +11,8 @@ import {
   Divider,
   Spinner,
   Pressable,
+  Box,
+  useToast,
 } from "native-base";
 import { BackHandler, Linking, Alert } from "react-native";
 import styles from "../Styles";
@@ -37,6 +39,7 @@ const PageFour = () => {
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const dispatch = useDispatch();
   const navigation: any = useNavigation();
+  const toast = useToast();
 
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,17 +59,24 @@ const PageFour = () => {
   const handleWhatsAppPress = async () => {
     const phoneNumber = "+962771112167"; // Specified phone number
     const whatsappURL = `whatsapp://send?phone=${phoneNumber}`;
+    const phoneURL = `tel:${phoneNumber}`; // URL for phone call
 
     try {
-      const supported = await Linking.canOpenURL(whatsappURL);
-      if (supported) {
+      const whatsappSupported = await Linking.canOpenURL(whatsappURL);
+      if (whatsappSupported) {
         await Linking.openURL(whatsappURL);
       } else {
-        Alert.alert(t("error"), t("whatsapp_not_installed"));
+        // If WhatsApp is not installed, try opening the phone dialer
+        const phoneSupported = await Linking.canOpenURL(phoneURL);
+        if (phoneSupported) {
+          await Linking.openURL(phoneURL);
+        } else {
+          Alert.alert(t("error"), t("no_whatsapp_or_phone_app"));
+        }
       }
     } catch (error) {
-      console.error("Error opening WhatsApp:", error);
-      Alert.alert(t("error"), t("failed_to_open_whatsapp"));
+      console.error("Error opening WhatsApp or Phone:", error);
+      Alert.alert(t("error"), t("failed_to_open_whatsapp_or_phone"));
     }
   };
 
@@ -158,6 +168,22 @@ const PageFour = () => {
       setUserProfile((prev) =>
         prev ? { ...prev, deleted_at: new Date().toISOString() } : prev
       );
+
+      // Show toast notification
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Box
+            bg="red.500"
+            px="2"
+            py="1"
+            rounded="sm"
+            _text={{ color: "#FFFFFF" }}
+          >
+            {t("account_delete_warning")}
+          </Box>
+        ),
+      });
     } catch (error: any) {
       console.error("Error soft-deleting account:", error);
       setError(error.response?.data?.message || "Failed to delete account");
@@ -316,14 +342,14 @@ const PageFour = () => {
         >
           {t("Order Tracking")}
         </Text>
-        <HStack justifyContent="space-between" alignItems="center">
+        <VStack justifyContent="space-between" alignItems="center">
           <Text style={{ color: textColor, textAlign: textAlignStyle }}>
             {t("my_orders")}
           </Text>
           <Button variant="ghost" onPress={() => navigation.navigate("Orders")}>
             <Text style={{ color: buttonBgColor }}>{t("View")}</Text>
           </Button>
-        </HStack>
+        </VStack>
       </VStack>
 
       {/* Favorites Section */}
