@@ -13,6 +13,7 @@ import {
   Pressable,
   Box,
   useToast,
+  ScrollView,
 } from "native-base";
 import { BackHandler, Linking, Alert } from "react-native";
 import styles from "../Styles";
@@ -22,8 +23,7 @@ import { useTranslation } from "react-i18next";
 import { setPassHome } from "../../store/PassHomeSlice";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Headphone } from "iconsax-react-native";
-
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 interface UserProfile {
   id: number;
   name: string;
@@ -263,11 +263,15 @@ const PageFour = () => {
   }
 
   return (
+    <ScrollView
+    style={{ backgroundColor: backgroundColor }}
+    >
     <VStack
       space={5}
       style={[styles.mainContainer, { backgroundColor: backgroundColor }]}
       paddingX={6}
       paddingY={4}
+      
     >
       {/* Profile Header */}
       <HStack justifyContent="space-between" alignItems="center">
@@ -293,7 +297,7 @@ const PageFour = () => {
         </HStack>
         <VStack alignItems={"center"}>
           <Pressable onPress={handleWhatsAppPress}>
-            <Headphone size="32" color={iconColor} variant="Bold" />
+          <MaterialIcons name="support-agent" size={32} color={iconColor} variant="Bold" />
           </Pressable>
           <Button variant="ghost" onPress={() => navigation.navigate("profil")}>
             <Text style={{ color: buttonBgColor }}>{t("Edit")}</Text>
@@ -394,6 +398,7 @@ const PageFour = () => {
         {t(isAccountDeleted ? "repback_account" : "delete_account")}
       </Button>
     </VStack>
+    </ScrollView>
   );
 };
 

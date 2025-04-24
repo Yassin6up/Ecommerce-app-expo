@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useCallback , useRef} from "react";
 import {
   KeyboardAvoidingView,
   ScrollView,
@@ -40,7 +40,6 @@ const Confirmation = ({ navigation, route }: any) => {
   const [canResend, setCanResend] = useState(false);
 
   const { phone } = route.params;
-  console.log("phone : ", phone);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -154,10 +153,12 @@ const Confirmation = ({ navigation, route }: any) => {
     }
   };
 
+
+
+
   const handleSubmit = async (values: any) => {
     await verifyCode(values.otp);
   };
-
   // Define black-and-white color scheme
   const textColor = isDarkMode ? "#FFFFFF" : "#000000";
   const inputBorderColor = isDarkMode ? "#FFFFFF" : "#000000";
@@ -173,11 +174,52 @@ const Confirmation = ({ navigation, route }: any) => {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+
+  // Inside your component
+const inputRef = useRef<TextInput>(null);
+
+
+
+
+const CustomInput = React.forwardRef<TextInput>((props, ref) => {
+  const internalRef = useRef<TextInput>(null);
+  
+  // Merge forwarded ref with internal ref
+  React.useImperativeHandle(ref, () => ({
+    ...(internalRef.current as TextInput),
+    keepFocus: () => {
+      internalRef.current?.focus();
+      setTimeout(() => internalRef.current?.focus(), 100);
+    }
+  }));
+
+  return ( <Input {...props}   ref={(el: any) => {
+    if (ref) {
+      if (typeof ref === 'function') {
+        ref(el?._input);
+      } else {
+        (ref as React.MutableRefObject<any>).current = el?._input;
+      }
+    } }}/> )
+
+});
+
+
+useEffect(() => {
+  const showSub = Keyboard.addListener('keyboardDidShow', () => {
+    inputRef.current?.keepFocus(); // Use custom focus method
+  });
+  return () => showSub.remove();
+}, []);
+
   return (
     <KeyboardAvoidingView
-      behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "android" ? -90 : 0}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Critical for iOS
+      keyboardVerticalOffset={Platform.OS === "android" ? -100 : 0}
       style={{ flex: 1 }}
+      onLayout={(e) => {
+        console.log('Layout height:', e.nativeEvent.layout.height);
+      }}
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -208,41 +250,54 @@ const Confirmation = ({ navigation, route }: any) => {
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
             >
-              {({ handleSubmit, errors, touched, setFieldValue, values }) => (
-                <>
+              {({ handleSubmit, errors, touched, setFieldValue, values }) => {
+                const handleOtpChange = useCallback((text: string) => {
+                  const digitsOnly = text.replace(/\D/g, '').slice(0, 6);
+                  setFieldValue("otp", digitsOnly);
+
+                  if (digitsOnly.length === 6) {
+                    if (Platform.OS === 'ios') {
+                      // Small delay for iOS keyboard stability
+                      setTimeout(() => Keyboard.dismiss(), 100);
+                    } else {
+                      Keyboard.dismiss();
+                    }
+                  }
+                }, [setFieldValue]); // Dependency array
+
+                return <>
                   <VStack space="16px">
                     <FormControl
                       isInvalid={!!(errors.otp && touched.otp)}
                       marginTop="48px"
                     >
                       <Stack alignItems="center" justifyContent="center">
-                        <Input
-                          value={values.otp}
-                          onChangeText={(text) => {
-                            const digitsOnly = text
-                              .replace(/[^0-9]/g, "")
-                              .substring(0, 6);
-                            setFieldValue("otp", digitsOnly);
-                            if (digitsOnly.length === 6) {
-                              Keyboard.dismiss();
-                            }
-                          }}
-                          keyboardType="number-pad"
-                          maxLength={6}
-                          textAlign="center"
-                          fontSize="24px"
-                          width="200px"
-                          borderBottomWidth="2"
-                          borderBottomColor={inputBorderColor}
-                          color={textColor}
-                          _focus={{
-                            borderBottomColor: inputBorderColor,
-                          }}
-                          letterSpacing="8px"
-                          fontWeight="bold"
-                          variant="underlined"
-                          placeholder="••••••"
-                        />
+                        <CustomInput   value={values.otp}
+                                onChangeText={handleOtpChange}
+                                ref={inputRef}
+                                keyboardType="number-pad"
+                                maxLength={6}
+                                textAlign="center"
+                                fontSize="24px"
+                                onBlur={(e) => {
+                                  if (Platform.OS === 'ios' && values.otp.length < 6) {
+                                    // Prevent blur until OTP is complete
+                                    inputRef.current?.focus();
+                                  }
+                                }}
+                                width="200px"
+                                borderBottomWidth="2"
+                                autoComplete="sms-otp"
+                                textContentType="oneTimeCode"
+                                borderBottomColor={inputBorderColor}
+                                color={textColor}
+                                _focus={{
+                                  borderBottomColor: inputBorderColor,
+                                }}
+                                letterSpacing="8px"
+                                fontWeight="bold"
+                                variant="underlined"
+                                placeholder="••••••" />
                       </Stack>
                       <FormControl.ErrorMessage
                         leftIcon={<WarningOutlineIcon size="xs" />}
@@ -315,7 +370,7 @@ const Confirmation = ({ navigation, route }: any) => {
                     </Button>
                   </VStack>
                 </>
-              )}
+              }}
             </Formik>
           </Stack>
         </VStack>
