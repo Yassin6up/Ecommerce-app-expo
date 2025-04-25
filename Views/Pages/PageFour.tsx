@@ -58,7 +58,7 @@ const PageFour = () => {
 
   const handleWhatsAppPress = async () => {
     const phoneNumber = "+962771112167"; // Specified phone number
-    const whatsappURL = `whatsapp://send?phone=${phoneNumber}`;
+const whatsappURL = `https://wa.me/${phoneNumber}`;
     const phoneURL = `tel:${phoneNumber}`; // URL for phone call
 
     try {
