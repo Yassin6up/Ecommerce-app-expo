@@ -22,7 +22,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/icone.png",
         "backgroundColor": "#000000"
-      } ,
+      },
       "config": {
         "scrollView": {
           "keyboardDismissMode": "interactive"
@@ -35,7 +35,24 @@
         "foregroundImage": "./assets/icone.png",
         "backgroundColor": "#000000"
       },
-      "package": "com.knjo.buyjo"
+      "package": "com.knjo.buyjo",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "category": ["DEFAULT", "BROWSABLE"],
+          "data": {
+            "scheme": "https",
+            "host": "wa.me"
+          }
+        },
+        {
+          "action": "DIAL",
+          "category": ["DEFAULT"],
+          "data": {
+            "scheme": "tel"
+          }
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

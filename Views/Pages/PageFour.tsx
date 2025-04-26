@@ -57,26 +57,23 @@ const PageFour = () => {
   const textAlignStyle = isRTL ? "right" : "left";
 
   const handleWhatsAppPress = async () => {
-    const phoneNumber = "+962771112167"; // Specified phone number
-const whatsappURL = `https://wa.me/${phoneNumber}`;
-    const phoneURL = `tel:${phoneNumber}`; // URL for phone call
-
+    const phoneNumber = "+962771112167";
+    const whatsappURL = `https://wa.me/${phoneNumber}`;
+    const phoneURL = `tel:${phoneNumber}`;
+  
     try {
-      const whatsappSupported = await Linking.canOpenURL(whatsappURL);
-      if (whatsappSupported) {
-        await Linking.openURL(whatsappURL);
-      } else {
-        // If WhatsApp is not installed, try opening the phone dialer
-        const phoneSupported = await Linking.canOpenURL(phoneURL);
-        if (phoneSupported) {
-          await Linking.openURL(phoneURL);
-        } else {
-          Alert.alert(t("error"), t("no_whatsapp_or_phone_app"));
-        }
-      }
+      await Linking.openURL(whatsappURL);
     } catch (error) {
-      console.error("Error opening WhatsApp or Phone:", error);
-      Alert.alert(t("error"), t("failed_to_open_whatsapp_or_phone"));
+      console.error("WhatsApp failed:", error);
+      try {
+        await Linking.openURL(phoneURL);
+      } catch (error) {
+        console.error("Phone failed:", error);
+        Alert.alert(
+          t("error", "Error"),
+          t("no_whatsapp_or_phone_app", "No WhatsApp or phone app installed")
+        );
+      }
     }
   };
 
