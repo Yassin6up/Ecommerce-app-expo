@@ -189,7 +189,8 @@ const resources = {
   "please_select": "Please select",
 "no_whatsapp_or_phone_app": "Neither WhatsApp nor a phone app is installed.",
   "failed_to_open_whatsapp_or_phone": "Failed to open WhatsApp or phone app.",
-  "account_delete_warning": "Your account will be removed in 30 days and cannot be restored."
+  "account_delete_warning": "Your account will be removed in 30 days and cannot be restored.",
+  "invalid_registration_data":"Invalid registration data. Please check your information and try again"
  
  
 
@@ -388,7 +389,8 @@ const resources = {
   "please_select": "يرجى الاختيار",
   "no_whatsapp_or_phone_app": "لا يوجد واتساب أو تطبيق هاتف مثبت.",
   "failed_to_open_whatsapp_or_phone": "فشل في فتح واتساب أو تطبيق الهاتف.",
-  "account_delete_warning": "سيتم حذف حسابك خلال 30 يومًا ولا يمكن استعادته."
+  "account_delete_warning": "سيتم حذف حسابك خلال 30 يومًا ولا يمكن استعادته.",
+   "invalid_registration_data":"بيانات التسجيل غير صالحة. يرجى التحقق من معلوماتك والمحاولة مرة أخرى"
   
 
 

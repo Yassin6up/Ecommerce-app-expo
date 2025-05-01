@@ -190,195 +190,197 @@ export default function Register() {
             {t("new_registration")}
           </Text>
         </Stack>
+<ScrollView>
+<VStack space="14px" flex={1} mt="50px" mb={10}>
+ 
+ <Text
+   color={textColor}
+   textAlign={isArabic ? "right" : "left"}
+   fontFamily="Alexandria_500Medium"
+ >
+   {t("username")}
+ </Text>
+ <Box
+   flexDirection={isArabic ? "row-reverse" : "row"}
+   alignItems="center"
+   px={4}
+   borderWidth={1}
+   borderColor={inputBorderColor}
+   rounded="8px"
+ >
+   <Input
+     placeholder={t("username_placeholder")}
+     flex={1}
+     variant="unstyled"
+     value={username}
+     onChangeText={setUsername}
+     _focus={{
+       backgroundColor: "transparent",
+       borderColor: "transparent",
+     }}
+     bg="transparent"
+     borderWidth={0}
+     textAlign={isArabic ? "right" : "left"}
+     color={textColor}
+   />
+   <UserSquare size="24" color={iconColor} />
+ </Box>
 
-        <VStack space="14px" flex={1} mt="50px" mb={10}>
-          {/* Username Input */}
-          <Text
-            color={textColor}
-            textAlign={isArabic ? "right" : "left"}
-            fontFamily="Alexandria_500Medium"
-          >
-            {t("username")}
-          </Text>
-          <Box
-            flexDirection={isArabic ? "row-reverse" : "row"}
-            alignItems="center"
-            px={4}
-            borderWidth={1}
-            borderColor={inputBorderColor}
-            rounded="8px"
-          >
-            <Input
-              placeholder={t("username_placeholder")}
-              flex={1}
-              variant="unstyled"
-              value={username}
-              onChangeText={setUsername}
-              _focus={{
-                backgroundColor: "transparent",
-                borderColor: "transparent",
-              }}
-              bg="transparent"
-              borderWidth={0}
-              textAlign={isArabic ? "right" : "left"}
-              color={textColor}
-            />
-            <UserSquare size="24" color={iconColor} />
-          </Box>
+ {/* Phone Number Input */}
+ <Text color={textColor} textAlign={isArabic ? "right" : "left"}>
+   {t("phone_number")}
+ </Text>
+ <Box
+   flexDirection={isArabic ? "row-reverse" : "row"}
+   alignItems="center"
+   px={4}
+   borderWidth={1}
+   borderColor={phoneError ? "red.500" : inputBorderColor}
+   rounded="8px"
+ >
+   <Input
+     placeholder={t("phone_placeholder")}
+     textAlign={isArabic ? "right" : "left"}
+     flex={1}
+     value={phoneNumber}
+     defaultValue="+962"
+     onChangeText={handlePhoneChange}
+     keyboardType="phone-pad"
+     variant="unstyled"
+     _focus={{
+       backgroundColor: "transparent",
+       borderColor: "transparent",
+     }}
+     bg="transparent"
+     borderWidth={0}
+     color={textColor}
+   />
+   <Mobile size="26" color={iconColor} />
+ </Box>
+ {phoneError && (
+   <Text color="red.500" fontSize="xs" ml={2}>
+     {phoneError}
+   </Text>
+ )}
 
-          {/* Phone Number Input */}
-          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>
-            {t("phone_number")}
-          </Text>
-          <Box
-            flexDirection={isArabic ? "row-reverse" : "row"}
-            alignItems="center"
-            px={4}
-            borderWidth={1}
-            borderColor={phoneError ? "red.500" : inputBorderColor}
-            rounded="8px"
-          >
-            <Input
-              placeholder={t("phone_placeholder")}
-              textAlign={isArabic ? "right" : "left"}
-              flex={1}
-              value={phoneNumber}
-              defaultValue="+962"
-              onChangeText={handlePhoneChange}
-              keyboardType="phone-pad"
-              variant="unstyled"
-              _focus={{
-                backgroundColor: "transparent",
-                borderColor: "transparent",
-              }}
-              bg="transparent"
-              borderWidth={0}
-              color={textColor}
-            />
-            <Mobile size="26" color={iconColor} />
-          </Box>
-          {phoneError && (
-            <Text color="red.500" fontSize="xs" ml={2}>
-              {phoneError}
-            </Text>
-          )}
+ {/* Password Input */}
+ <Text color={textColor} textAlign={isArabic ? "right" : "left"}>
+   {t("password")}
+ </Text>
+ <Box
+   flexDirection={isArabic ? "row-reverse" : "row"}
+   alignItems="center"
+   px={4}
+   borderWidth={1}
+   borderColor={inputBorderColor}
+   rounded="8px"
+ >
+   <Input
+     placeholder={t("password_placeholder")}
+     secureTextEntry
+     flex={1}
+     variant="unstyled"
+     value={password}
+     onChangeText={setPassword}
+     _focus={{
+       backgroundColor: "transparent",
+       borderColor: "transparent",
+     }}
+     bg="transparent"
+     borderWidth={0}
+     textAlign={isArabic ? "right" : "left"}
+     color={textColor}
+   />
+   <Lock size="24" color={iconColor} />
+ </Box>
 
-          {/* Password Input */}
-          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>
-            {t("password")}
-          </Text>
-          <Box
-            flexDirection={isArabic ? "row-reverse" : "row"}
-            alignItems="center"
-            px={4}
-            borderWidth={1}
-            borderColor={inputBorderColor}
-            rounded="8px"
-          >
-            <Input
-              placeholder={t("password_placeholder")}
-              secureTextEntry
-              flex={1}
-              variant="unstyled"
-              value={password}
-              onChangeText={setPassword}
-              _focus={{
-                backgroundColor: "transparent",
-                borderColor: "transparent",
-              }}
-              bg="transparent"
-              borderWidth={0}
-              textAlign={isArabic ? "right" : "left"}
-              color={textColor}
-            />
-            <Lock size="24" color={iconColor} />
-          </Box>
+ {/* Address Section */}
+ <Text color={textColor} textAlign={isArabic ? "right" : "left"}>
+   {t("address")}
+ </Text>
+ {/* City Dropdown */}
+ <Box
+   flexDirection={isArabic ? "row-reverse" : "row"}
+   alignItems="center"
+   px={4}
+   borderWidth={1}
+   borderColor={inputBorderColor}
+   rounded="8px"
+ >
+   <Select
+     flex={1}
+     variant="unstyled"
+     selectedValue={selectedCity}
+     placeholder={isArabic ? "اختر المدينة" : "Select City"}
+     onValueChange={(itemValue) => setSelectedCity(itemValue)}
+     _selectedItem={{
+       bg: "amber.100", // Match button color
+     }}
+     textAlign={isArabic ? "right" : "left"}
+     color={textColor}
+   >
+     <Select.Item label={isArabic ? "عمان" : "Amman"} value="Amman" />
+     <Select.Item label={isArabic ? "إربد" : "Irbid"} value="Irbid" />
+     <Select.Item label={isArabic ? "البلقاء" : "Balqa"} value="Balqa" />
+     <Select.Item label={isArabic ? "الكرك" : "Karak"} value="Karak" />
+     <Select.Item label={isArabic ? "معان" : "Ma'an"} value="Ma'an" />
+     <Select.Item label={isArabic ? "الزرقاء" : "Zarqa"} value="Zarqa" />
+     <Select.Item label={isArabic ? "المفرق" : "Mafraq"} value="Mafraq" />
+     <Select.Item label={isArabic ? "الطفيلة" : "Tafilah"} value="Tafilah" />
+     <Select.Item label={isArabic ? "مادبا" : "Madaba"} value="Madaba" />
+     <Select.Item label={isArabic ? "جرش" : "Jerash"} value="Jerash" />
+     <Select.Item label={isArabic ? "عجلون" : "Ajloun"} value="Ajloun" />
+     <Select.Item label={isArabic ? "العقبة" : "Aqaba"} value="Aqaba" />
+   </Select>
+   <Location size="24" color={iconColor} />
+ </Box>
 
-          {/* Address Section */}
-          <Text color={textColor} textAlign={isArabic ? "right" : "left"}>
-            {t("address")}
-          </Text>
-          {/* City Dropdown */}
-          <Box
-            flexDirection={isArabic ? "row-reverse" : "row"}
-            alignItems="center"
-            px={4}
-            borderWidth={1}
-            borderColor={inputBorderColor}
-            rounded="8px"
-          >
-            <Select
-              flex={1}
-              variant="unstyled"
-              selectedValue={selectedCity}
-              placeholder={isArabic ? "اختر المدينة" : "Select City"}
-              onValueChange={(itemValue) => setSelectedCity(itemValue)}
-              _selectedItem={{
-                bg: "amber.100", // Match button color
-              }}
-              textAlign={isArabic ? "right" : "left"}
-              color={textColor}
-            >
-              <Select.Item label={isArabic ? "عمان" : "Amman"} value="Amman" />
-              <Select.Item label={isArabic ? "إربد" : "Irbid"} value="Irbid" />
-              <Select.Item label={isArabic ? "البلقاء" : "Balqa"} value="Balqa" />
-              <Select.Item label={isArabic ? "الكرك" : "Karak"} value="Karak" />
-              <Select.Item label={isArabic ? "معان" : "Ma'an"} value="Ma'an" />
-              <Select.Item label={isArabic ? "الزرقاء" : "Zarqa"} value="Zarqa" />
-              <Select.Item label={isArabic ? "المفرق" : "Mafraq"} value="Mafraq" />
-              <Select.Item label={isArabic ? "الطفيلة" : "Tafilah"} value="Tafilah" />
-              <Select.Item label={isArabic ? "مادبا" : "Madaba"} value="Madaba" />
-              <Select.Item label={isArabic ? "جرش" : "Jerash"} value="Jerash" />
-              <Select.Item label={isArabic ? "عجلون" : "Ajloun"} value="Ajloun" />
-              <Select.Item label={isArabic ? "العقبة" : "Aqaba"} value="Aqaba" />
-            </Select>
-            <Location size="24" color={iconColor} />
-          </Box>
+ {/* Address Details Input */}
+ <Box
+   flexDirection={isArabic ? "row-reverse" : "row"}
+   alignItems="center"
+   px={4}
+   borderWidth={1}
+   borderColor={inputBorderColor}
+   rounded="8px"
+   mt={2}
+ >
+   <Input
+     placeholder={isArabic ? "تفاصيل العنوان (مثال: شارع ١٢٣)" : "Address Details (e.g., Street 123)"}
+     flex={1}
+     variant="unstyled"
+     value={addressDetails}
+     onChangeText={setAddressDetails}
+     _focus={{
+       backgroundColor: "transparent",
+       borderColor: "transparent",
+     }}
+     bg="transparent"
+     borderWidth={0}
+     textAlign={isArabic ? "right" : "left"}
+     color={textColor}
+   />
+   <Location size="24" color={iconColor} />
+ </Box>
 
-          {/* Address Details Input */}
-          <Box
-            flexDirection={isArabic ? "row-reverse" : "row"}
-            alignItems="center"
-            px={4}
-            borderWidth={1}
-            borderColor={inputBorderColor}
-            rounded="8px"
-            mt={2}
-          >
-            <Input
-              placeholder={isArabic ? "تفاصيل العنوان (مثال: شارع ١٢٣)" : "Address Details (e.g., Street 123)"}
-              flex={1}
-              variant="unstyled"
-              value={addressDetails}
-              onChangeText={setAddressDetails}
-              _focus={{
-                backgroundColor: "transparent",
-                borderColor: "transparent",
-              }}
-              bg="transparent"
-              borderWidth={0}
-              textAlign={isArabic ? "right" : "left"}
-              color={textColor}
-            />
-            <Location size="24" color={iconColor} />
-          </Box>
-
-          {/* Login Text */}
-          <HStack
-            alignItems="center"
-            space="2px"
-            flexDirection={isArabic ? "row" : "row-reverse"}
-          >
-            <Pressable onPress={() => navigation.navigate("Login")}>
-              <Text fontSize="12px" color={buttonBgColor}>
-                {t("login")}
-              </Text>
-            </Pressable>
-            <Text ml="1px" fontSize="12px" color={hintColor}>
-              {t("have_account")}
-            </Text>
-          </HStack>
-        </VStack>
+ {/* Login Text */}
+ <HStack
+   alignItems="center"
+   space="2px"
+   flexDirection={isArabic ? "row" : "row-reverse"}
+ >
+   <Pressable onPress={() => navigation.navigate("Login")}>
+     <Text fontSize="12px" color={buttonBgColor}>
+       {t("login")}
+     </Text>
+   </Pressable>
+   <Text ml="1px" fontSize="12px" color={hintColor}>
+     {t("have_account")}
+   </Text>
+ </HStack>
+</VStack>
+</ScrollView>
+      
       </ScrollView>
 
       {/* Register Button */}
@@ -387,7 +389,7 @@ export default function Register() {
           width="full"
           backgroundColor={isPressed ? buttonPressedBgColor : buttonBgColor}
           rounded="12px"
-          mt="20px"
+          mb="30px"
           py="16px"
           onPressIn={() => setIsPressed(true)}
           onPressOut={() => setIsPressed(false)}

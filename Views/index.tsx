@@ -60,17 +60,13 @@ const Pages: React.FC = () => {
       component: PageOne,
       options: {
         headerShown: true,
-        header: (props) => <Header2 />,
-        tabBarStyle: {
-          height: 50,
-          backgroundColor: tabBarBgColor,
-          borderTopWidth: 0,
-        },
-        tabBarLabel: (props) => (
+        header: () => <Header2 />,
+        tabBarLabel: ({ focused }) => (
           <Text
-            color={props.focused ? focusedColor : unfocusedColor}
+            color={focused ? focusedColor : unfocusedColor}
             fontWeight={500}
-            fontSize={"10px"}
+            fontSize="10px"
+            marginBottom={5} 
           >
             {t("Home")}
           </Text>
@@ -78,12 +74,12 @@ const Pages: React.FC = () => {
         tabBarIconStyle: {
           marginBottom: 0,
         },
-        tabBarIcon: (props) => (
+        tabBarIcon: ({ focused }) => (
           <Home
             width="22"
             height="22"
-            color={props.focused ? focusedColor : unfocusedColor}
-            variant={props.focused ? "Bold" : "Broken"}
+            color={focused ? focusedColor : unfocusedColor}
+            variant={focused ? "Bold" : "Broken"}
           />
         ),
       },
@@ -93,17 +89,13 @@ const Pages: React.FC = () => {
       component: Parts,
       options: {
         headerShown: true,
-        header: (props) => <Header2 />,
-        tabBarStyle: {
-          height: 50,
-          backgroundColor: tabBarBgColor,
-          borderTopWidth: 0,
-        },
-        tabBarLabel: (props) => (
+        header: () => <Header2 />,
+        tabBarLabel: ({ focused }) => (
           <Text
-            color={props.focused ? focusedColor : unfocusedColor}
+            color={focused ? focusedColor : unfocusedColor}
             fontWeight={500}
-            fontSize={"10px"}
+            fontSize="10px"
+            marginBottom={5}
           >
             {t("Explore")}
           </Text>
@@ -111,12 +103,12 @@ const Pages: React.FC = () => {
         tabBarIconStyle: {
           marginBottom: 0,
         },
-        tabBarIcon: (props) => (
+        tabBarIcon: ({ focused }) => (
           <Discover
             width="22"
             height="22"
-            color={props.focused ? focusedColor : unfocusedColor}
-            variant={props.focused ? "Bold" : "Broken"}
+            color={focused ? focusedColor : unfocusedColor}
+            variant={focused ? "Bold" : "Broken"}
           />
         ),
       },
@@ -126,17 +118,13 @@ const Pages: React.FC = () => {
       component: PageThree,
       options: {
         headerShown: true,
-        header: (props) => <Header2 />,
-        tabBarStyle: {
-          height: 50,
-          backgroundColor: tabBarBgColor,
-          borderTopWidth: 0,
-        },
-        tabBarLabel: (props) => (
+        header: () => <Header2 />,
+        tabBarLabel: ({ focused }) => (
           <Text
-            color={props.focused ? focusedColor : unfocusedColor}
+            color={focused ? focusedColor : unfocusedColor}
             fontWeight={500}
-            fontSize={"10px"}
+            fontSize="10px"
+            marginBottom={5}
           >
             {t("Carte")}
           </Text>
@@ -144,16 +132,16 @@ const Pages: React.FC = () => {
         tabBarIconStyle: {
           marginBottom: 0,
         },
-        tabBarIcon: (props) => (
-          <Stack position={"relative"}>
+        tabBarIcon: ({ focused }) => (
+          <Stack position="relative">
             {cartItems.length > 0 && (
               <Stack
-                w={4} // Increased size for better visibility
+                w={4}
                 h={4}
                 position="absolute"
                 rounded="full"
                 backgroundColor="#EB2525"
-                right={isArabic ? undefined : -8} // Adjusted positioning
+                right={isArabic ? undefined : -8}
                 left={isArabic ? -8 : undefined}
                 top={-6}
                 zIndex={87}
@@ -162,7 +150,7 @@ const Pages: React.FC = () => {
               >
                 <Text
                   color="#FFFFFF"
-                  fontSize="8px" // Small font size for the number
+                  fontSize="8px"
                   fontWeight="bold"
                 >
                   {cartItems.length}
@@ -172,8 +160,8 @@ const Pages: React.FC = () => {
             <ShoppingCart
               width="22"
               height="22"
-              color={props.focused ? focusedColor : unfocusedColor}
-              variant={props.focused ? "Bold" : "Broken"}
+              color={focused ? focusedColor : unfocusedColor}
+              variant={focused ? "Bold" : "Broken"}
             />
           </Stack>
         ),
@@ -184,17 +172,13 @@ const Pages: React.FC = () => {
       component: UserDetail,
       options: {
         headerShown: true,
-        header: (props) => <Header2 />,
-        tabBarStyle: {
-          height: 50,
-          backgroundColor: tabBarBgColor,
-          borderTopWidth: 0,
-        },
-        tabBarLabel: (props) => (
+        header: () => <Header2 />,
+        tabBarLabel: ({ focused }) => (
           <Text
-            color={props.focused ? focusedColor : unfocusedColor}
+            color={focused ? focusedColor : unfocusedColor}
             fontWeight={500}
-            fontSize={"10px"}
+            fontSize="10px"
+            marginBottom={5}
           >
             {t("myProfil")}
           </Text>
@@ -202,12 +186,12 @@ const Pages: React.FC = () => {
         tabBarIconStyle: {
           marginBottom: 0,
         },
-        tabBarIcon: (props) => (
+        tabBarIcon: ({ focused }) => (
           <User
             width="22"
             height="22"
-            color={props.focused ? focusedColor : unfocusedColor}
-            variant={props.focused ? "Bold" : "Broken"}
+            color={focused ? focusedColor : unfocusedColor}
+            variant={focused ? "Bold" : "Broken"}
           />
         ),
       },
@@ -231,14 +215,15 @@ const Pages: React.FC = () => {
   return (
     <Tab.Navigator
       initialRouteName="page one"
-      screenOptions={({ route }) => ({
+      screenOptions={{
         tabBarStyle: {
-          height: 50,
+          height: 60,
           backgroundColor: tabBarBgColor,
           borderTopWidth: 0,
+          paddingBottom: 10, // Ensure padding for bottom spacing
+          paddingTop: 5, // Optional: add top padding for balance
         },
-        tabBarLabel: () => null,
-      })}
+      }}
     >
       {orderedScreens.map((screen: Screen, index: number) => (
         <Tab.Screen
@@ -262,7 +247,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f5f5", // You can adjust this based on your theme
+    backgroundColor: "#f5f5f5",
   },
 });
 

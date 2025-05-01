@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { KeyboardAvoidingView, ScrollView, Platform } from "react-native";
+import { KeyboardAvoidingView, ScrollView, Platform, TextInput } from "react-native";
 import styles from "../Styles";
 import {
   VStack,
   Text,
   Stack,
-  Input,
   Box,
   Button,
   Icon,
@@ -185,15 +184,16 @@ export default function RecoveryPassword() {
       toast.show({
         placement: "top",
         render: () => (
-          <Box
-            bg="red.500"
-            px="2"
-            py="1"
-            rounded="sm"
-            _text={{ color: "#FFFFFF" }}
-          >
-            {error.response?.data?.message || t("reset_password_error")}
-          </Box>
+          
+            <Box
+              bg="red.500"
+              px="2"
+              py="1"
+              rounded="sm"
+              _text={{ color: "#FFFFFF" }}
+            >
+              {error.response?.data?.message || t("reset_password_error")}
+            </Box>
         ),
       });
     }
@@ -248,24 +248,21 @@ export default function RecoveryPassword() {
                   px={4}
                   borderWidth={1}
                   borderColor={inputBorderColor}
-                  rounded="8px"
+                  borderRadius="8px"
                 >
-                  <Input
+                  <TextInput
                     placeholder={t("phone_placeholder")}
                     textAlign={isArabic ? "right" : "left"}
-                    flex={1}
+                    style={{
+                      flex: 1,
+                      color: textColor,
+                      paddingVertical: 10,
+                      fontSize: 16,
+                    }}
                     value={phoneNumber}
                     defaultValue="+962"
                     onChangeText={setPhoneNumber}
                     keyboardType="phone-pad"
-                    variant="unstyled"
-                    _focus={{
-                      backgroundColor: "transparent",
-                      borderColor: "transparent",
-                    }}
-                    bg="transparent"
-                    borderWidth={0}
-                    color={textColor}
                     onFocus={() => console.log("Phone input focused")}
                     onBlur={() => console.log("Phone input blurred")}
                   />
@@ -279,12 +276,18 @@ export default function RecoveryPassword() {
                 <Text textAlign={isArabic ? "right" : "left"} color={textColor}>
                   {t("enter_code", { phone: phoneNumber })}
                 </Text>
-                <Input
+                <TextInput
                   placeholder={t("code_placeholder")}
                   value={code}
                   onChangeText={setCode}
-                  borderColor={inputBorderColor}
-                  color={textColor}
+                  style={{
+                    borderWidth: 1,
+                    borderColor: inputBorderColor,
+                    borderRadius: 8,
+                    padding: 10,
+                    color: textColor,
+                    fontSize: 16,
+                  }}
                   keyboardType="numeric"
                 />
                 <Button
@@ -312,17 +315,19 @@ export default function RecoveryPassword() {
                   px={4}
                   borderWidth={1}
                   borderColor={inputBorderColor}
-                  rounded="8px"
+                  borderRadius="8px"
                 >
-                  <Input
+                  <TextInput
                     placeholder={t("password_placeholder")}
-                    flex={1}
+                    style={{
+                      flex: 1,
+                      color: textColor,
+                      paddingVertical: 10,
+                      fontSize: 16,
+                    }}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!isPasswordVisible}
-                    variant="unstyled"
-                    bg="transparent"
-                    color={textColor}
                   />
                   <Pressable
                     onPress={() => setIsPasswordVisible(!isPasswordVisible)}
