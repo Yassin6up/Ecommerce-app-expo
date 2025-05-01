@@ -4,6 +4,8 @@ import {
   ScrollView,
   Platform,
   Keyboard,
+  TextInput ,
+  StyleSheet
 } from "react-native";
 import {
   Box,
@@ -16,7 +18,7 @@ import {
   WarningOutlineIcon,
   useToast,
   Pressable,
-  Input,
+  
 } from "native-base";
 import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
@@ -153,7 +155,56 @@ const Confirmation = ({ navigation, route }: any) => {
     }
   };
 
+  const colors = {
+    text: isDarkMode ? "#FFFFFF" : "#000000",
+    border: isDarkMode ? "#FFFFFF" : "#000000",
+    background: isDarkMode ? "#000000" : "#FFFFFF",
+    buttonBg: isDarkMode ? "#FFFFFF" : "#000000",
+    buttonText: isDarkMode ? "#000000" : "#FFFFFF",
+    pressedButton: isDarkMode ? "#CCCCCC" : "#333333",
+  };
 
+  // Timer and API calls remain the same as original
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: colors.background,
+    },
+    input: {
+      fontSize: 24,
+      letterSpacing: 8,
+      fontWeight: "bold",
+      color: colors.text,
+      width: 200,
+      borderBottomWidth: 2,
+      borderColor: colors.border,
+      padding: 8,
+      textAlign: "center",
+    },
+    button: {
+      backgroundColor: colors.buttonBg,
+      borderRadius: 12,
+      padding: 16,
+      width: "100%",
+      alignItems: "center",
+      marginTop: 20,
+    },
+    pressedButton: {
+      backgroundColor: colors.pressedButton,
+    },
+    buttonText: {
+      color: colors.buttonText,
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+    errorText: {
+      color: "#ff0000",
+      marginTop: 4,
+      fontSize: 12,
+    },
+  });
 
 
   const handleSubmit = async (values: any) => {
@@ -193,7 +244,7 @@ const CustomInput = React.forwardRef<TextInput>((props, ref) => {
     }
   }));
 
-  return ( <Input {...props}   ref={(el: any) => {
+  return ( <TextInput {...props}   ref={(el: any) => {
     if (ref) {
       if (typeof ref === 'function') {
         ref(el?._input);
@@ -205,21 +256,19 @@ const CustomInput = React.forwardRef<TextInput>((props, ref) => {
 });
 
 
-useEffect(() => {
-  const showSub = Keyboard.addListener('keyboardDidShow', () => {
-    inputRef.current?.keepFocus(); // Use custom focus method
-  });
-  return () => showSub.remove();
-}, []);
+// useEffect(() => {
+//   const showSub = Keyboard.addListener('keyboardDidShow', () => {
+//     inputRef.current?.keepFocus(); // Use custom focus method
+//   });
+//   return () => showSub.remove();
+// }, []);
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Critical for iOS
       keyboardVerticalOffset={Platform.OS === "android" ? -100 : 0}
       style={{ flex: 1 }}
-      onLayout={(e) => {
-        console.log('Layout height:', e.nativeEvent.layout.height);
-      }}
+    
     >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -231,7 +280,7 @@ useEffect(() => {
         >
           <StatusBar style="auto" />
           <Stack w={"full"} mb={4} position={"fixed"}>
-            <Pressable onPress={() => navigation.goBack()}>
+            <Pressable style={{marginLeft : 20}} onPress={() => navigation.goBack()}>
               <ArrowLeft size="32" color={iconColor} />
             </Pressable>
           </Stack>
@@ -272,32 +321,22 @@ useEffect(() => {
                       marginTop="48px"
                     >
                       <Stack alignItems="center" justifyContent="center">
-                        <CustomInput   value={values.otp}
-                                onChangeText={handleOtpChange}
-                                ref={inputRef}
-                                keyboardType="number-pad"
-                                maxLength={6}
-                                textAlign="center"
-                                fontSize="24px"
-                                onBlur={(e) => {
-                                  if (Platform.OS === 'ios' && values.otp.length < 6) {
-                                    // Prevent blur until OTP is complete
-                                    inputRef.current?.focus();
-                                  }
-                                }}
-                                width="200px"
-                                borderBottomWidth="2"
-                                autoComplete="sms-otp"
-                                textContentType="oneTimeCode"
-                                borderBottomColor={inputBorderColor}
-                                color={textColor}
-                                _focus={{
-                                  borderBottomColor: inputBorderColor,
-                                }}
-                                letterSpacing="8px"
-                                fontWeight="bold"
-                                variant="underlined"
-                                placeholder="••••••" />
+                      
+                  <TextInput
+                    ref={inputRef}
+                    value={values.otp}
+                    onChangeText={(text) =>{ handleOtpChange(text)}}
+                    style={styles.input}
+                    placeholder="••••••"
+                    placeholderTextColor={colors.text + "80"}
+                    keyboardType="number-pad"
+                    autoComplete="sms-otp"
+                    textContentType="oneTimeCode"
+                    maxLength={6}
+                    autoFocus
+                  />
+                
+               
                       </Stack>
                       <FormControl.ErrorMessage
                         leftIcon={<WarningOutlineIcon size="xs" />}
@@ -342,7 +381,7 @@ useEffect(() => {
                     width="full"
                   >
                     <Button
-                      width="full"
+                      width="90%"
                       backgroundColor={
                         isPressed ? buttonPressedBgColor : buttonBgColor
                       }
