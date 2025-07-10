@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Stack, Pressable, Text, Center, Switch, Popover, VStack, HStack, Box, Input, Icon } from "native-base";
-import { Setting2, Moon, Sun1, SearchNormal1 } from "iconsax-react-native";
+import { Setting2, Moon, Sun1, SearchNormal1, Notification } from "iconsax-react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "../store/themeSlice";
 import { setLanguage } from "../store/languageSlice";
@@ -8,6 +8,7 @@ import { RootState } from "../store/store";
 import i18n from "../Locale/i18n";
 import { Keyboard } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { I18nManager } from "react-native";
 
 const Header2 = () => {
   const [message, setMessage] = useState<string | null>(null);
@@ -63,10 +64,6 @@ const Header2 = () => {
     setTimeout(() => setMessage(null), 1000);
   };
 
-  useEffect(() => {
-    i18n.changeLanguage(currentLanguage);
-  }, [currentLanguage]);
-
   const handleThemePress = () => {
     dispatch(toggleTheme());
     const themeMessage = isDarkMode ? i18n.t("lightMode") : i18n.t("darkMode");
@@ -74,10 +71,13 @@ const Header2 = () => {
   };
 
   const handleLanguageChange = (lang: string) => {
+    i18n.changeLanguage(lang);
     dispatch(setLanguage(lang));
     setShowDropdown(false);
     showMessage(i18n.t("language") + `: ${lang}`);
   };
+
+  const isRTL = currentLanguage === "ar" || I18nManager.isRTL;
 
   return (
     <Stack 
@@ -89,11 +89,16 @@ const Header2 = () => {
       position="relative"
     > 
       <HStack w={'full'} alignItems={'center'} justifyContent={'space-between'}>
+        {/* Notification Icon (RTL/LTR aware) */}
+        {isRTL ? null : (
+          <Pressable onPress={() => navigation.navigate('NotificationScreen')}>
+            <Notification size="26" color={iconColor} variant="Bold" />
+          </Pressable>
+        )}
         {/* Settings Icon */}
         <Pressable onPress={() => setShowSetting(!showSetting)}>
           <Setting2 size="26" color={iconColor} />
         </Pressable>
-
         {/* Search Box */}
         <Box 
           width="70%" 
@@ -125,11 +130,16 @@ const Header2 = () => {
             color={primaryTextColor}
           />
         </Box>
-
         {/* Theme Toggle Icon */}
         <Pressable onPress={handleThemePress}>
           {isDarkMode ? <Sun1 size="26" color={iconColor} /> : <Moon size="26" color={iconColor} />}
         </Pressable>
+        {/* Notification Icon for RTL */}
+        {isRTL ? (
+          <Pressable onPress={() => navigation.navigate('NotificationScreen')}>
+            <Notification size="26" color={iconColor} variant="Bold" />
+          </Pressable>
+        ) : null}
       </HStack>
 
       {showSetting && (

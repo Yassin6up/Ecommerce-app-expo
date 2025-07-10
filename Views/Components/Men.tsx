@@ -5,28 +5,23 @@ import axios from "axios";
 import { RootState } from "../../store/store";
 import { useTranslation } from "react-i18next";
 import styles from "../Styles";
-import { HStack, VStack, Text, Image, Pressable } from "native-base";
+import { HStack, VStack, Text, Image, Pressable, Box, Icon, Button } from "native-base";
 import { useNavigation } from "@react-navigation/native";
+import { Heart } from "iconsax-react-native";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.8;
 const CARD_SPACING = 12;
+const CARD_HEIGHT = 250;
 
 export default function Men() {
-  const { t,i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const navigation = useNavigation<any>();
   const [menProducts, setMenProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  // Define black-and-white color scheme
-  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
-  const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000"; // Titles, prices
-  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333"; // Subtle text if needed
-  const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
-  const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
-  const highlightColor = isDarkMode ? "#FFFFFF" : "#000000"; // For "New" text
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const isRTL = i18n.language === "ar";
   const MEN_CATEGORY_ID = 1;
 
@@ -52,7 +47,6 @@ export default function Men() {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -66,11 +60,20 @@ export default function Men() {
     [navigation]
   );
 
+  const handleFavorite = (id: number) => {
+    setFavoriteIds((prev) =>
+      prev.includes(id) ? prev.filter((fid) => fid !== id) : [...prev, id]
+    );
+  };
 
+  const handleAddToCart = (item: any) => {
+    // Implement add to cart logic here
+    // e.g., dispatch(addToCart(item));
+  };
 
   if (error) {
     return (
-      <View style={[styles.mainContainer, { backgroundColor }]}>
+      <View style={[styles.mainContainer, { backgroundColor: isDarkMode ? "#000" : "#fff" }]}> 
         <Text style={{ color: "red" }}>{error}</Text>
       </View>
     );
@@ -80,68 +83,93 @@ export default function Men() {
     const imageUrl = item.images?.length
       ? `https://backend.j-byu.shop/api/prudact/${item.id}/img/${item.images[0]}`
       : "https://via.placeholder.com/300";
-
+    // For demo, random rating
+    const rating = Math.floor(Math.random() * 2) + 4; // 4 or 5 stars
     return (
-      <Pressable
-        onPress={() => handlePress(item)}
-        style={{
-          width: CARD_WIDTH,
-          marginRight: CARD_SPACING,
-          alignItems: "center",
-          alignSelf: "stretch",
-        }}
-        _pressed={{ opacity: 0.7 }}
+      <Box
+        bg={isDarkMode ? "#181818" : "#fff"}
+        rounded={16}
+        shadow={6}
+        overflow="hidden"
+        width={CARD_WIDTH}
+        height={CARD_HEIGHT}
+        mr={CARD_SPACING}
+        alignItems="center"
+        justifyContent="flex-start"
       >
-        <Image
-          source={{ uri: imageUrl }}
-          alt={item.title}
-          style={{ width: "100%", height: 200, borderRadius: 8 }}
-          resizeMode="cover"
-          onError={(e) => console.log(`Image load error for ${item.id}:`, e.nativeEvent.error)}
-        />
-        <HStack
-          w={"90%"}
-          alignItems={"center"}
-          justifyContent={"space-between"}
-          mt={5}
-        >
-          <Text
-            color={primaryTextColor}
-            w={"70%"}
-            numberOfLines={2}
-          >
-            {item.title}
-          </Text>
-          <VStack>
+        <Pressable onPress={() => handlePress(item)}>
+          <Image
+            source={{ uri: imageUrl }}
+            alt={item.title}
+            style={{ width: "100%", height: 120, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}
+            resizeMode="cover"
+            onError={(e) => console.log(`Image load error for ${item.id}:`, e.nativeEvent.error)}
+          />
+        </Pressable>
+        <VStack px={4} py={3} space={2} w="100%">
+          <HStack alignItems="center" justifyContent="space-between">
             <Text
-              color={primaryTextColor}
-              fontSize={18}
+              color={isDarkMode ? "#fff" : "#000"}
+              fontSize={15}
+              fontWeight="bold"
+              numberOfLines={2}
+              flex={1}
+              textAlign={isRTL ? "right" : "left"}
             >
-              {item.price} JOD 
+              {item.title}
             </Text>
-          </VStack>
-        </HStack>
-      </Pressable>
+            <Pressable onPress={() => handleFavorite(item.id)}>
+              <Icon as={Heart} size={6} color={favoriteIds.includes(item.id) ? "#F7CF9D" : isDarkMode ? "#fff" : "#000"} variant={favoriteIds.includes(item.id) ? "Bold" : "Linear"} />
+            </Pressable>
+          </HStack>
+          <HStack alignItems="center" space={1} mt={1}>
+            {[...Array(5)].map((_, i) => (
+              <Icon
+                key={i}
+                as={require('react-native-vector-icons/FontAwesome').default}
+                name="star"
+                size={4}
+                color={i < rating ? "#F7CF9D" : isDarkMode ? "#333" : "#ccc"}
+              />
+            ))}
+          </HStack>
+          <Text color={isDarkMode ? "#fff" : "#000"} fontSize={16} fontWeight="bold">
+            {item.price} JOD
+          </Text>
+          <Button
+            mt={2}
+            size="sm"
+            borderRadius={20}
+            px={6}
+            bg="#F7CF9D"
+            _text={{ color: '#000', fontWeight: 'bold', fontSize: 14 }}
+            shadow={2}
+            onPress={() => handleAddToCart(item)}
+          >
+            {t('Add_to_cart')}
+          </Button>
+        </VStack>
+      </Box>
     );
   };
 
   return (
-    <View style={[styles.mainContainer, { backgroundColor }]}>
+    <View style={[styles.mainContainer, { backgroundColor: isDarkMode ? "#000" : "#fff" }]}> 
       <HStack
         w={"full"}
         alignItems={"center"}
         justifyContent={"space-between"}
-        flexDirection={isRTL?'row-reverse':'row'}
+        flexDirection={isRTL ? 'row-reverse' : 'row'}
         my={4}
       >
-        <Text color={primaryTextColor} fontSize={20}>
-          <Text color={highlightColor}>{t("New")}</Text>
+        <Text color={isDarkMode ? "#fff" : "#000"} fontSize={20} fontWeight="bold">
+          <Text color={isDarkMode ? "#fff" : "#000"}>{t("New")}</Text>
         </Text>
         <Pressable
           px={4}
           py={2}
-          rounded={4}
-          bgColor={buttonBgColor}
+          rounded={20}
+          bgColor="#F7CF9D"
           alignSelf="stretch"
           onPress={() =>
             navigation.navigate("page two", {
@@ -151,14 +179,13 @@ export default function Men() {
           }
           _pressed={{ opacity: 0.7 }}
         >
-          <HStack alignItems={"center"} justifyContent={"space-between"}>
-            <Text color={buttonTextColor} fontSize={12}>
+          <HStack alignItems={"center"} justifyContent={"center"}>
+            <Text color="#000" fontSize={13} fontWeight="bold">
               {t("show_all")}
             </Text>
           </HStack>
         </Pressable>
       </HStack>
-
       <FlatList
         data={menProducts}
         keyExtractor={(item) => item.id.toString()}

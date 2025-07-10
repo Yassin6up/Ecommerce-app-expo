@@ -19,7 +19,7 @@ const PageOne = () => {
     ]} flex={1} height={'100%'} >
       <Adds />
       <NewProducts />
-      <Men  />
+      {/* <Men  /> */}
       {/* <Kids  /> */}
    
     </ScrollView>

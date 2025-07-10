@@ -190,12 +190,18 @@ const resources = {
 "no_whatsapp_or_phone_app": "Neither WhatsApp nor a phone app is installed.",
   "failed_to_open_whatsapp_or_phone": "Failed to open WhatsApp or phone app.",
   "account_delete_warning": "Your account will be removed in 30 days and cannot be restored.",
-  "invalid_registration_data":"Invalid registration data. Please check your information and try again"
- 
- 
-
-
-
+  "invalid_registration_data":"Invalid registration data. Please check your information and try again",
+  // --- Notification Screen ---
+  notification_order_shipped: "Order Shipped",
+  notification_order_shipped_msg: "Your order #1234 has been shipped and is on its way!",
+  notification_payment_successful: "Payment Successful",
+  notification_payment_successful_msg: "Your payment for order #1234 was successful. Thank you!",
+  notification_new_offer: "New Offer",
+  notification_new_offer_msg: "Check out our new discounts on summer collections!",
+  notification_time_2h: "2 hours ago",
+  notification_time_today: "Today",
+  notification_time_now: "Just now",
+  Notifications: "Notifications",
 
 
     },
@@ -352,8 +358,6 @@ const resources = {
   "cancelled": "ملغي",
   "no_orders_for_status": "لم يتم العثور على طلبات لهذه الحالة",
 
- 
-
   "loading": "جار التحميل",
   "error_fetching_orders": "خطأ في جلب الطلبات",
 
@@ -390,8 +394,18 @@ const resources = {
   "no_whatsapp_or_phone_app": "لا يوجد واتساب أو تطبيق هاتف مثبت.",
   "failed_to_open_whatsapp_or_phone": "فشل في فتح واتساب أو تطبيق الهاتف.",
   "account_delete_warning": "سيتم حذف حسابك خلال 30 يومًا ولا يمكن استعادته.",
-   "invalid_registration_data":"بيانات التسجيل غير صالحة. يرجى التحقق من معلوماتك والمحاولة مرة أخرى"
-  
+   "invalid_registration_data":"بيانات التسجيل غير صالحة. يرجى التحقق من معلوماتك والمحاولة مرة أخرى",
+  // --- Notification Screen ---
+  notification_order_shipped: "تم شحن الطلب",
+  notification_order_shipped_msg: "تم شحن طلبك رقم 1234 وهو في الطريق إليك!",
+  notification_payment_successful: "تم الدفع بنجاح",
+  notification_payment_successful_msg: "تمت عملية الدفع لطلبك رقم 1234 بنجاح. شكراً لك!",
+  notification_new_offer: "عرض جديد",
+  notification_new_offer_msg: "اكتشف خصوماتنا الجديدة على تشكيلات الصيف!",
+  notification_time_2h: "منذ ساعتين",
+  notification_time_today: "اليوم",
+  notification_time_now: "الآن",
+  Notifications: "الإشعارات",
 
 
     },

@@ -3,10 +3,11 @@ import { Dimensions, StyleSheet } from "react-native";
 import Swiper from "react-native-swiper";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { VStack, Image, Text, Pressable, Box } from "native-base";
+import { VStack, Image, Text, Pressable, Box, Button } from "native-base";
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@react-navigation/native";
-import logo from "../../assets/logo.png"; // Ensure this path is correct
+import logo from "../../assets/logo.png";
 import axios from "axios";
 
 const { width } = Dimensions.get("window");
@@ -32,7 +33,6 @@ export default function Adds() {
         setLoading(false);
       }
     };
-
     fetchSliders();
   }, []);
 
@@ -41,7 +41,6 @@ export default function Adds() {
       if (item.link && item.link !== "null" && typeof item.link === "string") {
         const productIdMatch = item.link.match(/\/products\/(\d+)/);
         const productId = productIdMatch ? productIdMatch[1] : null;
-
         if (productId) {
           navigation.navigate("page two", {
             screen: "ProductDetails",
@@ -63,8 +62,8 @@ export default function Adds() {
         <Image
           source={logo}
           alt="App Logo"
-          width={100} // Adjust size as needed
-          height={100} // Adjust size as needed
+          width={100}
+          height={100}
           resizeMode="contain"
         />
       </Box>
@@ -98,7 +97,7 @@ export default function Adds() {
         <Text
           style={[
             isDarkMode ? styles.darkText : styles.lightText,
-            { fontSize: 20 },
+            { fontSize: 22,  letterSpacing: 1,lineHeight:30 },
           ]}
         >
           {t("Sales")}
@@ -110,8 +109,8 @@ export default function Adds() {
           autoplay
           autoplayTimeout={3}
           showsPagination
-          dotStyle={{ backgroundColor: "rgba(255, 255, 255, 0.5)" }}
-          activeDotStyle={{ backgroundColor: "#F7CF9D" }}
+          dotStyle={{ backgroundColor: isDarkMode ? "#333" : "rgba(0,0,0,0.2)", width: 8, height: 8, borderRadius: 4 }}
+          activeDotStyle={{ backgroundColor: "#F7CF9D", width: 12, height: 12, borderRadius: 6 }}
           width={width}
           height={250}
         >
@@ -129,6 +128,35 @@ export default function Adds() {
                 style={styles.bannerImage}
                 resizeMode="cover"
               />
+              {/* Gradient overlay for text and button */}
+              <LinearGradient
+                colors={['transparent', isDarkMode ? 'rgba(0,0,0,0.85)' : 'rgba(0,0,0,0.55)']}
+                style={styles.gradientOverlay}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+              >
+                <VStack px={5} pb={4} pt={12} alignItems={isArabic ? 'flex-end' : 'flex-start'}>
+                  {slider.text ? (
+                    <Text
+                      style={{ color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 6, textAlign: isArabic ? 'right' : 'left' }}
+                      numberOfLines={2}
+                    >
+                      {slider.text}
+                    </Text>
+                  ) : null}
+                  {/* <Button
+                    size="sm"
+                    borderRadius={20}
+                    px={6}
+                    bg="#F7CF9D"
+                    _text={{ color: '#000', fontWeight: 'bold', fontSize: 14 }}
+                    shadow={2}
+                    mt={2}
+                  >
+                    {t('View')}
+                  </Button> */}
+                </VStack>
+              </LinearGradient>
             </Pressable>
           ))}
         </Swiper>
@@ -152,7 +180,7 @@ const styles = StyleSheet.create({
   },
   swiperContainer: {
     width: "100%",
-    borderRadius: 16,
+    borderRadius: 18,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -165,7 +193,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 16,
+    borderRadius: 18,
     overflow: "hidden",
     position: "relative",
     width: width,
@@ -173,7 +201,17 @@ const styles = StyleSheet.create({
   bannerImage: {
     width: width,
     height: 250,
-    borderRadius: 16,
+    borderRadius: 18,
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 100,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
+    justifyContent: 'flex-end',
   },
   lightText: {
     color: "black",

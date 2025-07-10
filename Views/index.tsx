@@ -1,4 +1,4 @@
-import { Stack, View } from "native-base";
+import { Stack as NBStack, View } from "native-base";
 import React, { useState, useEffect } from "react";
 import { Text } from "native-base";
 import {
@@ -16,6 +16,8 @@ import { RootState } from "../store/store";
 import { useTranslation } from "react-i18next";
 import { I18nManager, StyleSheet } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
+import NotificationScreen from "./Pages/NotificationScreen";
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 interface Screen {
   name: string;
@@ -24,6 +26,7 @@ interface Screen {
 }
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 const Pages: React.FC = () => {
   const cartItems = useSelector((state: RootState) => state.cart.items);
@@ -133,9 +136,9 @@ const Pages: React.FC = () => {
           marginBottom: 0,
         },
         tabBarIcon: ({ focused }) => (
-          <Stack position="relative">
+          <NBStack position="relative">
             {cartItems.length > 0 && (
-              <Stack
+              <NBStack
                 w={4}
                 h={4}
                 position="absolute"
@@ -155,7 +158,7 @@ const Pages: React.FC = () => {
                 >
                   {cartItems.length}
                 </Text>
-              </Stack>
+              </NBStack>
             )}
             <ShoppingCart
               width="22"
@@ -163,7 +166,7 @@ const Pages: React.FC = () => {
               color={focused ? focusedColor : unfocusedColor}
               variant={focused ? "Bold" : "Broken"}
             />
-          </Stack>
+          </NBStack>
         ),
       },
     },
@@ -213,32 +216,48 @@ const Pages: React.FC = () => {
   }
 
   return (
-    <Tab.Navigator
-      initialRouteName="page one"
-      screenOptions={{
-        tabBarStyle: {
-          height: 60,
-          backgroundColor: tabBarBgColor,
-          borderTopWidth: 0,
-          paddingBottom: 10, // Ensure padding for bottom spacing
-          paddingTop: 5, // Optional: add top padding for balance
-        },
-      }}
-    >
-      {orderedScreens.map((screen: Screen, index: number) => (
-        <Tab.Screen
-          key={index}
-          options={screen.options}
-          name={screen.name}
-          component={screen.component}
-          listeners={{
-            tabPress: (e) => {
-              handleTabPress(screen.name);
-            },
-          }}
-        />
-      ))}
-    </Tab.Navigator>
+    <Stack.Navigator>
+      <Stack.Screen
+        name="MainTabs"
+        options={{ headerShown: false }}
+        component={() => (
+          <Tab.Navigator
+            initialRouteName="page one"
+            screenOptions={{
+              tabBarStyle: {
+                height: 60,
+                backgroundColor: tabBarBgColor,
+                borderTopWidth: 0,
+                paddingBottom: 10,
+                paddingTop: 5,
+              },
+            }}
+          >
+            {orderedScreens.map((screen: Screen, index: number) => (
+              <Tab.Screen
+                key={index}
+                options={screen.options}
+                name={screen.name}
+                component={screen.component}
+                listeners={{
+                  tabPress: (e) => {
+                    handleTabPress(screen.name);
+                  },
+                }}
+              />
+            ))}
+          </Tab.Navigator>
+        )}
+      />
+      <Stack.Screen
+        name="NotificationScreen"
+        component={NotificationScreen}
+        options={{
+          headerShown: false,
+          presentation: 'modal',
+        }}
+      />
+    </Stack.Navigator>
   );
 };
 
