@@ -4,43 +4,114 @@ import {
   Dimensions,
   ActivityIndicator,
   Image as RNImage,
-  Animated,
+  FlatList,
+  ScrollView,
 } from "react-native";
-import Swiper from "react-native-swiper";
 import NetInfo from "@react-native-community/netinfo";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../store/store";
 import { fetchAllProducts } from "../../store/features/productsSlice";
+import { fetchCategories } from "../../store/categories/categoriesSlice";
 import { useTranslation } from "react-i18next";
 import styles from "../Styles";
 import { VStack, Text, Stack, Pressable, Box, Icon, Button, HStack, Skeleton } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { Heart } from "iconsax-react-native";
+import axios from "axios";
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = width *0.9;
+const CARD_WIDTH = width * 0.9;
 const CARD_HEIGHT = 320;
 
 export default function NewProducts() {
   const dispatch = useDispatch<AppDispatch>();
   const { t, i18n } = useTranslation();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
-  const { products: productsData, status } = useSelector(
-    (state: any) => state.products
-  );
   const navigation = useNavigation<any>();
   const [isConnected, setIsConnected] = useState<boolean>(true);
-  const [activeIndex, setActiveIndex] = useState(0);
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const isRTL = i18n.language === "ar";
 
+  // Category filter state
+  const categories = useSelector((state: RootState) => state.categories.items);
+  const categoriesLoading = useSelector((state: RootState) => state.categories.loading);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Children categories state
+  const [childrenCategories, setChildrenCategories] = useState<any[]>([]);
+  const [childrenLoading, setChildrenLoading] = useState<boolean>(false);
+
+  // Products state
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    dispatch(fetchAllProducts());
+    dispatch(fetchCategories());
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsConnected(state.isConnected ?? false);
     });
     return () => unsubscribe();
   }, [dispatch]);
+
+  // Fetch children for all parent categories
+  useEffect(() => {
+    const fetchAllChildren = async () => {
+      if (!categories || categories.length === 0) return;
+      setChildrenLoading(true);
+      try {
+        const allChildren: any[] = [];
+        for (const parent of categories) {
+          const res = await axios.get(`https://backend.j-byu.shop/api/categories/children/${parent.id}`);
+          if (Array.isArray(res.data)) {
+            allChildren.push(...res.data);
+          }
+        }
+        setChildrenCategories(allChildren);
+      } catch (err) {
+        setChildrenCategories([]);
+      } finally {
+        setChildrenLoading(false);
+      }
+    };
+    fetchAllChildren();
+  }, [categories]);
+
+  // Fetch products (all or by category)
+  const fetchProducts = useCallback(async (categoryId?: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      let response;
+      if (categoryId) {
+        response = await axios.get(`https://backend.j-byu.shop/api/products/byCatgId/${categoryId}`);
+        setProducts(response.data);
+      } else {
+        // fallback: fetch all products (random)
+        response = await axios.get("https://backend.j-byu.shop/api/random-products", { params: { user_id: "1" } });
+        setProducts(Array.isArray(response.data) ? response.data : []);
+      }
+    } catch (err: any) {
+      setError(t("NoProductsAvailable"));
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
+  // Initial fetch (all products)
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // Fetch products when filter changes
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchProducts(selectedCategory);
+    } else {
+      fetchProducts();
+    }
+  }, [selectedCategory, fetchProducts]);
 
   const handlePress = useCallback(
     (item: any) => {
@@ -63,7 +134,130 @@ export default function NewProducts() {
     // e.g., dispatch(addToCart(item));
   };
 
-  const displayedProducts = Array.isArray(productsData) ? productsData : [];
+  // Render filter bar (horizontal scroll, sticky)
+  const renderFilterBar = () => (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={{ backgroundColor: isDarkMode ? '#171717' : '#fff', paddingVertical: 8, paddingHorizontal: 8 }}
+      contentContainerStyle={{ alignItems: 'center' }}
+    >
+      <Pressable onPress={() => setSelectedCategory(null)} style={{ marginRight: 12 }}>
+        <Box
+          px={5}
+          py={2}
+          rounded={20}
+          bg={selectedCategory === null ? "#F7CF9D" : isDarkMode ? "#222" : "#eee"}
+          borderWidth={selectedCategory === null ? 2 : 0}
+          borderColor="#F7CF9D"
+        >
+          <Text color={selectedCategory === null ? "#000" : isDarkMode ? "#fff" : "#000"} fontWeight="bold">
+            الكل
+          </Text>
+        </Box>
+      </Pressable>
+      {childrenCategories.map((cat) => (
+        <Pressable key={cat.id} onPress={() => setSelectedCategory(cat.id)} style={{ marginRight: 12 }}>
+          <Box
+            px={5}
+            py={2}
+            rounded={20}
+            bg={selectedCategory === cat.id ? "#F7CF9D" : isDarkMode ? "#222" : "#eee"}
+            borderWidth={selectedCategory === cat.id ? 2 : 0}
+            borderColor="#F7CF9D"
+          >
+            <Text color={selectedCategory === cat.id ? "#000" : isDarkMode ? "#fff" : "#000"} fontWeight="bold">
+              {cat.name}
+            </Text>
+          </Box>
+        </Pressable>
+      ))}
+    </ScrollView>
+  );
+
+  // Render product card
+  const renderProduct = ({ item }: { item: any }) => {
+    let images: string[] = [];
+    try {
+      images = JSON.parse(item.images);
+    } catch (error) {
+      // ignore
+    }
+    const imageUrl = images.length
+      ? `https://backend.j-byu.shop/api/prudact/${item.id}/img/${images[0]}`
+      : "https://via.placeholder.com/300";
+    return (
+      <Box
+        bg={isDarkMode ? "#1a1a1a" : "#fff"}
+        rounded={20}
+        shadow={4}
+        overflow="hidden"
+        width={CARD_WIDTH}
+        height={CARD_HEIGHT}
+        alignSelf="center"
+        mb={6}
+      >
+        <Pressable onPress={() => handlePress(item)}>
+          <RNImage
+            source={{ uri: imageUrl }}
+            style={{ width: "100%", height: 180, borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
+            resizeMode="contain"
+          />
+          {/* Favorite button overlay */}
+          <Pressable 
+            onPress={() => handleFavorite(item.id)}
+            style={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              backgroundColor: 'rgba(0,0,0,0.3)',
+              borderRadius: 20,
+              padding: 8,
+            }}
+          >
+            <Icon 
+              as={Heart} 
+              size={6} 
+              color={favoriteIds.includes(item.id) ? "#F7CF9D" : "#fff"} 
+              variant={favoriteIds.includes(item.id) ? "Bold" : "Linear"} 
+            />
+          </Pressable>
+        </Pressable>
+        <VStack px={5} py={4} space={3} flex={1} justifyContent="space-between">
+          <VStack space={2}>
+            <Text
+              color={isDarkMode ? "#fff" : "#000"}
+              fontSize={16}
+              fontWeight="bold"
+              numberOfLines={2}
+              textAlign={isRTL ? "right" : "left"}
+              lineHeight={25}
+            >
+              {item.title}
+            </Text>
+            {/* Product description */}
+            
+            <Text color={isDarkMode ? "#fff" : "#468500"} fontSize={18} fontWeight="bold">
+              {item.price} JOD
+            </Text>
+          </VStack>
+          <Button
+            size="md"
+            borderRadius={25}
+            px={8}
+            py={3}
+            bg="#F7CF9D"
+            _text={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}
+            shadow={3}
+            onPress={() => handleAddToCart(item)}
+            _pressed={{ opacity: 0.8 }}
+          >
+            {t('Add_to_cart')}
+          </Button>
+        </VStack>
+      </Box>
+    );
+  };
 
   if (!isConnected) {
     return (
@@ -85,115 +279,47 @@ export default function NewProducts() {
     );
   }
 
-  // Shimmer loading
-  if (status === "loading") {
-    return (
-      <Box px={4} py={6}>
-        <HStack space={4} justifyContent="center">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} h={CARD_HEIGHT} w={CARD_WIDTH} rounded={20} startColor={isDarkMode ? "#222" : "#eee"} endColor={isDarkMode ? "#444" : "#ccc"} />
-          ))}
-        </HStack>
-      </Box>
-    );
-  }
-
-  const renderSwiperItem = (item: any, index: number) => {
-    let images: string[] = [];
-    try {
-      images = JSON.parse(item.images);
-    } catch (error) {
-      console.error(`Error parsing images for product ${item.id}:`, error);
-    }
-    const imageUrl = images.length
-      ? `https://backend.j-byu.shop/api/prudact/${item.id}/img/${images[0]}`
-      : "https://via.placeholder.com/300";
-
-    // Remove scale and opacity effects to reduce lag
-    const isActive = activeIndex === index;
-
+  // Shimmer loading for categories (only on first load)
+  if (categoriesLoading || childrenLoading) {
     return (
       <View
-        key={item.id}
-        style={{
-          width: CARD_WIDTH,
-          height: CARD_HEIGHT,
-          alignItems: "center",
-          justifyContent: "center",
-          alignSelf: "stretch",
-        }}
+        style={[
+          styles.mainContainer,
+          isDarkMode ? styles.darkBckground : styles.lightBckground,
+        ]}
       >
-        <Box
-          bg={isDarkMode ? "#1a1a1a" : "#fff"}
-          rounded={20}
-          shadow={isActive ? 12 : 4}
-          overflow="hidden"
-          width={CARD_WIDTH}
-          height={CARD_HEIGHT}
-          borderWidth={isActive ? 2 : 0}
-          borderColor="#F7CF9D"
+        <VStack
+          w={"full"}
+          alignItems={"center"}
+          justifyContent={"center"}
+          mb={4}
         >
-          <Pressable onPress={() => handlePress(item)}>
-            <RNImage
-              source={{ uri: imageUrl }}
-              style={{ width: "100%", height: 180, borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
-              resizeMode="contain"
-              onError={(e) => console.log(`Image load error for ${item.id}:`, e.nativeEvent.error)}
-            />
-            {/* Favorite button overlay */}
-            <Pressable 
-              onPress={() => handleFavorite(item.id)}
-              style={{
-                position: 'absolute',
-                top: 12,
-                right: 12,
-                backgroundColor: 'rgba(0,0,0,0.3)',
-                borderRadius: 20,
-                padding: 8,
-              }}
-            >
-              <Icon 
-                as={Heart} 
-                size={6} 
-                color={favoriteIds.includes(item.id) ? "#F7CF9D" : "#fff"} 
-                variant={favoriteIds.includes(item.id) ? "Bold" : "Linear"} 
-              />
-            </Pressable>
-          </Pressable>
-          <VStack px={5} py={4} space={3} flex={1} justifyContent="space-between">
-            <VStack space={2}>
-              <Text
-                color={isDarkMode ? "#fff" : "#000"}
-                fontSize={16}
-                fontWeight="bold"
-                numberOfLines={2}
-                textAlign={isRTL ? "right" : "left"}
-                lineHeight={20}
-              >
-                {item.title}
-              </Text>
-              <Text color={isDarkMode ? "#fff" : "#000"} fontSize={18} fontWeight="bold">
-                {item.price} JOD
-              </Text>
-            </VStack>
-            <Button
-              size="md"
-              borderRadius={25}
-              px={8}
-              py={3}
-              bg="#F7CF9D"
-              _text={{ color: '#000', fontWeight: 'bold', fontSize: 15 }}
-              shadow={3}
-              onPress={() => handleAddToCart(item)}
-              _pressed={{ opacity: 0.8 }}
-            >
-              {t('Add_to_cart')}
-            </Button>
-          </VStack>
+          <Text
+            style={[
+              isDarkMode ? styles.darkText : styles.lightText,
+              {
+                fontSize: 24,
+                marginBottom: 8,
+                textAlign: isRTL ? "right" : "left",
+                lineHeight: 50,
+              },
+            ]}
+          >
+            <Text style={{ color: isDarkMode ? "#fff" : "#000" }}>{t("New")}</Text> {t("Products")}
+          </Text>
+          <Stack width={"15%"} h={2} bg="#F7CF9D" rounded={4}></Stack>
+        </VStack>
+        {renderFilterBar()}
+        <Box px={4} py={6}>
+          <HStack space={4} justifyContent="center">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} h={CARD_HEIGHT} w={CARD_WIDTH} rounded={20} startColor={isDarkMode ? "#222" : "#eee"} endColor={isDarkMode ? "#444" : "#ccc"} />
+            ))}
+          </HStack>
         </Box>
       </View>
     );
-  };
+  }
 
   return (
     <View
@@ -205,78 +331,45 @@ export default function NewProducts() {
         w={"full"}
         alignItems={"center"}
         justifyContent={"center"}
-        mb={12}>
+        mb={4}
+      >
         <Text
           style={[
             isDarkMode ? styles.darkText : styles.lightText,
             {
               fontSize: 24,
-              marginBottom: 16,
+              marginBottom: 8,
               textAlign: isRTL ? "right" : "left",
-         lineHeight:50
+              lineHeight: 50,
             },
-          ]}>
-          <Text style={{color: isDarkMode ? "#fff" : "#000" }}>{t("New")}</Text> {t("Products")}
+          ]}
+        >
+          <Text style={{ color: isDarkMode ? "#fff" : "#000" }}>{t("New")}</Text> {t("Products")}
         </Text>
         <Stack width={"15%"} h={2} bg="#F7CF9D" rounded={4}></Stack>
       </VStack>
-      {displayedProducts.length > 0 ? (
-        <VStack space={6}>
-          <Swiper
-            showsButtons={false}
-  
-            autoplayTimeout={4}
-            horizontal={true}
-            loop={true}
-            containerStyle={{
-              height: CARD_HEIGHT + 40,
-              width: "100%",
-            }}
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            dot={
-              <View
-                style={{
-                  backgroundColor: isDarkMode ? "#333" : "#ccc",
-                  width: 10,
-                  height: 10,
-                  borderRadius: 5,
-                  marginHorizontal: 6,
-                  marginVertical: 3,
-                }}
-              />
-            }
-            activeDot={
-              <View
-                style={{
-                  backgroundColor: "#F7CF9D",
-                  width: 30,
-                  height: 10,
-                  borderRadius: 5,
-                  marginHorizontal: 6,
-                  marginVertical: 3,
-                }}
-              />
-            }
-            loadMinimal
-            loadMinimalSize={3}
-            index={activeIndex}
-            onIndexChanged={setActiveIndex}
-            scrollEnabled={true}
-            showsPagination={true}
-            removeClippedSubviews={false}
-          >
-            {displayedProducts.map((item, idx) => renderSwiperItem(item, idx))}
-          </Swiper>
-        </VStack>
-      ) : (
-        <Text
-          style={{ textAlign: "center", color: isDarkMode ? "#fff" : "#000" }}>
-          {t("NoProductsAvailable")}
-        </Text>
-      )}
+      <FlatList
+        data={products}
+        keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
+        renderItem={renderProduct}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        ListHeaderComponent={renderFilterBar}
+        stickyHeaderIndices={[0]}
+        ListEmptyComponent={loading ? (
+          <Box px={4} py={6}>
+            <HStack space={4} justifyContent="center">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} h={CARD_HEIGHT} w={CARD_WIDTH} rounded={20} startColor={isDarkMode ? "#222" : "#eee"} endColor={isDarkMode ? "#444" : "#ccc"} />
+              ))}
+            </HStack>
+          </Box>
+        ) : error ? (
+          <Text style={{ textAlign: "center", color: isDarkMode ? "#fff" : "#000" }}>
+            {error}
+          </Text>
+        ) : null}
+      />
     </View>
   );
 }

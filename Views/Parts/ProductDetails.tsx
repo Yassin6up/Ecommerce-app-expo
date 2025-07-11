@@ -6,9 +6,11 @@ import {
   ActivityIndicator,
   Animated,
   BackHandler,
-  Alert, // For login prompt
+  Alert,
+  ScrollView,
+  Dimensions, // <-- Add this import
 } from "react-native";
-import { StackActions, useRoute } from "@react-navigation/native";
+import { StackActions, useRoute, useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../store/cartSlice";
 import {
@@ -22,40 +24,41 @@ import {
   Text,
   Image,
   HStack,
-  ScrollView,
   Button,
-  Stack,
-  Box, // For toast
-  useToast, // For toast
+  Box,
+  useToast,
 } from "native-base";
-import styles from "../Styles";
-import { useNavigation } from "@react-navigation/native";
+import Swiper from "react-native-swiper";
 import { ArrowLeft, Heart } from "iconsax-react-native";
 import i18next from "i18next";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setPassHome } from "../../store/PassHomeSlice";
+import { RouteProp } from '@react-navigation/native';
+
+const { width: deviceWidth } = Dimensions.get("window");
+const imageHeight = deviceWidth * 0.75; // 4:3 ratio for better visibility
 
 const ProductDetails = () => {
-  const navigation: any = useNavigation();
-  const route = useRoute<any>();
+  const navigation = useNavigation();
+  const route = useRoute<RouteProp<{ params: { id: string } }, 'params'>>();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const toast = useToast(); // Initialize useToast
+  const toast = useToast();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>("");
   const [scaleValue] = useState(new Animated.Value(1));
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [isFavorite, setFave] = useState(false);
-  const [mainImage, setMainImage] = useState<string>("");
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const isRTL = i18next.language === "ar";
 
-  const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
+  // Dynamic theme colors
+  const backgroundColor = isDarkMode ? "#1A1A1A" : "#FFFFFF";
   const primaryTextColor = isDarkMode ? "#FFFFFF" : "#000000";
-  const secondaryTextColor = isDarkMode ? "#CCCCCC" : "#333333";
+  const secondaryTextColor = isDarkMode ? "#B0B0B0" : "#4A4A4A";
   const buttonBgColor = isDarkMode ? "#FFFFFF" : "#000000";
   const buttonTextColor = isDarkMode ? "#000000" : "#FFFFFF";
   const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
@@ -63,7 +66,7 @@ const ProductDetails = () => {
   // Handle back button press
   useEffect(() => {
     const backAction = () => {
-      navigation.navigate("parts");
+      (navigation as any).navigate("parts");
       return true;
     };
 
@@ -75,16 +78,13 @@ const ProductDetails = () => {
     return () => backHandler.remove();
   }, [navigation]);
 
+  // Fetch product data
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const { id } = route.params;
         let userId = await AsyncStorage.getItem("userId");
-
-        // Use userId = "0" for non-logged-in users
-        if (!userId) {
-          userId = "0";
-        }
+        if (!userId) userId = "0";
 
         const response = await axios.get(
           `https://backend.j-byu.shop/api/products/${id}`,
@@ -97,10 +97,9 @@ const ProductDetails = () => {
         };
         setFave(response.data.isSaved);
         setProduct(productData);
-        setMainImage(productData.images[0]);
       } catch (err: any) {
         setError(t("product_fetch_error"));
-        console.error("Product fetch error:", err.response?.data);
+        console.error("Product fetch error:", err?.response?.data);
       } finally {
         setLoading(false);
       }
@@ -111,33 +110,27 @@ const ProductDetails = () => {
     }
   }, [route.params?.id, t]);
 
+  // Handle adding to cart
   const handleAddToCart = () => {
     if (!product) return;
 
-    // Check if colors and/or sizes exist
     const hasColors = product.colors && JSON.parse(product.colors)?.length > 0;
     const hasSizes = product.sizes && JSON.parse(product.sizes)?.length > 0;
 
-    // Validate selections
     let missingSelections = [];
-    if (hasColors && !selectedColor) {
-      missingSelections.push(t("color"));
-    }
-    if (hasSizes && !selectedSize) {
-      missingSelections.push(t("size"));
-    }
+    if (hasColors && !selectedColor) missingSelections.push(t("color"));
+    if (hasSizes && !selectedSize) missingSelections.push(t("size"));
 
-    // If there are missing selections, show a toast and prevent adding to cart
     if (missingSelections.length > 0) {
       toast.show({
         placement: "top",
         render: () => (
           <Box
             bg="red.500"
-            px="2"
-            py="1"
-            rounded="sm"
-            _text={{ color: "#FFFFFF" }}
+            px="4"
+            py="2"
+            rounded="md"
+            _text={{ color: "#FFFFFF", fontWeight: "bold" }}
           >
             {t("please_select")} {missingSelections.join(" & ")}
           </Box>
@@ -146,13 +139,12 @@ const ProductDetails = () => {
       return;
     }
 
-    // If all required selections are made, proceed to add to cart
     dispatch(
       addToCart({
         id: product.id,
         name: product.title,
         price: product.price,
-        image: mainImage,
+        image: product.images[0],
         quantity: 1,
         vendorWhatsApp: product.vendorWhatsApp,
         vendorPhoneNumber: product.vendorPhoneNumber,
@@ -161,16 +153,15 @@ const ProductDetails = () => {
       })
     );
 
-    // Show success toast notification
     toast.show({
       placement: "top",
       render: () => (
         <Box
           bg="green.500"
-          px="2"
-          py="1"
-          rounded="sm"
-          _text={{ color: "#FFFFFF" }}
+          px="4"
+          py="2"
+          rounded="md"
+          _text={{ color: "#FFFFFF", fontWeight: "bold" }}
         >
           {t("product_added_to_cart")}
         </Box>
@@ -178,10 +169,10 @@ const ProductDetails = () => {
     });
   };
 
+  // Handle favorite toggle
   const handleToggleFavorite = async () => {
     const userId = await AsyncStorage.getItem("userId");
 
-    // Check if user is logged in
     if (!userId) {
       Alert.alert(
         t("please_login_title"),
@@ -191,7 +182,6 @@ const ProductDetails = () => {
           {
             text: t("login"),
             onPress: () => {
-              // Navigate to Login screen in AuthPages
               dispatch(setPassHome(false));
             },
           },
@@ -205,13 +195,13 @@ const ProductDetails = () => {
 
     Animated.sequence([
       Animated.timing(scaleValue, {
-        toValue: 1.2,
-        duration: 100,
+        toValue: 1.3,
+        duration: 150,
         useNativeDriver: true,
       }),
       Animated.timing(scaleValue, {
         toValue: 1,
-        duration: 100,
+        duration: 150,
         useNativeDriver: true,
       }),
     ]).start();
@@ -233,22 +223,15 @@ const ProductDetails = () => {
         dispatch(removeFromFavorites({ productId: product.id }));
       }
     } catch (error: any) {
-      setFave(isFavorite); // Revert on failure
-      console.error("Toggle favorite error:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-      if (error.response?.status === 405) {
-        console.error("Method not allowed - try GET if POST is unsupported");
-      }
+      setFave(isFavorite);
+      console.error("Toggle favorite error:", error.response?.data);
     }
   };
 
   if (loading) {
     return (
       <View
-        style={[styles.mainContainer, { justifyContent: "center", backgroundColor }]}
+        style={[styles.container, { backgroundColor, justifyContent: "center" }]}
       >
         <ActivityIndicator size="large" color={primaryTextColor} />
       </View>
@@ -257,119 +240,96 @@ const ProductDetails = () => {
 
   if (error || !product) {
     return (
-      <View style={[styles.mainContainer, { backgroundColor }]}>
-        <Text style={{ color: "red" }}>{error || t("product_not_found")}</Text>
+      <View style={[styles.container, { backgroundColor }]}>
+        <Text style={{ color: "red", fontSize: 16, textAlign: "center" }}>
+          {error || t("product_not_found")}
+        </Text>
       </View>
     );
   }
 
-  const handleImageSelect = (image: string) => {
-    setMainImage(image);
-  };
-
   return (
-    <VStack style={[styles.mainContainer, { backgroundColor }]}>
-      <Stack w={"full"} mb={4} position={"fixed"}>
-        <Pressable onPress={() => navigation.navigate("parts")}>
-          <ArrowLeft size="32" color={iconColor} />
-        </Pressable>
-      </Stack>
-
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
+    <VStack style={[styles.container, { backgroundColor }]}>
+      {/* Header with Back Button */}
+      <HStack
+        w="full"
+        p={4}
+        alignItems="center"
+        justifyContent="space-between"
+        style={styles.header}
       >
-        <HStack
-          width={"full"}
-          justifyContent={"space-between"}
-          alignItems={"center"}
-          space={2}
-        >
-          <Image
-            source={{
-              uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${mainImage}`,
-            }}
-            width={250}
-            height={310}
-            rounded={4}
-            resizeMode="cover"
-            alt={product.title}
-          />
-          <ScrollView
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            height={300}
-          >
-            <VStack space={12}>
-              {product.images.map((img: string, idx: number) => (
-                <Pressable key={idx} onPress={() => handleImageSelect(img)}>
-                  <Image
-                    source={{
-                      uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${img}`,
-                    }}
-                    width={120}
-                    height={120}
-                    rounded={4}
-                    resizeMode="cover"
-                    alt={`${product.title}-${idx}`}
-                    borderWidth={mainImage === img ? 3 : 0}
-                    borderColor={mainImage === img ? "green" : "transparent"}
-                  />
-                </Pressable>
-              ))}
-            </VStack>
-          </ScrollView>
-        </HStack>
-        <Stack width={'full'} alignItems={'flex-end'}>
-          <Stack
-            alignItems={'center'}
-            justifyContent={'center'}
-            backgroundColor={'gray.300'}
-            w={46}
-            h={46}
-            rounded={'full'}
-          >
-            <Pressable onPress={handleToggleFavorite}>
-              <Heart
-                size="32"
-                color={iconColor}
-                variant={isFavorite ? "Bold" : "Outline"}
-              />
-            </Pressable>
-          </Stack>
-        </Stack>
+        <Pressable onPress={() => (navigation as any).navigate("parts")}>
+          <ArrowLeft size={32} color={iconColor} />
+        </Pressable>
+        <Pressable onPress={handleToggleFavorite}>
+          <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+            <Heart
+              size={32}
+              color={iconColor}
+              variant={isFavorite ? "Bold" : "Outline"}
+              style={styles.favoriteIcon}
+            />
+          </Animated.View>
+        </Pressable>
+      </HStack>
 
-        <HStack justifyContent="space-between" alignItems="center">
-          <Text
-            fontSize={18}
-            marginTop={2}
-            color={primaryTextColor}
-            textAlign={isRTL ? "right" : "left"}
-          >
-            {product.title}
-          </Text>
-        </HStack>
+      {/* Swiper for Product Images */}
+      <View style={{ width: deviceWidth, height: imageHeight, alignSelf: 'center' }}>
+        <Swiper
+          style={{ height: imageHeight }}
+          showsPagination
+          paginationStyle={styles.pagination}
+          dotStyle={[styles.dot, { backgroundColor: isDarkMode ? "#666" : "#CCC" }]}
+          activeDotStyle={[styles.activeDot, { backgroundColor: "#34C759" }]}
+          loop
+        >
+          {product.images.map((img: string, idx: number) => (
+            <View key={idx} style={{ width: deviceWidth, height: imageHeight, justifyContent: 'center', alignItems: 'center' }}>
+              <Image
+                source={{
+                  uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${img}`,
+                }}
+                style={{ width: deviceWidth, height: imageHeight }}
+                resizeMode="contain"
+                alt={`${product.title}-${idx}`}
+              />
+            </View>
+          ))}
+        </Swiper>
+      </View>
+
+      {/* Product Information */}
+      <ScrollView style={{ flex: 1, paddingBottom: 80, marginBottom: 80 }}>
+        <VStack px={4} py={8} space={4}>
+        <Text
+          fontSize="xl"
+          fontWeight="bold"
+          color={primaryTextColor}
+          textAlign={isRTL ? "right" : "left"}
+        >
+          {product.title}
+        </Text>
 
         <Text
-          color={primaryTextColor}
-          bold
           fontSize="2xl"
+          fontWeight="bold"
+          color={primaryTextColor}
           textAlign={isRTL ? "right" : "left"}
         >
           {product.price} JOD
         </Text>
 
         <Text
+          fontSize="md"
           color={secondaryTextColor}
           textAlign={isRTL ? "right" : "left"}
-          marginTop={8}
         >
           {product.description}
         </Text>
 
         {/* Color Selection */}
         {product.colors && JSON.parse(product.colors)?.length > 0 && (
-          <VStack mt={4} space={2}>
+          <VStack space={2}>
             <Text
               fontSize="lg"
               fontWeight="bold"
@@ -378,30 +338,25 @@ const ProductDetails = () => {
             >
               {t("Select_Color")}
             </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <HStack space={3}>
-                {JSON.parse(product.colors)?.map((color: string) => (
-                  <Pressable
-                    key={color}
-                    onPress={() => setSelectedColor(color)}
-                    style={[
-                      customStyles.colorButton,
-                      { backgroundColor: color },
-                      selectedColor === color && {
-                        borderColor: "green",
-                        borderWidth: 3,
-                      },
-                    ]}
-                  />
-                ))}
-              </HStack>
-            </ScrollView>
+            <HStack space={3} flexWrap="wrap">
+              {JSON.parse(product.colors)?.map((color: string) => (
+                <Pressable
+                  key={color}
+                  onPress={() => setSelectedColor(color)}
+                  style={[
+                    styles.colorButton,
+                    { backgroundColor: color },
+                    selectedColor === color && styles.selectedColor,
+                  ]}
+                />
+              ))}
+            </HStack>
           </VStack>
         )}
 
         {/* Size Selection */}
         {product.sizes && JSON.parse(product.sizes)?.length > 0 && (
-          <VStack mt={4} space={2}>
+          <VStack space={2}>
             <Text
               fontSize="lg"
               fontWeight="bold"
@@ -410,39 +365,43 @@ const ProductDetails = () => {
             >
               {t("Select_Size")}
             </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <HStack space={3}>
-                {JSON.parse(product.sizes)?.map((size: string) => (
-                  <Pressable
-                    key={size}
-                    onPress={() => setSelectedSize(size)}
-                    style={[
-                      customStyles.sizeButton,
-                      {
-                        backgroundColor: isDarkMode ? "#1A1A1A" : "#F5F5F5",
-                        borderColor: selectedSize === size ? "green" : iconColor,
-                      },
-                    ]}
+            <HStack space={3} flexWrap="wrap">
+              {JSON.parse(product.sizes)?.map((size: string) => (
+                <Pressable
+                  key={size}
+                  onPress={() => setSelectedSize(size)}
+                  style={[
+                    styles.sizeButton,
+                    {
+                      backgroundColor: isDarkMode ? "#333" : "#F5F5F5",
+                      borderColor: selectedSize === size ? "#34C759" : iconColor,
+                    },
+                    selectedSize === size && styles.selectedSize,
+                  ]}
+                >
+                  <Text
+                    color={primaryTextColor}
+                    fontWeight={selectedSize === size ? "bold" : "normal"}
                   >
-                    <Text
-                      color={primaryTextColor}
-                      fontWeight={selectedSize === size ? "bold" : "normal"}
-                    >
-                      {size}
-                    </Text>
-                  </Pressable>
-                ))}
-              </HStack>
-            </ScrollView>
+                    {size}
+                  </Text>
+                </Pressable>
+              ))}
+            </HStack>
           </VStack>
         )}
+      </VStack>
       </ScrollView>
+    
 
-      <View style={button.fixedButtonContainer}>
+      {/* Fixed Add to Cart Button */}
+      <View style={styles.fixedButtonContainer}>
         <Button
           onPress={handleAddToCart}
           backgroundColor={buttonBgColor}
-          _text={{ color: buttonTextColor }}
+          _text={{ color: buttonTextColor, fontWeight: "bold", fontSize: "md" }}
+          style={styles.addToCartButton}
+          _pressed={{ opacity: 0.8 }}
         >
           {t("Add_to_cart")}
         </Button>
@@ -451,40 +410,96 @@ const ProductDetails = () => {
   );
 };
 
-const button = StyleSheet.create({
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    position: "absolute",
+    top: 0,
+    zIndex: 10,
+    backgroundColor: "transparent",
+  },
+  favoriteIcon: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  },
+  swiper: {
+    // No fixed height here, handled inline
+    marginTop: 60,
+  },
+  slide: {
+    // No flex or height here, handled inline
+  },
+  image: {
+    // No fixed width/height here, handled inline
+    borderRadius: 12,
+  },
+  pagination: {
+    bottom: 10,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  activeDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginHorizontal: 4,
+  },
+  colorButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  selectedColor: {
+    borderColor: "#34C759",
+    borderWidth: 3,
+  },
+  sizeButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  selectedSize: {
+    borderColor: "#34C759",
+    borderWidth: 3,
+  },
   fixedButtonContainer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 10,
+    padding: 16,
+    backgroundColor: "transparent",
   },
-});
-
-const customStyles = StyleSheet.create({
-  favoriteButton: {
-    borderRadius: 20,
-    padding: 6,
+  addToCartButton: {
+    borderRadius: 12,
+    paddingVertical: 14,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 3,
+    shadowRadius: 5,
     elevation: 5,
-  },
-  colorButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
-  },
-  sizeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });
 
