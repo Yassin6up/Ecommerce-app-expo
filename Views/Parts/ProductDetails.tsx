@@ -91,6 +91,8 @@ const ProductDetails = () => {
           { params: { user_id: userId } }
         );
 
+        console.log('Product detail API response:', response.data); // <-- Added for debugging
+
         const productData = {
           ...response.data,
           images: JSON.parse(response.data.images),
@@ -299,7 +301,7 @@ const ProductDetails = () => {
       </View>
 
       {/* Product Information */}
-      <ScrollView style={{ flex: 1, paddingBottom: 80, marginBottom: 80 }}>
+      <ScrollView style={{ flex: 1, paddingBottom: 80, marginBottom: 80,paddingTop: 20 }}>
         <VStack px={4} py={8} space={4}>
         <Text
           fontSize="xl"
@@ -317,6 +319,14 @@ const ProductDetails = () => {
           textAlign={isRTL ? "right" : "left"}
         >
           {product.price} JOD
+        </Text>
+
+        <Text
+          fontSize="md"
+          color={secondaryTextColor}
+          textAlign={isRTL ? "right" : "left"}
+        >
+          {t("stock_quantity")}: {product.stock_quantity}
         </Text>
 
         <Text
@@ -344,11 +354,21 @@ const ProductDetails = () => {
                   key={color}
                   onPress={() => setSelectedColor(color)}
                   style={[
-                    styles.colorButton,
-                    { backgroundColor: color },
-                    selectedColor === color && styles.selectedColor,
+                    styles.sizeButton, // reuse sizeButton style for a button look
+                    {
+                      backgroundColor: isDarkMode ? "#333" : "#F5F5F5",
+                      borderColor: selectedColor === color ? "#34C759" : iconColor,
+                    },
+                    selectedColor === color && styles.selectedSize,
                   ]}
-                />
+                >
+                  <Text
+                    color={primaryTextColor}
+                    fontWeight={selectedColor === color ? "bold" : "normal"}
+                  >
+                    {color}
+                  </Text>
+                </Pressable>
               ))}
             </HStack>
           </VStack>

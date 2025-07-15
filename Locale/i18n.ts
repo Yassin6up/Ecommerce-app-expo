@@ -202,6 +202,7 @@ const resources = {
   notification_time_today: "Today",
   notification_time_now: "Just now",
   Notifications: "Notifications",
+  "stock_quantity":" Quantity in Stock ",
 
 
     },
@@ -406,6 +407,7 @@ const resources = {
   notification_time_today: "اليوم",
   notification_time_now: "الآن",
   Notifications: "الإشعارات",
+  "stock_quantity":"الكمية المتوفرة",
 
 
     },
