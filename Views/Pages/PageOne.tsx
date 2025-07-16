@@ -12,7 +12,9 @@ import Adds from "../Components/Adds";
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
-import Constants from 'expo-constants'; 
+import Constants from 'expo-constants';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 async function registerForPushNotificationsAsync() {
   let token;
@@ -58,17 +60,35 @@ async function registerForPushNotificationsAsync() {
 
 const PageOne = () => {
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
-  console.log("token : " , registerForPushNotificationsAsync())
+
+  React.useEffect(() => {
+    const savePushToken = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        if (!userId) return; // User not logged in
+        const token = await registerForPushNotificationsAsync();
+        if (!token) return;
+        await axios.post('https://backend.j-byu.shop/api/save-push-token', {
+          userId: Number(userId),
+          pushToken: token,
+        });
+      } catch (error) {
+        console.error('Error saving push notification token:', error);
+      }
+    };
+    savePushToken();
+  }, []);
+
   return (
     <ScrollView style={[
       styles.viewContainer,
       isDarkMode ? styles.darkBckground : styles.lightBckground,
-    ]} flex={1} height={'100%'} >
+    ]} flex={1}  >
       <Adds />
       <NewProducts />
       {/* <Men  /> */}
       {/* <Kids  /> */}
-   
+
     </ScrollView>
   );
 };

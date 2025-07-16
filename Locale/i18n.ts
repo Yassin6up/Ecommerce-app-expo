@@ -203,6 +203,9 @@ const resources = {
   notification_time_now: "Just now",
   Notifications: "Notifications",
   "stock_quantity":" Quantity in Stock ",
+  "Mark_all_as_read": "Mark all as read",
+  "Unread":"Unread",
+  "No notifications":"No notifications"
 
 
     },
@@ -408,7 +411,9 @@ const resources = {
   notification_time_now: "الآن",
   Notifications: "الإشعارات",
   "stock_quantity":"الكمية المتوفرة",
-
+  "Mark_all_as_read": "تحديد الكل كمقروء",
+    "Unread":"غير مقروء",
+     "No notifications":"لا توجد إشعارات"
 
     },
   },

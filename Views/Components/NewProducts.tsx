@@ -369,6 +369,7 @@ export default function NewProducts() {
             {error}
           </Text>
         ) : null}
+        scrollEnabled={true}
       />
     </View>
   );

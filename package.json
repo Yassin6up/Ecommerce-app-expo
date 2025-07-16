@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.1.2",
@@ -22,6 +23,7 @@
     "expo-device": "^7.1.4",
     "expo-image-picker": "^16.0.6",
     "expo-linear-gradient": "^14.1.5",
+    "expo-modules-core": "~2.2.3",
     "expo-notifications": "^0.31.4",
     "expo-splash-screen": "~0.29.21",
     "expo-status-bar": "~2.0.1",
@@ -48,6 +50,8 @@
   "devDependencies": {
     "@babel/core": "^7.26.7",
     "@types/react": "~18.3.1",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
     "typescript": "^5.7.3"
   },
   "private": true
