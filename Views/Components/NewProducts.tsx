@@ -215,9 +215,8 @@ export default function NewProducts() {
               padding: 8,
             }}
           >
-            <Icon 
-              as={Heart} 
-              size={6} 
+            <Heart 
+              size={24} 
               color={favoriteIds.includes(item.id) ? "#F7CF9D" : "#fff"} 
               variant={favoriteIds.includes(item.id) ? "Bold" : "Linear"} 
             />

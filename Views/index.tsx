@@ -5,7 +5,7 @@ import {
   BottomTabNavigationOptions,
   createBottomTabNavigator,
 } from "@react-navigation/bottom-tabs";
-import { User, Home, Discover, ShoppingCart } from "iconsax-react-native";
+import { User, Home, Discover, ShoppingBag } from "iconsax-react-native";
 import PageOne from "./Pages/PageOne";
 import PageThree from "./Pages/PageThree";
 import Header2 from "./Header2";
@@ -18,6 +18,7 @@ import { I18nManager, StyleSheet } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import NotificationScreen from "./Pages/NotificationScreen";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 
 interface Screen {
   name: string;
@@ -136,37 +137,40 @@ const Pages: React.FC = () => {
           marginBottom: 0,
         },
         tabBarIcon: ({ focused }) => (
-          <NBStack position="relative">
-            {cartItems.length > 0 && (
-              <NBStack
-                w={4}
-                h={4}
-                position="absolute"
-                rounded="full"
-                backgroundColor="#EB2525"
-                right={isArabic ? undefined : -8}
-                left={isArabic ? -8 : undefined}
-                top={-6}
-                zIndex={87}
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Text
-                  color="#FFFFFF"
-                  fontSize="8px"
-                  fontWeight="bold"
-                >
-                  {cartItems.length}
-                </Text>
-              </NBStack>
-            )}
-            <ShoppingCart
-              width="22"
-              height="22"
-              color={focused ? focusedColor : unfocusedColor}
-              variant={focused ? "Bold" : "Broken"}
-            />
-          </NBStack>
+       
+<NBStack
+    position="relative"
+    width="24px" // Match icon width
+    height="24px" // Match icon height
+    overflow="visible" // Prevent clipping
+  >
+    {cartItems.length > 0 && (
+      <NBStack
+        w={4}
+        h={4}
+        position="absolute"
+        rounded="full"
+        backgroundColor="#EB2525"
+        right={isArabic ? undefined : -8}
+        left={isArabic ? -8 : undefined}
+        top={-6}
+        zIndex={87}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Text color="#FFFFFF" fontSize="8px" fontWeight="bold">
+          {cartItems.length}
+        </Text>
+      </NBStack>
+    )}
+    <ShoppingBag
+      width="24"
+      height="24"
+      color={focused ? focusedColor : unfocusedColor}
+      variant={focused ? "Bold" : "Broken"}
+    />
+  </NBStack>
+       
         ),
       },
     },
@@ -225,7 +229,7 @@ const Pages: React.FC = () => {
             initialRouteName="page one"
             screenOptions={{
               tabBarStyle: {
-                height: 60,
+                height: 80,
                 backgroundColor: tabBarBgColor,
                 borderTopWidth: 0,
                 paddingBottom: 10,

@@ -358,6 +358,7 @@ const ProductDetails = () => {
                     {
                       backgroundColor: isDarkMode ? "#333" : "#F5F5F5",
                       borderColor: selectedColor === color ? "#34C759" : iconColor,
+                      marginVertical:2
                     },
                     selectedColor === color && styles.selectedSize,
                   ]}
