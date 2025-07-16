@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "216178647793",
+    "project_id": "jbuy-ffeda",
+    "storage_bucket": "jbuy-ffeda.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:216178647793:android:29fd44d6087938e094ff50",
+        "android_client_info": {
+          "package_name": "com.knjo.buyjo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUcrQYIYxfc2mJzYp8Fuy8PkA-qpt2D3o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

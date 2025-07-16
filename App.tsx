@@ -103,3 +103,58 @@ const styles = StyleSheet.create({
     width:'100%'
   },
 });
+
+
+
+
+// api docs for salah 
+
+
+/*
+FOR SAVE PUSH NOTIFICAITON 
+1 . go to file /Pages/PageOne
+2 . send token to this api  :
+       POST : https://backend.j-byu.shop/api/save-push-token
+        {
+          "userId": 4,
+          "pushToken": "ExpoPushToken[XYZ123ABC456]"
+        }
+
+3 . link set this apis for  notifications page 
+
+  - get all notifications by user :
+    GET : https://backend.j-byu.shop/api/user/:userId
+    
+    EXAMPLE :
+          {
+            "notifications": [
+              {
+                "id": 1,
+                "title": "New Feature Available",
+                "message": "Check out our latest update!",
+                "userId": 1,
+                "productId": 101,
+                "createdAt": "2023-11-15T10:00:00Z",
+                "isRead": false
+              },
+            ]
+          } 
+
+  - delete notificaiton by id 
+    DELETE : https://backend.j-byu.shop/api/:notificationId
+
+  - get count of unread notificaitons  by user id
+    GET : https://backend.j-byu.shop/api/user/:userId/unread-count
+
+  - make all notificaitons readed by user id 
+    PATCH : https://backend.j-byu.shop/api/user/:userId/mark-all-read
+
+
+
+
+
+
+
+
+
+*/
