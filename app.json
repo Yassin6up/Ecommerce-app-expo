@@ -30,6 +30,7 @@
       }
     },
     "android": {
+      "permissions": ["NOTIFICATIONS"],
       "versionCode": 8,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icone.png",
@@ -63,9 +64,12 @@
         "projectId": "aba96dbc-307b-43ae-80a2-c1fa8ef31cc1"
       }
     },
-    "owner": "alcaranoisco"
+    "owner": "alcaranoisco",
+      "plugins": ["expo-notifications"]
   },
+ 
   "assetBundlePatterns": [
     "**/*"
   ]
+ 
 }

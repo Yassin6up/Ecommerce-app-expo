@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { StatusBar as RNStatusBar, Platform } from "react-native";
+import { StatusBar as RNStatusBar, Platform, TextInput } from "react-native";
 import styles from "../Styles";
 import {
   VStack,
   Text,
   Stack,
-  Input,
   Box,
   Button,
   Icon,
@@ -228,21 +227,19 @@ export default function Login() {
           borderColor={phoneError ? "red.500" : inputBorderColor}
           rounded="8px"
         >
-          <Input
+          <TextInput
             placeholder={t("phone_placeholder")}
-            textAlign={isArabic ? "right" : "left"}
-            flex={1}
+            style={{
+              flex: 1,
+              color: textColor,
+              textAlign: isArabic ? "right" : "left",
+              backgroundColor: "transparent",
+              borderWidth: 0,
+              height: 48, // or your preferred height
+            }}
             value={phoneNumber}
             onChangeText={handlePhoneChange}
             keyboardType="phone-pad"
-            variant="unstyled"
-            _focus={{
-              backgroundColor: "transparent",
-              borderColor: "transparent",
-            }}
-            bg="transparent"
-            borderWidth={0}
-            color={textColor}
           />
           <Mobile size="26" color={iconColor} />
         </Box>
@@ -256,38 +253,37 @@ export default function Login() {
         <Text textAlign={isArabic ? "right" : "left"} color={textColor}>
           {t("password")}
         </Text>
-        <Box
-          flexDirection={isArabic ? "row-reverse" : "row"}
-          alignItems="center"
-          px={4}
-          borderWidth={1}
-          borderColor={inputBorderColor}
-          rounded="8px"
-        >
-          <Input
-            placeholder={t("password_placeholder")}
-            textAlign={isArabic ? "right" : "left"}
-            flex={1}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!isPasswordVisible}
-            variant="unstyled"
-            _focus={{
-              backgroundColor: "transparent",
-              borderColor: "transparent",
-            }}
-            bg="transparent"
-            borderWidth={0}
-            color={textColor}
-          />
-          <Pressable onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-            <Icon
-              as={isPasswordVisible ? <EyeSlash /> : <Eye />}
-              color={iconColor}
-              size="26"
-            />
-          </Pressable>
-        </Box>
+<Box
+  flexDirection={isArabic ? "row-reverse" : "row"}
+  alignItems="center"
+  px={4}
+  borderWidth={1}
+  borderColor={inputBorderColor}
+  rounded="8px"
+  height={10}
+>
+  <TextInput
+    placeholder={t("password_placeholder")}
+    style={{
+      flex: 1,
+      color: textColor,
+      textAlign: isArabic ? "right" : "left",
+      backgroundColor: "transparent",
+      borderWidth: 0,
+      height: 48, // or your preferred height
+    }}
+    value={password}
+    onChangeText={setPassword}
+    secureTextEntry={!isPasswordVisible}
+  />
+  <Pressable onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+    <Icon
+      as={isPasswordVisible ? <EyeSlash /> : <Eye />}
+      color={iconColor}
+      size="26"
+    />
+  </Pressable>
+</Box>
         {/* Forgot Password */}
         <Pressable
           onPress={() => navigation.navigate("recoveryPassword")}

@@ -43,7 +43,7 @@ export default function NewProducts() {
 
   // Products state
   const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true); // Start with loading true
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -102,22 +102,25 @@ export default function NewProducts() {
   // Initial fetch (all products)
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+  }, []); // Remove fetchProducts from dependency to avoid infinite loop
 
   // Fetch products when filter changes
   useEffect(() => {
-    if (selectedCategory) {
-      fetchProducts(selectedCategory);
-    } else {
-      fetchProducts();
+    if (selectedCategory !== null) { // Only fetch when category actually changes, not on initial load
+      if (selectedCategory) {
+        fetchProducts(selectedCategory);
+      } else {
+        fetchProducts();
+      }
     }
-  }, [selectedCategory, fetchProducts]);
+  }, [selectedCategory]); // Remove fetchProducts from dependency
 
   const handlePress = useCallback(
     (item: any) => {
       navigation.navigate("page two", {
         screen: "ProductDetails",
         params: { item, id: item.id },
+        from: 'page one'
       });
     },
     [navigation]
@@ -132,6 +135,10 @@ export default function NewProducts() {
   const handleAddToCart = (item: any) => {
     // Implement add to cart logic here
     // e.g., dispatch(addToCart(item));
+  };
+
+  const handleRetry = () => {
+    fetchProducts(selectedCategory || undefined);
   };
 
   // Render filter bar (horizontal scroll, sticky)
@@ -248,10 +255,10 @@ export default function NewProducts() {
             bg="#F7CF9D"
             _text={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}
             shadow={3}
-            onPress={() => handleAddToCart(item)}
+          onPress={() => handlePress(item)}
             _pressed={{ opacity: 0.8 }}
           >
-            {t('Add_to_cart')}
+            {t('ProductDetails')}
           </Button>
         </VStack>
       </Box>
@@ -279,7 +286,7 @@ export default function NewProducts() {
   }
 
   // Shimmer loading for categories (only on first load)
-  if (categoriesLoading || childrenLoading) {
+  if (categoriesLoading || childrenLoading || (loading && products.length === 0)) {
     return (
       <View
         style={[
@@ -355,19 +362,46 @@ export default function NewProducts() {
         contentContainerStyle={{ paddingBottom: 40 }}
         ListHeaderComponent={renderFilterBar}
         stickyHeaderIndices={[0]}
-        ListEmptyComponent={loading ? (
-          <Box px={4} py={6}>
-            <HStack space={4} justifyContent="center">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} h={CARD_HEIGHT} w={CARD_WIDTH} rounded={20} startColor={isDarkMode ? "#222" : "#eee"} endColor={isDarkMode ? "#444" : "#ccc"} />
-              ))}
-            </HStack>
-          </Box>
-        ) : error ? (
-          <Text style={{ textAlign: "center", color: isDarkMode ? "#fff" : "#000" }}>
-            {error}
-          </Text>
-        ) : null}
+        ListEmptyComponent={() => {
+          if (loading) {
+            return (
+              <Box px={4} py={6}>
+                <HStack space={4} justifyContent="center">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} h={CARD_HEIGHT} w={CARD_WIDTH} rounded={20} startColor={isDarkMode ? "#222" : "#eee"} endColor={isDarkMode ? "#444" : "#ccc"} />
+                  ))}
+                </HStack>
+              </Box>
+            );
+          } else if (error) {
+            return (
+              <VStack space={4} alignItems="center" py={8}>
+                <Text style={{ textAlign: "center", color: isDarkMode ? "#fff" : "#000", fontSize: 16 }}>
+                  {error}
+                </Text>
+                                 <Button
+                   size="sm"
+                   borderRadius={20}
+                   px={6}
+                   bg="#F7CF9D"
+                   _text={{ color: '#fff', fontWeight: 'bold' }}
+                   onPress={handleRetry}
+                 >
+                   {t('Retry')}
+                 </Button>
+              </VStack>
+            );
+          } else if (products.length === 0) {
+            return (
+              <VStack space={4} alignItems="center" py={8}>
+                <Text style={{ textAlign: "center", color: isDarkMode ? "#fff" : "#000", fontSize: 16 }}>
+                  {t("NoProductsAvailable")}
+                </Text>
+              </VStack>
+            );
+          }
+          return null;
+        }}
         scrollEnabled={true}
       />
     </View>

@@ -9,6 +9,9 @@ import i18n from "../Locale/i18n";
 import { Keyboard } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { I18nManager } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { useIsFocused } from '@react-navigation/native';
 
 const Header2 = () => {
   const [message, setMessage] = useState<string | null>(null);
@@ -21,6 +24,9 @@ const Header2 = () => {
   const currentLanguage = useSelector((state: RootState) => state.language.currentLanguage);
 
   const [searchQuery, setSearchQuery] = useState("");
+
+  const isFocused = useIsFocused();
+  const [unreadCount, setUnreadCount] = useState<number>(0);
 
   // Define black-and-white color scheme
   const backgroundColor = isDarkMode ? "#000000" : "#FFFFFF";
@@ -79,11 +85,25 @@ const Header2 = () => {
 
   const isRTL = currentLanguage === "ar" || I18nManager.isRTL;
 
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        if (!userId) return;
+        const unreadRes = await axios.get(`https://backend.j-byu.shop/api/user/${userId}/unread-count`);
+        setUnreadCount(unreadRes.data.unreadCount || 0);
+      } catch (error) {
+        setUnreadCount(0);
+      }
+    };
+    fetchUnreadCount();
+  }, [isFocused]);
+
   return (
     <Stack 
       width="100%" 
       paddingX={8} 
-      paddingTop={12} 
+      paddingTop={8} 
       paddingBottom={2} 
       backgroundColor={backgroundColor} 
       position="relative"
@@ -91,8 +111,26 @@ const Header2 = () => {
       <HStack w={'full'} alignItems={'center'} justifyContent={'space-between'}>
         {/* Notification Icon (RTL/LTR aware) */}
         {isRTL ? null : (
-          <Pressable onPress={() => navigation.navigate('NotificationScreen')}>
+          <Pressable onPress={() => navigation.navigate('NotificationScreen')} position="relative">
             <Notification size="26" color={iconColor} variant="Bold" />
+            {unreadCount > 0 && (
+              <Box
+                position="absolute"
+                top={-2}
+                right={-2}
+                bg="#FF3B30"
+                borderRadius={9999}
+                minW={5}
+                h={5}
+                alignItems="center"
+                justifyContent="center"
+                zIndex={1}
+              >
+                <Text color="#fff" fontSize={10} fontWeight="bold">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </Box>
+            )}
           </Pressable>
         )}
         {/* Settings Icon */}
@@ -136,8 +174,26 @@ const Header2 = () => {
         </Pressable>
         {/* Notification Icon for RTL */}
         {isRTL ? (
-          <Pressable onPress={() => navigation.navigate('NotificationScreen')}>
+          <Pressable onPress={() => navigation.navigate('NotificationScreen')} position="relative">
             <Notification size="26" color={iconColor} variant="Bold" />
+            {unreadCount > 0 && (
+              <Box
+                position="absolute"
+                top={-2}
+                right={-2}
+                bg="#FF3B30"
+                borderRadius={9999}
+                minW={4}
+                h={4}
+                alignItems="center"
+                justifyContent="center"
+                zIndex={1}
+              >
+                <Text color="#fff" fontSize={10} fontWeight="bold">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </Box>
+            )}
           </Pressable>
         ) : null}
       </HStack>

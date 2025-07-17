@@ -51,7 +51,7 @@ const Header = () => {
     <Stack 
       width="100%" 
       paddingX={8} 
-      paddingTop={12} 
+      paddingTop={10} 
       paddingBottom={2} 
       backgroundColor={backgroundColor} 
       position="relative"

@@ -94,3 +94,8 @@ const PageOne = () => {
 };
 
 export default PageOne;
+
+
+// cachePolicy="memory-disk"
+
+// transition={300}

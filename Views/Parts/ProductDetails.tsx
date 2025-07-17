@@ -39,9 +39,32 @@ import { RouteProp } from '@react-navigation/native';
 const { width: deviceWidth } = Dimensions.get("window");
 const imageHeight = deviceWidth * 0.75; // 4:3 ratio for better visibility
 
+const ProgressiveImage = ({ source, style, alt }) => {
+  const [loading, setLoading] = useState(true);
+
+  return (
+    <View style={{ justifyContent: "center", alignItems: "center" }}>
+      {loading && (
+        <ActivityIndicator
+          size="small"
+          color="#34C759"
+          style={{ position: "absolute", zIndex: 1 }}
+        />
+      )}
+      <Image
+        source={source}
+        style={style}
+        alt={alt}
+        resizeMode="contain"
+        onLoadEnd={() => setLoading(false)}
+      />
+    </View>
+  );
+};
+
 const ProductDetails = () => {
   const navigation = useNavigation();
-  const route = useRoute<RouteProp<{ params: { id: string } }, 'params'>>();
+  const route = useRoute<RouteProp<{ params: { id: string; from?: string } }, 'params'>>();
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const toast = useToast();
@@ -64,19 +87,19 @@ const ProductDetails = () => {
   const iconColor = isDarkMode ? "#FFFFFF" : "#000000";
 
   // Handle back button press
-  useEffect(() => {
-    const backAction = () => {
-      (navigation as any).navigate("parts");
-      return true;
-    };
+  // useEffect(() => {
+  //   const backAction = () => {
+  //     (navigation as any).navigate("parts");
+  //     return true;
+  //   };
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
+  //   const backHandler = BackHandler.addEventListener(
+  //     "hardwareBackPress",
+  //     backAction
+  //   );
 
-    return () => backHandler.remove();
-  }, [navigation]);
+  //   return () => backHandler.remove();
+  // }, [navigation]);
 
   // Fetch product data
   useEffect(() => {
@@ -260,7 +283,13 @@ const ProductDetails = () => {
         justifyContent="space-between"
         style={styles.header}
       >
-        <Pressable onPress={() => (navigation as any).navigate("parts")}>
+        <Pressable onPress={() => {
+          if (route.params?.from === 'page one') {
+            (navigation as any).navigate('page one');
+          } else {
+            (navigation as any).navigate('parts');
+          }
+        }}>
           <ArrowLeft size={32} color={iconColor} />
         </Pressable>
         <Pressable onPress={handleToggleFavorite}>
@@ -287,12 +316,11 @@ const ProductDetails = () => {
         >
           {product.images.map((img: string, idx: number) => (
             <View key={idx} style={{ width: deviceWidth, height: imageHeight, justifyContent: 'center', alignItems: 'center' }}>
-              <Image
+              <ProgressiveImage
                 source={{
                   uri: `https://backend.j-byu.shop/api/prudact/${product.id}/img/${img}`,
                 }}
                 style={{ width: deviceWidth, height: imageHeight }}
-                resizeMode="contain"
                 alt={`${product.title}-${idx}`}
               />
             </View>
@@ -396,6 +424,7 @@ const ProductDetails = () => {
                     {
                       backgroundColor: isDarkMode ? "#333" : "#F5F5F5",
                       borderColor: selectedSize === size ? "#34C759" : iconColor,
+                      marginVertical:5
                     },
                     selectedSize === size && styles.selectedSize,
                   ]}

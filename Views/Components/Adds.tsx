@@ -168,7 +168,6 @@ export default function Adds() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -196,10 +195,10 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     overflow: "hidden",
     position: "relative",
-    width: width,
+    width: "100%",
   },
   bannerImage: {
-    width: width,
+    width: "100%",
     height: 250,
     borderRadius: 18,
   },

@@ -205,7 +205,8 @@ const resources = {
   "stock_quantity":" Quantity in Stock ",
   "Mark_all_as_read": "Mark all as read",
   "Unread":"Unread",
-  "No notifications":"No notifications"
+  "No notifications":"No notifications",
+  "ProductDetails":"Product details"
 
 
     },
@@ -413,7 +414,8 @@ const resources = {
   "stock_quantity":"الكمية المتوفرة",
   "Mark_all_as_read": "تحديد الكل كمقروء",
     "Unread":"غير مقروء",
-     "No notifications":"لا توجد إشعارات"
+     "No notifications":"لا توجد إشعارات",
+       "ProductDetails":"تفاصيل المنتج"
 
     },
   },

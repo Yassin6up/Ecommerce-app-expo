@@ -18,6 +18,7 @@ import { I18nManager, StyleSheet } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import NotificationScreen from "./Pages/NotificationScreen";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import ProductDetails2 from "./Parts/ProductDetails2";
 
 
 interface Screen {
@@ -261,6 +262,7 @@ const Pages: React.FC = () => {
           presentation: 'modal',
         }}
       />
+    
     </Stack.Navigator>
   );
 };

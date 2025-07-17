@@ -12,7 +12,12 @@ import store from "./store/store";
 import i18n from "./Locale/i18n";
 import Pages from "./Views";
 import AppScreens from "./Views/AllPages";
+import { BackHandler } from 'react-native';
 export default function App() {
+  if (typeof (BackHandler as any).removeEventListener === 'undefined') {
+  (BackHandler as any).removeEventListener = () => {};
+}
+
   SplashScreen.preventAutoHideAsync();
   useEffect(() => {
     if (I18nManager.isRTL) {
