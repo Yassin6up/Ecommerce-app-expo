@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Stack, Pressable, Text, Center, Switch, Popover, VStack, HStack, Box, Input, Icon } from "native-base";
+import { Stack, Pressable, Text, Center, Switch, Popover, VStack, HStack, Box } from "native-base";
 import { Setting2, Moon, Sun1, SearchNormal1, Notification } from "iconsax-react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "../store/themeSlice";
 import { setLanguage } from "../store/languageSlice";
 import { RootState } from "../store/store";
 import i18n from "../Locale/i18n";
-import { Keyboard } from "react-native";
+import { Keyboard, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { I18nManager } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -145,27 +145,27 @@ const Header2 = () => {
           borderRadius="8" 
           borderWidth={1} 
           borderColor={borderColor}
+          position="relative"
         >
-          <Input
-            variant="unstyled"
-            _focus={{ backgroundColor: "transparent", borderColor: primaryTextColor }}
-            bg="transparent"
-            borderWidth={0}
+          {/* Search Icon */}
+       
+          <TextInput
+            style={{
+              height: 40,
+              paddingLeft: 36, // space for icon
+              color: primaryTextColor,
+              backgroundColor: 'transparent',
+              borderRadius: 8,
+              borderWidth: 0,
+              width: '100%',
+            }}
             placeholder={i18n.t("searchPlaceholder") || "Search..."}
             placeholderTextColor={secondaryTextColor}
             value={searchQuery}
             onChangeText={handleSearchChange}
             onSubmitEditing={handleSearchSubmit}
             returnKeyType="search"
-            InputLeftElement={
-              <Icon 
-                as={<SearchNormal1 />} 
-                size={5} 
-                ml={2} 
-                color={iconColor} 
-              />
-            }
-            color={primaryTextColor}
+            underlineColorAndroid="transparent"
           />
         </Box>
         {/* Theme Toggle Icon */}

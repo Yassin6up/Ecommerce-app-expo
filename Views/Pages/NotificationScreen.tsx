@@ -23,7 +23,7 @@ interface NotificationItem {
 const AnimatedBox = Animated.createAnimatedComponent(Box);
 
 const NotificationScreen = () => {
-  const navigation = useNavigation();
+  const navigation: any = useNavigation();
   const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar' || I18nManager.isRTL;
@@ -188,7 +188,19 @@ const NotificationScreen = () => {
               notifications.map((notif) => (
                 <Pressable
                   key={notif.id}
-                  onPress={() => !notif.isRead && handleMarkAllRead()}
+                  onPress={() => {
+                    if (notif.productId) {
+                      navigation.navigate('MainTabs', {
+                        screen: 'page two',
+                        params: {
+                          screen: 'ProductDetails',
+                          params: { item: notif, id: notif.productId }
+                        }
+                      });
+                    } else if (!notif.isRead) {
+                      handleMarkAllRead();
+                    }
+                  }}
                   _pressed={{ opacity: 0.8 }}
                 >
                   <Box
