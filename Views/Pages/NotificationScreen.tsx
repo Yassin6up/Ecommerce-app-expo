@@ -144,7 +144,7 @@ const NotificationScreen = () => {
               {t('Notifications')}
             </Text>
           </HStack>
-          <Box w={28} /> {/* Placeholder to balance the layout */}
+          <Box width={28}>{/* empty for spacing */}</Box>
         </HStack>
       </Box>
 
@@ -171,7 +171,7 @@ const NotificationScreen = () => {
 
       {/* Notification List */}
       <ScrollView showsVerticalScrollIndicator={false}>
-       <AnimatedBox style={{ opacity: fadeAnim }}>
+    
           <VStack space={3} pb={4}>
             {loading ? (
               <Text textAlign="center" color={secondaryTextColor} fontSize="md">
@@ -244,7 +244,7 @@ const NotificationScreen = () => {
               ))
             )}
           </VStack>
-        </AnimatedBox>
+
       </ScrollView>
     </Box>
   );

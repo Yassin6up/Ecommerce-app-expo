@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   View,
   Dimensions,
@@ -43,7 +43,7 @@ export default function NewProducts() {
 
   // Products state
   const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true); // Start with loading true
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -87,7 +87,6 @@ export default function NewProducts() {
         response = await axios.get(`https://backend.j-byu.shop/api/products/byCatgId/${categoryId}`);
         setProducts(response.data);
       } else {
-        // fallback: fetch all products (random)
         response = await axios.get("https://backend.j-byu.shop/api/random-products", { params: { user_id: "1" } });
         setProducts(Array.isArray(response.data) ? response.data : []);
       }
@@ -102,25 +101,25 @@ export default function NewProducts() {
   // Initial fetch (all products)
   useEffect(() => {
     fetchProducts();
-  }, []); // Remove fetchProducts from dependency to avoid infinite loop
+  }, [fetchProducts]);
 
   // Fetch products when filter changes
   useEffect(() => {
-    if (selectedCategory !== null) { // Only fetch when category actually changes, not on initial load
+    if (selectedCategory !== null) {
       if (selectedCategory) {
         fetchProducts(selectedCategory);
       } else {
         fetchProducts();
       }
     }
-  }, [selectedCategory]); // Remove fetchProducts from dependency
+  }, [selectedCategory, fetchProducts]);
 
   const handlePress = useCallback(
     (item: any) => {
       navigation.navigate("page two", {
         screen: "ProductDetails",
         params: { item, id: item.id },
-        from: 'page one'
+        from: "page one",
       });
     },
     [navigation]
@@ -141,46 +140,62 @@ export default function NewProducts() {
     fetchProducts(selectedCategory || undefined);
   };
 
-  // Render filter bar (horizontal scroll, sticky)
-  const renderFilterBar = () => (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={{ backgroundColor: isDarkMode ? '#171717' : '#fff', paddingVertical: 8, paddingHorizontal: 8 }}
-      contentContainerStyle={{ alignItems: 'center' }}
-    >
-      <Pressable onPress={() => setSelectedCategory(null)} style={{ marginRight: 12 }}>
-        <Box
-          px={5}
-          py={2}
-          rounded={20}
-          bg={selectedCategory === null ? "#F7CF9D" : isDarkMode ? "#222" : "#eee"}
-          borderWidth={selectedCategory === null ? 2 : 0}
-          borderColor="#F7CF9D"
-        >
-          <Text color={selectedCategory === null ? "#000" : isDarkMode ? "#fff" : "#000"} fontWeight="bold">
-            الكل
-          </Text>
-        </Box>
-      </Pressable>
-      {childrenCategories.map((cat) => (
-        <Pressable key={cat.id} onPress={() => setSelectedCategory(cat.id)} style={{ marginRight: 12 }}>
+  // Memoize renderFilterBar to prevent re-rendering
+  const renderFilterBar = useMemo(() => {
+    return (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{
+          backgroundColor: isDarkMode ? "#171717" : "#fff",
+          paddingVertical: 8,
+          paddingHorizontal: 8,
+        }}
+        contentContainerStyle={{ alignItems: "center" }}
+      >
+        <Pressable onPress={() => setSelectedCategory(null)} style={{ marginRight: 12 }}>
           <Box
             px={5}
             py={2}
             rounded={20}
-            bg={selectedCategory === cat.id ? "#F7CF9D" : isDarkMode ? "#222" : "#eee"}
-            borderWidth={selectedCategory === cat.id ? 2 : 0}
+            bg={selectedCategory === null ? "#F7CF9D" : isDarkMode ? "#222" : "#eee"}
+            borderWidth={selectedCategory === null ? 2 : 0}
             borderColor="#F7CF9D"
           >
-            <Text color={selectedCategory === cat.id ? "#000" : isDarkMode ? "#fff" : "#000"} fontWeight="bold">
-              {cat.name}
+            <Text
+              color={selectedCategory === null ? "#000" : isDarkMode ? "#fff" : "#000"}
+              fontWeight="bold"
+            >
+              الكل
             </Text>
           </Box>
         </Pressable>
-      ))}
-    </ScrollView>
-  );
+        {childrenCategories.map((cat) => (
+          <Pressable
+            key={cat.id}
+            onPress={() => setSelectedCategory(cat.id)}
+            style={{ marginRight: 12 }}
+          >
+            <Box
+              px={5}
+              py={2}
+              rounded={20}
+              bg={selectedCategory === cat.id ? "#F7CF9D" : isDarkMode ? "#222" : "#eee"}
+              borderWidth={selectedCategory === cat.id ? 2 : 0}
+              borderColor="#F7CF9D"
+            >
+              <Text
+                color={selectedCategory === cat.id ? "#000" : isDarkMode ? "#fff" : "#000"}
+                fontWeight="bold"
+              >
+                {cat.name}
+              </Text>
+            </Box>
+          </Pressable>
+        ))}
+      </ScrollView>
+    );
+  }, [childrenCategories, selectedCategory, isDarkMode]);
 
   // Render product card
   const renderProduct = ({ item }: { item: any }) => {
@@ -211,21 +226,21 @@ export default function NewProducts() {
             resizeMode="contain"
           />
           {/* Favorite button overlay */}
-          <Pressable 
+          <Pressable
             onPress={() => handleFavorite(item.id)}
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 12,
               right: 12,
-              backgroundColor: 'rgba(0,0,0,0.3)',
+              backgroundColor: "rgba(0,0,0,0.3)",
               borderRadius: 20,
               padding: 8,
             }}
           >
-            <Heart 
-              size={24} 
-              color={favoriteIds.includes(item.id) ? "#F7CF9D" : "#fff"} 
-              variant={favoriteIds.includes(item.id) ? "Bold" : "Linear"} 
+            <Heart
+              size={24}
+              color={favoriteIds.includes(item.id) ? "#F7CF9D" : "#fff"}
+              variant={favoriteIds.includes(item.id) ? "Bold" : "Linear"}
             />
           </Pressable>
         </Pressable>
@@ -241,8 +256,6 @@ export default function NewProducts() {
             >
               {item.title}
             </Text>
-            {/* Product description */}
-            
             <Text color={isDarkMode ? "#fff" : "#468500"} fontSize={18} fontWeight="bold">
               {item.price} JOD
             </Text>
@@ -253,12 +266,12 @@ export default function NewProducts() {
             px={8}
             py={3}
             bg="#F7CF9D"
-            _text={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}
+            _text={{ color: "#fff", fontWeight: "bold", fontSize: 15 }}
             shadow={3}
-          onPress={() => handlePress(item)}
+            onPress={() => handlePress(item)}
             _pressed={{ opacity: 0.8 }}
           >
-            {t('ProductDetails')}
+            {t("ProductDetails")}
           </Button>
         </VStack>
       </Box>
@@ -271,12 +284,14 @@ export default function NewProducts() {
         style={[
           styles.mainContainer,
           isDarkMode ? styles.darkBckground : styles.lightBckground,
-        ]}>
+        ]}
+      >
         <VStack
           w={"full"}
           alignItems={"center"}
           justifyContent={"center"}
-          mt={50}>
+          mt={50}
+        >
           <Text style={{ color: isDarkMode ? "#fff" : "#000", fontSize: 18 }}>
             {t("No Connection")}
           </Text>
@@ -285,7 +300,6 @@ export default function NewProducts() {
     );
   }
 
-  // Shimmer loading for categories (only on first load)
   if (categoriesLoading || childrenLoading || (loading && products.length === 0)) {
     return (
       <View
@@ -315,11 +329,18 @@ export default function NewProducts() {
           </Text>
           <Stack width={"15%"} h={2} bg="#F7CF9D" rounded={4}></Stack>
         </VStack>
-        {renderFilterBar()}
+        {renderFilterBar}
         <Box px={4} py={6}>
           <HStack space={4} justifyContent="center">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} h={CARD_HEIGHT} w={CARD_WIDTH} rounded={20} startColor={isDarkMode ? "#222" : "#eee"} endColor={isDarkMode ? "#444" : "#ccc"} />
+              <Skeleton
+                key={i}
+                h={CARD_HEIGHT}
+                w={CARD_WIDTH}
+                rounded={20}
+                startColor={isDarkMode ? "#222" : "#eee"}
+                endColor={isDarkMode ? "#444" : "#ccc"}
+              />
             ))}
           </HStack>
         </Box>
@@ -332,7 +353,8 @@ export default function NewProducts() {
       style={[
         styles.mainContainer,
         isDarkMode ? styles.darkBckground : styles.lightBckground,
-      ]}>
+      ]}
+    >
       <VStack
         w={"full"}
         alignItems={"center"}
@@ -368,7 +390,14 @@ export default function NewProducts() {
               <Box px={4} py={6}>
                 <HStack space={4} justifyContent="center">
                   {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} h={CARD_HEIGHT} w={CARD_WIDTH} rounded={20} startColor={isDarkMode ? "#222" : "#eee"} endColor={isDarkMode ? "#444" : "#ccc"} />
+                    <Skeleton
+                      key={i}
+                      h={CARD_HEIGHT}
+                      w={CARD_WIDTH}
+                      rounded={20}
+                      startColor={isDarkMode ? "#222" : "#eee"}
+                      endColor={isDarkMode ? "#444" : "#ccc"}
+                    />
                   ))}
                 </HStack>
               </Box>
@@ -376,25 +405,29 @@ export default function NewProducts() {
           } else if (error) {
             return (
               <VStack space={4} alignItems="center" py={8}>
-                <Text style={{ textAlign: "center", color: isDarkMode ? "#fff" : "#000", fontSize: 16 }}>
+                <Text
+                  style={{ textAlign: "center", color: isDarkMode ? "#fff" : "#000", fontSize: 16 }}
+                >
                   {error}
                 </Text>
-                                 <Button
-                   size="sm"
-                   borderRadius={20}
-                   px={6}
-                   bg="#F7CF9D"
-                   _text={{ color: '#fff', fontWeight: 'bold' }}
-                   onPress={handleRetry}
-                 >
-                   {t('Retry')}
-                 </Button>
+                <Button
+                  size="sm"
+                  borderRadius={20}
+                  px={6}
+                  bg="#F7CF9D"
+                  _text={{ color: "#fff", fontWeight: "bold" }}
+                  onPress={handleRetry}
+                >
+                  {t("Retry")}
+                </Button>
               </VStack>
             );
           } else if (products.length === 0) {
             return (
               <VStack space={4} alignItems="center" py={8}>
-                <Text style={{ textAlign: "center", color: isDarkMode ? "#fff" : "#000", fontSize: 16 }}>
+                <Text
+                  style={{ textAlign: "center", color: isDarkMode ? "#fff" : "#000", fontSize: 16 }}
+                >
                   {t("NoProductsAvailable")}
                 </Text>
               </VStack>

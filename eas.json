@@ -8,24 +8,19 @@
       "developmentClient": true,
       "distribution": "internal",
       "android": {
-        "buildType": "apk",
-       "googleServicesFile": "./google-services.json"
+        "buildType": "apk"
       }
-      
     },
     "preview": {
       "distribution": "internal",
-
       "android": {
-        "buildType": "apk",
-              "googleServicesFile": "./google-services.json"
+        "buildType": "apk"
       }
     },
     "production": {
       "autoIncrement": true,
       "android": {
-        "buildType": "app-bundle",
-        "googleServicesFile": "./google-services.json"
+        "buildType": "app-bundle"
       }
     }
   },
